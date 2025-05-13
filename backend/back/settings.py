@@ -27,6 +27,19 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+CORS_ALLOWED_ORIGINS = [
+  "http://localhost:8080",
+  "http://127.0.0.1:8000"
+]
+
+REST_FRAMEWORK = {
+  'DEFAULT_AUTHENTICATION_CLASSES': (
+    'rest_framework.authentication.TokenAuthentication',
+  ),
+  'DEFAULT_PERMISSION_CLASSES': (
+    'rest_framework.permissions.IsAuthenticated',
+  )
+}
 
 # Application definition
 
@@ -37,11 +50,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
+    'djoser',
+
+    'apps.core',
+
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -74,8 +96,12 @@ WSGI_APPLICATION = 'back.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'ekoparekayin_tcarayutyun',
+        'USER': 'root',
+        'PASSWORD': 'Test1234!@#$',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 
@@ -115,6 +141,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# AUTH_USER_MODEL = 'account.User'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
