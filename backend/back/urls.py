@@ -20,6 +20,5 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/ekopatrol/', include('djoser.urls')),
-    path('api/ekopatrol/', include('djoser.urls.authtoken')),
-    path('', include('apps.core.urls'))
+    path('api/ekopatrol/', include('djoser.urls.authtoken'))
 ]
