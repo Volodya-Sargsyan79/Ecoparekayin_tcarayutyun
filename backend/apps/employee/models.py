@@ -8,14 +8,14 @@ class Person(models.Model):
     first_name = models.CharField(max_length=15)
     last_name = models.CharField(max_length=15)
     birthday = models.DateField(null=True, blank=True)
-    passport = models.CharField(max_length=15)
+    passport = models.CharField(max_length=15, null=True, blank=True)
     id_card = models.CharField(max_length=15, null=True, blank=True)
     hvhh = models.CharField(max_length=15, null=True, blank=True)
     email = models.CharField(max_length=30, null=True, blank=True)
     img = models.ImageField(upload_to='person', null=True, blank=True)
 
     def __str__(self):
-        return f'{self.first_name} {self.last_name}'
+        return f'{self.id} {self.first_name} {self.last_name}'
 
 class DocumentationImage(models.Model):
     person = models.ForeignKey(Person, related_name='documentation_image', on_delete=models.CASCADE)
@@ -43,7 +43,7 @@ class Phone(models.Model):
     phone = models.CharField(max_length=20, null=True, blank=True)
 
     def __str__(self):
-        return self.phone
+        return f'{self.person} {self.phone }'
 
 class Study(models.Model):
     person = models.ForeignKey(Person, related_name='study', on_delete=models.CASCADE)
@@ -59,6 +59,9 @@ class Soldier(models.Model):
     where = models.CharField(max_length=255)
     from_year = models.CharField(max_length=4)
     to_year = models.CharField(max_length=4)
+
+    def __str__(self):
+        return f'{self.person}'
 
 class Conviction(models.Model):
     person = models.ForeignKey(Person, related_name='conviction', on_delete=models.CASCADE)
@@ -110,7 +113,7 @@ class VictimsAwards(models.Model):
     data_of_victims_or_awards = models.DateField(null=True, blank=True)
 
 class OfficialProperty(models.Model):
-    person = models.ForeignKey(Person, related_name='official_property', on_delete=models.CASCADE)
+    person = models.ForeignKey(Employees, related_name='official_property', on_delete=models.CASCADE)
     type = models.CharField(max_length=20)
     model = models.CharField(max_length=20)
     year = models.CharField(max_length=4)

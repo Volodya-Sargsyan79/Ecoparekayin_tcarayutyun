@@ -48,7 +48,7 @@
         </div>
         
         <div class="column is-12 has-text-centered">
-          <a href="#" class="button is-size-3 mt-6 mb-6" style="background: #163820; color:#ffffff;">
+          <a href="/log-in" class="button is-size-3 mt-6 mb-6" style="background: #163820; color:#ffffff;">
             Click to get starte
           </a>
         </div>

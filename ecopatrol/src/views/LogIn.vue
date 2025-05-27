@@ -57,7 +57,9 @@ export default {
         }
     },
     methods: {
-        submitForm() {
+        async submitForm() {
+            this.$store.commit('setIsLoading', true)
+
             axios.defaults.headers.common['Authorization'] = ""
 
             localStorage.removeItem('token')
@@ -77,7 +79,7 @@ export default {
                     password: this.password
                 }
 
-                axios
+                await axios
                     .post('/api/ekopatrol/token/login/', formData)
                     .then(response => {
                         const token = response.data.auth_token
@@ -87,20 +89,23 @@ export default {
                         axios.defaults.headers.common['Authorization'] = "Token " + token
                         
                         localStorage.setItem('token', token)
+
+                        console.log(response.data.auth_token)
                         
-                        this.$router.push('/dashboard/my-account')
+                        this.$router.push('/dashboard')
                     })
                     .catch(error => {
                         if (error.response) {
                             for (const property in error.response.data) {
-                                this.errors.push(`${property}: ${errors.response.data[property]}`)
+                                this.errors.push(`${property}: ${error.response.data[property]}`)
                             }
                             console.log(JSON.stringify(error.response.data))
                         } else if (error.message) {
                             this.errors.push('Something went wrong. Please try again')
                             console.log(JSON.stringify(error))
                         }
-                    }) 
+                    })
+                this.$store.commit('setIsLoading', false) 
             }
         }
     }

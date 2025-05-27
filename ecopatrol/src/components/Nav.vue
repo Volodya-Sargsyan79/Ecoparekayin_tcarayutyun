@@ -12,16 +12,27 @@
         <a class="navbar-item" href="/sign-up">Home</a>
         <a class="navbar-item" href="https://eps.am/">About</a>
       </div>
-
-      <div class="navbar-end">
-        <div class="navbar-item">
-          <div class="buttons">
-            <a class="button" href="/log-in">
-              Log in
-            </a>
-          </div>
-        </div>
-      </div>
+    </div>
+    <div v-if=this.$store.state.user.isAuthenticated>
+      <LogOut />
     </div>
   </nav>
 </template>
+
+<script>
+import LogOut from './LogOut.vue';
+
+export default {
+    name: 'Nav',
+    components: {
+            LogOut
+    },
+    data() {
+        return {
+            username: '',
+            password: '',
+            errors: []
+        }
+    }
+}
+</script>

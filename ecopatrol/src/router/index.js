@@ -5,6 +5,7 @@ import SignUp from '@/views/SignUp.vue'
 import LogIn from '@/views/LogIn.vue'
 import Dashboard from '@/views/dashboard/Dashboard.vue'
 import MyAccount from '@/views/dashboard/MyAccount.vue'
+import Employee from '@/views/dashboard/Employee.vue'
 
 const routes = [
   {
@@ -26,6 +27,14 @@ const routes = [
     path: '/dashboard',
     name: 'Dashboard',
     component: Dashboard,
+    meta: {
+      requireLogin: true
+    }
+  },
+  {
+    path: '/dashboard/employee',
+    name: 'Employee',
+    component: Employee,
     meta: {
       requireLogin: true
     }

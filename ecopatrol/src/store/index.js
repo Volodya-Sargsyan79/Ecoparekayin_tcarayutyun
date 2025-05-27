@@ -4,6 +4,8 @@ export default createStore({
   state: {
     user: {
       token: '',
+      employee: "",
+      person: "",
       isLoading: false,
       isAuthenticated: false
     }
@@ -20,7 +22,7 @@ export default createStore({
         state.user.isAuthenticated = false
       }
     },
-    setISLoading(state, status) {
+    setIsLoading(state, status) {
       state.user.isLoading = status
     },
     setToken(state, token) {
