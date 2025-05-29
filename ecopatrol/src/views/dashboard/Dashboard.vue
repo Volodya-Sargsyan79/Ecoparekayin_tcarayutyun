@@ -233,7 +233,6 @@
                     })
                     .then(response => {
                         this.$store.state.user.employee = response.data
-                        console.log(this.$store.state.user.employee)
                         this.$router.push('/dashboard/employee')
                     })
                     .catch(error => {

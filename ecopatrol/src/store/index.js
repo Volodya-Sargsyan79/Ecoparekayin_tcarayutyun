@@ -5,6 +5,10 @@ export default createStore({
     user: {
       token: '',
       employee: "",
+      relatives: "",
+      pals: "",
+      friend: "",
+      relation: "",
       person: "",
       isLoading: false,
       isAuthenticated: false
