@@ -4,7 +4,7 @@ export default createStore({
   state: {
     user: {
       token: '',
-      employee: "",
+      workList: "",
       relatives: "",
       pals: "",
       friend: "",

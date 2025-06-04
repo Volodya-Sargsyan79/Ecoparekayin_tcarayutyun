@@ -1,17 +1,17 @@
 from django.urls import path
 from .views import (
-    GetEmployeeList,
-    GetEmployeeRelativesList,
-    GetEmployeePalsList,
+    GetPersonList,
+    GetPersonRelativesList,
+    GetPersonWorkList,
     GetEmployeeFriendsList,
     GetEmployeeRelationList
 )
     
 
 urlpatterns = [
-    path('employee/', GetEmployeeList.as_view()),
-    path('employee/relatives/', GetEmployeeRelativesList.as_view()),
-    path('employee/pals/', GetEmployeePalsList.as_view()),
-    path('employee/friends/', GetEmployeeFriendsList.as_view()),
-    path('employee/relation/', GetEmployeeRelationList.as_view())
+    path('person/', GetPersonList.as_view()),
+    path('person/relatives/', GetPersonRelativesList.as_view()),
+    path('person/work_list/', GetPersonWorkList.as_view()),
+    path('person/friends/', GetEmployeeFriendsList.as_view()),
+    path('person/relation/', GetEmployeeRelationList.as_view())
 ]

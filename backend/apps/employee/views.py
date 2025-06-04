@@ -7,9 +7,10 @@ from django.db import connection
 # Create your views here.
 
 
-class GetEmployeeList(APIView):
+class GetPersonList(APIView):
     def get(self, request):
 
+        id = request.GET.get('id') or ''
         first_name = request.GET.get('first_name') or ''
         last_name = request.GET.get('last_name') or ''
         passport = request.GET.get('passport') or ''
@@ -18,14 +19,14 @@ class GetEmployeeList(APIView):
 
         sql = '''
             SELECT * FROM employee_person 
-            JOIN employee_employees ON employee_employees.person_id = employee_person.id 
-            WHERE employee_person.first_name = %s AND employee_person.last_name = %s
+            WHERE employee_person.id = %s or  employee_person.first_name = %s AND employee_person.last_name = %s
             OR employee_person.passport = %s OR employee_person.id_card = %s or employee_person.hvhh = %s;
         '''
 
         try:
             cursor = connection.cursor()
             cursor.execute(sql, [
+                id,
                 first_name.capitalize(), 
                 last_name.capitalize(), 
                 passport.upper(),
@@ -44,7 +45,7 @@ class GetEmployeeList(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
-class GetEmployeeRelativesList(APIView):
+class GetPersonRelativesList(APIView):
     def get(self, request):
 
         id = request.GET.get('id') or ''
@@ -59,9 +60,15 @@ class GetEmployeeRelativesList(APIView):
                 employee_person.passport, 
                 employee_person.id_card,
                 employee_person.hvhh,
-                employee_person.img FROM employee_employees JOIN employee_relatives ON employee_relatives.employee_id = employee_employees.id
-            JOIN employee_person ON employee_person.id = employee_relatives.person_id
-            WHERE employee_employees.id = %s
+                employee_person.img 
+            FROM 
+                employee_relatives 
+            JOIN 
+                employee_person 
+            ON
+                employee_person.id = employee_relatives.person_id
+            WHERE
+                employee_relatives.relatives_id = %s
         '''
 
         try:
@@ -79,24 +86,29 @@ class GetEmployeeRelativesList(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
-class GetEmployeePalsList(APIView):
+class GetPersonWorkList(APIView):
     def get(self, request):
 
         id = request.GET.get('id') or ''
 
         sql = '''
-            SELECT 
+           SELECT 
                 employee_person.id,
-                employee_pals.name, 
+                employee_employees.name,
+                employee_employees.position_start,
+                employee_employees.data_of_start,
+                employee_employees.end_of_start,
+                employee_person.id,
                 employee_person.first_name, 
-                employee_person.last_name, 
-                employee_person.birthday, 
-                employee_person.passport, 
-                employee_person.id_card,
-                employee_person.hvhh,
-                employee_person.img FROM employee_employees JOIN employee_pals ON employee_pals.employee_id = employee_employees.id
-            JOIN employee_person ON employee_person.id = employee_pals.person_id
-            WHERE employee_employees.id = %s
+                employee_person.last_name 
+            FROM 
+                ekoparekayin_tcarayutyun.employee_employees
+            JOIN 
+                employee_person
+            ON 
+                employee_person.id=employee_employees.person_id
+            WHERE 
+                employee_person.id=%s
         '''
 
         try:

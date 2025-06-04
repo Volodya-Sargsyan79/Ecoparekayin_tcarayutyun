@@ -1,56 +1,51 @@
 <template>
     <section class="section">
-        <div class="container_employee" v-if="$store.state.user.employee.length > 0 ">                                                    
+        <div 
+            class="container_employee" 
+            v-if="$store.state.user.person.length > 0 
+                || $store.state.user.workList.length > 0">
+                {{ console.log($store.state.user.workList, 111111111) }}                                                    
             <div class="columns is-multiline">                                                        
-                <div class="column is-4">
-                    <img class="employee_img"  :src="'http://localhost:8000/media/' + this.$store.state.user.employee[0].img"/>
+                <div class="column is-4" v-if="item.img">
+                    <img class="employee_img"  :src="'http://localhost:8000/media/' + item.img"/>
                 </div>
                 <div class="column is-8">
                     <table class="table">
-                        <tbody>
-                            <tr>
-                                <td>Անուն - </td>
-                                <td>{{ this.$store.state.user.employee[0].first_name }}</td>
+                        <tbody >
+                            <tr v-if="item.name">
+                                <td colspan="2">{{ item.name }}</td>
                             </tr>
-                            <tr>
-                                <td>Ազգանուն - </td>
-                                <td>{{ this.$store.state.user.employee[0].last_name }}</td>
-                            </tr>
-                            <tr>
-                                <td>Ծննդյան ամսաթիվ - </td>
-                                <td>{{ this.$store.state.user.employee[0].birthday }}</td>
-                            </tr>
-                            <tr>
-                                <td>Անձնագիր - </td>
-                                <td>{{ this.$store.state.user.employee[0].passport }}</td>
-                            </tr>
-                            <tr>
-                                <td>Նույնականացման քարտ - </td>
-                                <td>{{ this.$store.state.user.employee[0].id_card }}</td>
-                            </tr>
-                            <tr>
-                                <td>Հվհհ - </td>
-                                <td>{{ this.$store.state.user.employee[0].hvhh }}</td>
-                            </tr>
-                            <tr>
-                                <td>Email - </td>
-                                <td>{{ this.$store.state.user.employee[0].email }}</td>
-                            </tr>
-                            <tr>
-                                <td>Աշխատանք - </td>
-                                <td>{{ this.$store.state.user.employee[0].name }}</td>
-                            </tr>
-                            <tr>
+                            <tr v-if="item.name">
                                 <td>Պաշտոն - </td>
-                                <td>{{ this.$store.state.user.employee[0].position_start }}</td>
+                                <td>{{ item.position_start }}</td>
                             </tr>
-                            <tr>
-                                <td>Ընդունման ամսաթիվ - </td>
-                                <td>{{ this.$store.state.user.employee[0].data_of_start }}</td>
+                            <tr v-if="item.first_name">
+                                <td>Անուն - </td>
+                                <td>{{ item.first_name }}</td>
                             </tr>
-                            <tr>
-                                <td>Ազատման ամսաթիվ - </td>
-                                <td>{{ this.$store.state.user.employee[0].end_of_start }}</td>
+                            <tr v-if="item.last_name">
+                                <td>Ազգանուն - </td>
+                                <td>{{ item.last_name }}</td>
+                            </tr>
+                            <tr v-if="item.birthday">
+                                <td>Ծննդյան ամսաթիվ - </td>
+                                <td>{{ item.birthday }}</td>
+                            </tr>
+                            <tr v-if="item.passport">
+                                <td>Անձնագիր - </td>
+                                <td>{{ item.passport }}</td>
+                            </tr>
+                            <tr v-if="item.id_card">
+                                <td>Նույնականացման քարտ - </td>
+                                <td>{{ item.id_card }}</td>
+                            </tr>
+                            <tr v-if="item.hvhh">
+                                <td>Հվհհ - </td>
+                                <td>{{ item.hvhh }}</td>
+                            </tr>
+                            <tr v-if="item.email">
+                                <td>Email - </td>
+                                <td>{{ item.email }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -79,6 +74,11 @@
                 errors: [],
                 employee: []
             }
+        },
+        props: {
+            item: {
+                type: Object
+            },
         }
     }
 </script>

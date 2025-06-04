@@ -101,35 +101,35 @@ class Employees(models.Model):
 
 class Relatives(models.Model):
     name = models.CharField(max_length=15)
-    person = models.ForeignKey(Person, related_name='relatives', on_delete=models.CASCADE)
-    employee =  models.ForeignKey(Employees, related_name='relatives', on_delete=models.CASCADE)
+    person = models.ForeignKey(Person, related_name='relatives_1', on_delete=models.CASCADE)
+    relatives = models.ForeignKey(Person, related_name='relatives_2', on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.employee} - {self.name} - {self.person}'
+        return f'{self.relatives} - {self.name} - {self.person}'
     
 class Pals(models.Model):
     name = models.CharField(max_length=15)
-    person = models.ForeignKey(Person, related_name='pals', on_delete=models.CASCADE)
-    employee =  models.ForeignKey(Employees, related_name='pals', on_delete=models.CASCADE)
+    person = models.ForeignKey(Person, related_name='pals_1', on_delete=models.CASCADE)
+    pals = models.ForeignKey(Person, related_name='pals_2', on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.employee} - {self.name} - {self.person}'
+        return f'{self.pals} - {self.name} - {self.person}'
     
 class Friends(models.Model):
     name = models.CharField(max_length=15)
-    person = models.ForeignKey(Person, related_name='friends', on_delete=models.CASCADE)
-    employee =  models.ForeignKey(Employees, related_name='friends', on_delete=models.CASCADE)
+    person = models.ForeignKey(Person, related_name='friends_1', on_delete=models.CASCADE)
+    friends = models.ForeignKey(Person, related_name='friends_2', on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.employee} - {self.name} - {self.person}'
+        return f'{self.friends} - {self.name} - {self.person}'
     
 class Relation(models.Model):
     name = models.CharField(max_length=15)
-    person = models.ForeignKey(Person, related_name='relation', on_delete=models.CASCADE)
-    employee =  models.ForeignKey(Employees, related_name='relation', on_delete=models.CASCADE)
+    person = models.ForeignKey(Person, related_name='relation_1', on_delete=models.CASCADE)
+    relation = models.ForeignKey(Person, related_name='relation_2', on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.employee} - {self.name} - {self.person}'
+        return f'{self.relation} - {self.name} - {self.person}'
 
 class VictimsAwards(models.Model):
     person = models.ManyToManyField(Employees)
