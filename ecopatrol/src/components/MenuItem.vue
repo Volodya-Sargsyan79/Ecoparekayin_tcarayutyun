@@ -3,7 +3,7 @@
 
         <div 
             class="label"
-            @click="handleClick"
+            @click="handleClick(title)"
             :style="{ paddingLeft: depth * 20 + 20 + 'px' }"
         >
             <div class="left">
@@ -25,6 +25,7 @@
                 :key="index"
                 :func="item.func"
                 :label="item.label"
+                :title="item.title"
                 :depth="depth + 1"
                 :data="item.children"
             />
@@ -47,6 +48,9 @@
                 type: String,
                 required: true
             },
+            title: {
+                title: String,
+            },
             depth: {
                 type: Number,
                 required: true
@@ -59,11 +63,11 @@
             }
         },
         methods: {
-            handleClick() {
+            handleClick(title) {
                 if (this.data && this.data.length > 0) {
                     this.toggleMenu();
                 } else if (typeof this.func === 'function') {
-                    this.func();
+                    this.func(title);
                 }
             },
             toggleMenu() {

@@ -56,8 +56,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'djoser',
-
-    'apps.employee'
+    
+    'apps.person',
 
 ]
 
@@ -98,7 +98,7 @@ WSGI_APPLICATION = 'back.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ekoparekayin_tcarayutyun',
+        'NAME': 'ekopatrol',
         'USER': 'root',
         'PASSWORD': 'Test1234!@#$',
         'HOST': 'localhost',

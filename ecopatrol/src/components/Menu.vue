@@ -9,6 +9,7 @@
             v-for="(item, index) in menuTree"
             :key="index"
             :label="item.label"
+            :title="item.title"
             :func="item.func"
             :depth="0"
             :data="item.children"
@@ -29,19 +30,23 @@
                         children: [
                             {
                                 label: 'Հարազատներ',
+                                title: "Հ",
                                 func: this.personRelatives,
                             },
                             {
                                 label: 'Բարեկամներ',
-                                func: this.personPals,
+                                title: "Բ",
+                                func: this.personRelatives,
                             },
                             {
                                 label: 'Ընկերներ',
-                                func: this.personFriends,
+                                title: "Ը",
+                                func: this.personRelatives,
                             },
                             {
                                 label: 'Կապեր',
-                                func: this.personRelation,
+                                title: "Կ",
+                                func: this.personRelatives,
                             },
                         ]
                     },
@@ -79,15 +84,23 @@
                         ]
                     },
                     {
-                        label: 'Սեփականություն',
+                        label: 'Անշարժ գույք',
                         children: [
                             {
-                                label: 'Անշարժ գույք',
+                                label: 'Հաշվառման հասցե',
+                                func: this.registrationAddress,
                             },
                             {
-                                label: 'Մեքենա',
+                                label: 'Բնակության հասցե',
+                                func: this.residentialAddress,
+                            },
+                            {
+                                label: 'property',
                             }
                         ]
+                    },
+                    {
+                        label: 'Մեքենա',
                     },
                     {
                         label: 'Փաստաթղթեր',
@@ -103,87 +116,16 @@
             MenuItem
         },
         methods: {
-            personRelatives() {
+            personRelatives(title) {
                  axios
                     .get('/api/ekopatrol/person/relatives/', {
                         params: {
-                            id: this.$store.state.user.person[0].id
+                            id: this.$store.state.user.person[0].id,
+                            registration: title
                         }
                     })
                     .then(response => {
                         this.$store.state.user.person = response.data
-                    })
-                    .catch(error => {
-                        if (error.response) {
-                            for (const property in error.response.data) {
-                                this.errors.push(`${property}: ${error.response.data[property]}`)
-                            }
-                            console.log(JSON.stringify(error.response.data))
-                        } else if (error.message) {
-                            this.errors.push('Something went wrong. Please try again')
-                            console.log(JSON.stringify(error))
-                        }
-                    }) 
-            },
-            personPals() {
-                 axios
-                    .get('/api/ekopatrol/person/pals/', {
-                        params: {
-                            id: this.$store.state.user.person[0].id
-                        }
-                    })
-                    .then(response => {
-                        this.$store.state.user.pals = response.data
-                        console.log(this.$store.state.user.pals)
-                        // this.$router.push(/dashboard/person_information')
-                    })
-                    .catch(error => {
-                        if (error.response) {
-                            for (const property in error.response.data) {
-                                this.errors.push(`${property}: ${error.response.data[property]}`)
-                            }
-                            console.log(JSON.stringify(error.response.data))
-                        } else if (error.message) {
-                            this.errors.push('Something went wrong. Please try again')
-                            console.log(JSON.stringify(error))
-                        }
-                    }) 
-            },
-            personFriends() {
-                 axios
-                    .get('/api/ekopatrol/person/friends/', {
-                        params: {
-                            id: this.$store.state.user.person[0].id
-                        }
-                    })
-                    .then(response => {
-                        this.$store.state.user.friends = response.data
-                        console.log(this.$store.state.user.friends)
-                        // this.$router.push('/dashboard/person_information')
-                    })
-                    .catch(error => {
-                        if (error.response) {
-                            for (const property in error.response.data) {
-                                this.errors.push(`${property}: ${error.response.data[property]}`)
-                            }
-                            console.log(JSON.stringify(error.response.data))
-                        } else if (error.message) {
-                            this.errors.push('Something went wrong. Please try again')
-                            console.log(JSON.stringify(error))
-                        }
-                    }) 
-            },
-            personRelation() {
-                axios
-                    .get('/api/ekopatrol/person/relation/', {
-                        params: {
-                            id: this.$store.state.user.person[0].id
-                        }
-                    })
-                    .then(response => {
-                        this.$store.state.user.relation = response.data
-                        console.log(this.$store.state.user.relation)
-                        // this.$router.push(/dashboard/person_information')
                     })
                     .catch(error => {
                         if (error.response) {
