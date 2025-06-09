@@ -1,67 +1,29 @@
 <template>
-    <section class="section">
-        <div 
-            class="container_employee" 
-            v-if="$store.state.user.person.length > 0 
-                || $store.state.user.workList.length > 0">                                                   
+    <section>
+        <div class="container_employee" v-if="item"> 
             <div class="columns is-multiline">                                                        
-                <div class="column is-4" v-if="item.img">
-                    <img class="employee_img"  :src="'http://localhost:8000/media/' + item.img"/>
+                <div class="column is-4">
+                    <img v-if="item.img" class="employee_img"  :src="'http://localhost:8000/media/' + item.img"/>
                 </div>
                 <div class="column is-8">
                     <table class="table">
-                        <tbody >
+                        <thead>
                             <tr v-if="item.pal_name">
-                                <td colspan="3">{{ item.pal_name }}</td>
+                                <th colspan="3" class="has-text-centered">{{ item.pal_name }}</th>
                             </tr>
-                             <tr v-if="item.plase_name">
-                                <td colspan="3">{{ item.plase_name }}</td>
-                            </tr>
-                            <tr v-if="item.position_start" class="has-text-left">
-                                <td>Պաշտոն</td>
-                                <td>-</td>
-                                <td>{{ item.position_start }}</td>
-                            </tr>
-                             <tr v-if="item.data_of_start" class="has-text-left">
-                                <td>Պաշտոնի սկիզբ</td>
-                                 <td>-</td>
-                                <td>{{ item.data_of_start }}</td>
-                            </tr>
-                            <tr v-if="item.end_of_start" class="has-text-left">
-                                <td>Պաշտոնի ավարտ</td>
-                                 <td>-</td>
-                                <td>{{ item.end_of_start }}</td>
-                            </tr>
-                            <tr v-if="item.degree" class="has-text-left">
-                                <td>Կոչում</td>
-                                 <td>-</td>
-                                <td>{{ item.degree }}</td>
-                            </tr>
-                            <tr v-if="item.birthday" class="has-text-left">
-                                <td>Ծննդյան ամսաթիվ</td>
-                                 <td>-</td>
-                                <td>{{ item.birthday }}</td>
-                            </tr>
-                            <tr v-if="item.passport" class="has-text-left">
-                                <td>Անձնագիր</td>
-                                 <td>-</td>
-                                <td>{{ item.passport }}</td>
-                            </tr>
-                            <tr v-if="item.id_card" class="has-text-left">
-                                <td>Նույնականացման քարտ</td>
-                                 <td>-</td>
-                                <td>{{ item.id_card }}</td>
-                            </tr>
-                            <tr v-if="item.hvhh" class="has-text-left">
-                                <td>Հվհհ</td>
-                                 <td>-</td>
-                                <td>{{ item.hvhh }}</td>
-                            </tr>
-                            <tr v-if="item.email" class="has-text-left">
-                                <td>Email</td>
-                                 <td>-</td>
-                                <td>{{ item.email }}</td>
-                            </tr>
+                        </thead>
+                        <tbody>                           
+                            <template v-for="(value, key) in item">
+                                <tr
+                                    v-if="key !== 'id' && key !== 'img' && value !== '' && value !== null && value !== undefined"
+                                    :key="key"
+                                    class="has-text-left"
+                                >
+                                    <td>{{ formatKey(key) }}</td>
+                                    <td>-</td>
+                                    <td >{{ value }}</td>
+                                </tr>
+                            </template>
                         </tbody>
                     </table>
                 </div>
@@ -94,6 +56,13 @@
             item: {
                 type: Object
             },
+        },
+        methods: {
+            formatKey(key) {
+                return key
+                .replace(/_/g, ' ')          // Replace underscores with spaces
+                .replace(/\b\w/g, l => l.toUpperCase()); // Capitalize first letter of each word
+            }
         }
     }
 </script>

@@ -41,17 +41,17 @@ class Car(models.Model):
 
 class Address(models.Model):
     person = models.ForeignKey(Person, related_name='address', on_delete=models.CASCADE)
+    REGISTERED = (
+        ("Հաշվառման հասցե", "Հաշվառման"),
+        ("Բնակության հասցե", "Բնակության"),
+        ("Սեփականություն", "Սեփականություն")
+    )
+    registration = models.CharField(max_length=20, choices=REGISTERED)
     country = models.CharField(max_length=50)
     city = models.CharField(max_length=50)
     street = models.CharField(max_length=50)
     house = models.CharField(max_length=20)
     apartment = models.CharField(max_length=20, blank=True, null=True)
-    REGISTERED = (
-        ("Հ", "Հաշվառման"),
-        ("Բ", "Բնակության"),
-        ("Ս", "Սեփականություն")
-    )
-    registration = models.CharField(max_length=1, choices=REGISTERED)
     img = models.ImageField(upload_to='person_documentation', null=True, blank=True)
 
     def __str__(self):

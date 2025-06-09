@@ -2,7 +2,7 @@
     <div class="menu">
         <div class="has-text-centered">
             <h2 class="is-size-4 mt-4 mb-4">
-                Տեղեկատվություն<br/>{{ this.$store.state.user.person[0].first_name }} {{ this.$store.state.user.person[0].last_name }}ի<br/>վերաբերյալ
+                <br/>{{ $store.state.user.person.first_name }} {{ $store.state.user.person.last_name }}<br/>
             </h2>
         </div>
         <MenuItem 
@@ -120,12 +120,13 @@
                  axios
                     .get('/api/ekopatrol/person/relatives/', {
                         params: {
-                            id: this.$store.state.user.person[0].id,
+                            id: this.$store.state.user.person.id,
                             registration: title
                         }
                     })
                     .then(response => {
                         this.$store.state.user.person = response.data
+
                     })
                     .catch(error => {
                         if (error.response) {

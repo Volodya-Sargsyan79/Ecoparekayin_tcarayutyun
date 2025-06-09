@@ -150,13 +150,12 @@
             }
         },
         methods: {
-            personSearch() {
+            async personSearch() {
                 this.errors = []
 
-                this.$store.commit('setIsLoading', true)
-
-                axios
-                    .get('/api/ekopatrol/person/', {
+                try {
+                    // 1. Search for person
+                    const personRes = await axios.get('/api/ekopatrol/person/', {
                         params: {
                             first_name: this.person.first_name,
                             last_name: this.person.last_name,
@@ -164,22 +163,48 @@
                             id_card: this.person.id_card,
                             hvhh: this.person.hvhh
                         }
-                    })
-                    .then(response => {
-                        this.$store.state.user.person = response.data
-                        this.$router.push('/dashboard/person_information')
-                    })
-                    .catch(error => {
-                        if (error.response) {
-                            for (const property in error.response.data) {
-                                this.errors.push(`${property}: ${error.response.data[property]}`)
-                            }
-                            console.log(JSON.stringify(error.response.data))
-                        } else if (error.message) {
-                            this.errors.push('Something went wrong. Please try again')
-                            console.log(JSON.stringify(error))
+                    });
+    
+                    if (personRes.data.length > 1) {
+                        this.$store.state.user.person = personRes.data;
+
+                        this.$router.push('/dashboard/person_information');
+                    } else {
+                        this.$store.state.user.person = personRes.data[0];
+
+                        const personId = this.$store.state.user.person?.id;
+                        
+                        if (!personId) throw new Error("Person ID not found");
+
+                        // 2. Get phone info
+                        const phoneRes = await axios.get('/api/ekopatrol/person/phone/', {
+                            params: { person_id: personId }
+                        });
+                        this.$store.state.user.phone = phoneRes.data;
+
+                        // 3. Get address info
+                        const addressRes = await axios.get('/api/ekopatrol/person/address/', {
+                            params: { person_id: personId }
+                        });
+                        this.$store.state.user.address = addressRes.data;
+
+                        // 4. Navigate
+                        this.$router.push('/dashboard/person_information');
+                    }
+
+                } catch (error) {
+                    if (error.response && error.response.data) {
+                        for (const property in error.response.data) {
+                            this.errors.push(`${property}: ${error.response.data[property]}`);
                         }
-                    }) 
+                        console.log(JSON.stringify(error.response.data));
+                    } else {
+                        this.errors.push('Something went wrong. Please try again');
+                        console.log(error.message || error);
+                    }
+                } finally {
+                    this.$store.commit('setIsLoading', false);
+                }             
 
                 this.$store.commit('setIsLoading', false)
             

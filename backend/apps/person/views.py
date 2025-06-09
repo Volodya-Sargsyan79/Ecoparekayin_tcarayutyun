@@ -45,6 +45,76 @@ class GetPersonList(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
+class GetPersonPhoneList(APIView):
+    def get(self, request):
+
+        id = request.GET.get('person_id') or ''
+
+        sql = '''
+            SELECT 
+                person_phone.phone, 
+                person_phone.home, 
+                person_phone.mobile, 
+                person_phone.viber, 
+                person_phone.whatsUp, 
+                person_phone.telegram 
+            FROM 
+                person_phone
+            WHERE 
+                person_phone.person_id = %s
+        '''
+
+        try:
+            cursor = connection.cursor()
+            cursor.execute(sql, [
+                id,
+            ])
+            columns = [col[0] for col in cursor.description]  # <-- Get column names
+            results = [
+                dict(zip(columns, row)) for row in cursor.fetchall()
+            ]
+            
+            return Response(results, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            # Log the error using log_error function
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class GetPersonAddressList(APIView):
+    def get(self, request):
+
+        id = request.GET.get('person_id') or ''
+
+        sql = '''
+            SELECT 
+                person_address.country, 
+                person_address.city, 
+                person_address.street, 
+                person_address.house, 
+                person_address.apartment, 
+                person_address.registration 
+            FROM 
+                ekopatrol.person_address
+            where person_address.person_id = %s;
+        '''
+
+        try:
+            cursor = connection.cursor()
+            cursor.execute(sql, [
+                id,
+            ])
+            columns = [col[0] for col in cursor.description]  # <-- Get column names
+            results = [
+                dict(zip(columns, row)) for row in cursor.fetchall()
+            ]
+            
+            return Response(results, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            # Log the error using log_error function
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
 class GetPersonRelativesList(APIView):
     def get(self, request):
 

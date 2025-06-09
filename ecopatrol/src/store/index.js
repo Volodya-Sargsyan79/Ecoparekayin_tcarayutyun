@@ -6,10 +6,10 @@ export default createStore({
       token: '',
       workList: "",
       relatives: "",
-      pals: "",
-      friend: "",
-      relation: "",
       person: "",
+      persons: "",
+      phone: "",
+      address: "",
       isLoading: false,
       isAuthenticated: false
     }
