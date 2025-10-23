@@ -59,9 +59,10 @@
         },
         methods: {
             formatKey(key) {
-                return key
-                .replace(/_/g, ' ')          // Replace underscores with spaces
-                .replace(/\b\w/g, l => l.toUpperCase()); // Capitalize first letter of each word
+                if (typeof key === 'string') {
+                    return key.replace(/_/g, ' ').toUpperCase();
+                }
+                return '';
             }
         }
     }

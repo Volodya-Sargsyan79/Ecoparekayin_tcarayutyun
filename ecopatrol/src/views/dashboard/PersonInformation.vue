@@ -7,34 +7,44 @@
                         <div class="columns is-multiline">
                             <div class="column is-2">
                                 <div class="box">
-                                    <div v-if="typeof $store.state.user.person === 'object'">
-                                        <Menu />
+                                    <div v-if="this.$store.state.user.persons" class="has-text-centered">
+                                        <Menu />                                     
                                     </div>
 
-                                    <div v-else class="has-text-centered">
-                                        <p>Տվյալներ չեն գտնվել կամ բեռնվում են...</p>
+                                    <div v-else >
+                                        <p>Տվյալներ չեն գտնվել...</p>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="column is-10" v-if="$store.state.user.person.length > 1">
-                                <div class="box" v-for="(item, index) in $store.state.user.person" :key="index">
+                            <div class="column is-10" v-if="this.$store.state.user.person.length > 0">
+                                <div class="box" v-for="(item, index) in this.$store.state.user.person" :key="index">
                                     <div class="has-text-centered column is-12">                                                
-                                        <div class="has-text-centered">
+                                        <div class="has-text-centered" v-if="item.first_name">
                                             <h2 class="is-size-4 mt-4 mb-4 name_title" @click="person(item.id)">
                                                {{ item.first_name }} {{ item.last_name }}ի անձնական տվյալները 
+                                            </h2>
+                                        </div>
+                                        <div class="has-text-centered" v-else>
+                                            <h2 class="is-size-4 mt-4 mb-4 name_title">
+                                              {{ this.$store.state.user.persons.first_name }} {{ this.$store.state.user.persons.last_name }}ի անձնական տվյալները
                                             </h2>
                                         </div>
                                         <TablePerson :item="item" />
                                     </div>
                                 </div>
                             </div>
-                            <div class="column is-10" v-else>
+                            <div 
+                                class="column is-10"  
+                                v-else-if="this.$store.state.user.person &&
+                                Object.keys(this.$store.state.user.person).length !== 0 &&
+                                this.$store.state.user.person.constructor === Object"
+                            >
                                 <div class="box">
                                     <div class="has-text-centered column is-12">                                                
                                         <div class="has-text-centered">
                                             <h2 class="is-size-4 mt-4 mb-4 name_title" >
-                                               {{ $store.state.user.person.first_name }} {{ $store.state.user.person.last_name }}ի անձնական տվյալները 
+                                               {{ this.$store.state.user.persons.first_name }} {{ this.$store.state.user.persons.last_name }}ի անձնական տվյալները 
                                             </h2>
                                         </div>
                                         <TablePerson :item="$store.state.user.person" />
@@ -48,6 +58,17 @@
                                             :key="index" 
                                             :item="item" 
                                         />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="column is-10" v-else>
+                                <div class="box">
+                                    <div class="has-text-centered column is-12">                                                
+                                        <div class="has-text-centered">
+                                            <h2 class="is-size-4 mt-4 mb-4 name_title" >
+                                               Տվյալներ չեն գտնվել... 
+                                            </h2>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -96,32 +117,27 @@
                         }
                     });
     
-                    if (personRes.data.length > 1) {
-                        this.$store.state.user.person = personRes.data;
+                    this.$store.state.user.person = personRes.data[0];
+                     this.$store.state.user.persons = personRes.data[0];
 
-                        this.$router.push('/dashboard/person_information');
-                    } else {
-                        this.$store.state.user.person = personRes.data[0];
+                    const personId = this.$store.state.user.person?.id;
+                    
+                    if (!personId) throw new Error("Person ID not found");
 
-                        const personId = this.$store.state.user.person?.id;
-                        
-                        if (!personId) throw new Error("Person ID not found");
+                    // 2. Get phone info
+                    const phoneRes = await axios.get('/api/ekopatrol/person/phone/', {
+                        params: { person_id: personId }
+                    });
+                    this.$store.state.user.phone = phoneRes.data;
 
-                        // 2. Get phone info
-                        const phoneRes = await axios.get('/api/ekopatrol/person/phone/', {
-                            params: { person_id: personId }
-                        });
-                        this.$store.state.user.phone = phoneRes.data;
+                    // 3. Get address info
+                    const addressRes = await axios.get('/api/ekopatrol/person/address/', {
+                        params: { person_id: personId }
+                    });
+                    this.$store.state.user.address = addressRes.data;
 
-                        // 3. Get address info
-                        const addressRes = await axios.get('/api/ekopatrol/person/address/', {
-                            params: { person_id: personId }
-                        });
-                        this.$store.state.user.address = addressRes.data;
-
-                        // 4. Navigate
-                        this.$router.push('/dashboard/person_information');
-                    }
+                    // 4. Navigate
+                    this.$router.push('/dashboard/person_information');
 
                 } catch (error) {
                     if (error.response && error.response.data) {

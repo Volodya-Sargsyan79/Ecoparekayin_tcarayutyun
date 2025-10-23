@@ -36,7 +36,7 @@ class Car(models.Model):
     number = models.CharField(max_length=10)
 
     def __str__(self):
-        return f'{self.type}, {self.model}, {self.year}, {self.number}'
+        return f'{self.person}, {self.type}, {self.model}, {self.year}, {self.number}'
     
 
 class Address(models.Model):
@@ -60,12 +60,16 @@ class Address(models.Model):
 
 class Study(models.Model):
     person = models.ForeignKey(Person, related_name='study', on_delete=models.CASCADE)
+    place = models.CharField(max_length=255)
     educational_institution = models.CharField(max_length=255)
     facultet = models.CharField(max_length=255)
     profession = models.CharField(max_length=50)
     start_year = models.CharField(max_length=4)
     end_year = models.CharField(max_length=4)
+    img = models.ImageField(upload_to='person_study', null=True, blank=True)
 
+    def __str__(self):
+        return f'{self.person}, {self.educational_institution}, {self.facultet}'
 
 class Soldier(models.Model):
     person = models.ForeignKey(Person, related_name='soldier', on_delete=models.CASCADE)
@@ -104,9 +108,13 @@ class Relatives(models.Model):
 
 class Informations(models.Model):
     person = models.ForeignKey(Person, related_name='informations', on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
+    sex = models.CharField(max_length=255, null=True, blank=True)
+    politics = models.CharField(max_length=255, null=True, blank=True)
+    religion = models.CharField(max_length=255, null=True, blank=True)
     about = models.TextField(null=True, blank=True)
 
+    def __str__(self):
+        return f'{self.person}'
 
 class Employees(models.Model):
     employee = models.ForeignKey(Person, related_name='employee', on_delete=models.CASCADE)

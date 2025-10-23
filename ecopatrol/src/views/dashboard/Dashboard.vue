@@ -152,6 +152,7 @@
         methods: {
             async personSearch() {
                 this.errors = []
+                this.$store.commit('setIsLoading', true)
 
                 try {
                     // 1. Search for person
@@ -171,6 +172,7 @@
                         this.$router.push('/dashboard/person_information');
                     } else {
                         this.$store.state.user.person = personRes.data[0];
+                        this.$store.state.user.persons = personRes.data[0];
 
                         const personId = this.$store.state.user.person?.id;
                         
@@ -178,13 +180,13 @@
 
                         // 2. Get phone info
                         const phoneRes = await axios.get('/api/ekopatrol/person/phone/', {
-                            params: { person_id: personId }
+                            params: { id: personId }
                         });
                         this.$store.state.user.phone = phoneRes.data;
 
                         // 3. Get address info
                         const addressRes = await axios.get('/api/ekopatrol/person/address/', {
-                            params: { person_id: personId }
+                            params: { id: personId }
                         });
                         this.$store.state.user.address = addressRes.data;
 

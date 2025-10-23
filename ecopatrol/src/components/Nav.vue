@@ -9,7 +9,7 @@
 
     <div id="navbar-item" class="navbar-menu">
       <div class="navbar-start">
-        <a class="navbar-item" href="/sign-up">Home</a>
+        <a class="navbar-item" href="/dashboard">Home</a>
         <a class="navbar-item" href="https://eps.am/">About</a>
       </div>
     </div>

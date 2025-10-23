@@ -50,6 +50,7 @@
             },
             title: {
                 title: String,
+                required: true
             },
             depth: {
                 type: Number,
