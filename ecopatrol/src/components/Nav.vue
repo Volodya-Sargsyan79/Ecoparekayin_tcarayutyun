@@ -5,19 +5,17 @@
         <div class="navbar-brand">
           <a class="navbar-item" href="/">
             <img src="https://eps.am/image/header-logo.png" alt style="max-height: 5rem;" class="img"/>
-            <p style="color: #ffffff;">Eco-patrol Service of the <br/> Ministry of Environment</p>
+            <p style="color: #ffffff;">Հայաստանի Հանրապետության<br/>Շրջակա միջավայրի նախարարության<br/>ԷԿՈՊԱՐԵԿԱՅԻՆ ԾԱՌԱՅՈՒԹՅՈՒՆ</p>
           </a>
         </div>
-
-        <div v-if=this.$store.state.user.isAuthenticated>
-          <LogOut />
-        </div>
-      </div>
-
-      <div id="navbar-item" class="navbar-menu">
-        <div class="navbar-start" style="color: #ffffff;">
-          <a class="navbar-item" href="/dashboard">Home</a>
-          <a class="navbar-item" href="https://eps.am/">About</a>
+        <div class="navbar-brand">
+          <a class="navbar-item" href="/">
+            <p style="color: #ffffff;">Հայաստանի Հանրապետության</p>
+            <img src="https://ecopatrolservice.am/image/gerb-logo.png" alt style="max-height: 5rem;" class="img"/>
+          </a>
+          <div v-if=this.$store.state.user.isAuthenticated>
+            <LogOut />
+          </div>
         </div>
       </div>
     </div>

@@ -5,6 +5,9 @@ import LogIn from '@/views/LogIn.vue'
 import Dashboard from '@/views/dashboard/Dashboard.vue'
 import MyAccount from '@/views/dashboard/MyAccount.vue'
 import PersonInformation from '@/views/dashboard/PersonInformation.vue'
+import FireAlarm from '@/views/dashboard/FireAlarm.vue'
+import EPSAlarm from '@/views/dashboard/EPSAlarm.vue'
+import CrimeAlert from '@/views/dashboard/CrimeAlert.vue'
 
 const routes = [
   {
@@ -37,6 +40,30 @@ const routes = [
     path: '/dashboard/my-account',
     name: 'MyAccount',
     component: MyAccount,
+    meta: {
+      requireLogin: true
+    }
+  },
+  {
+    path: '/dashboard/firealarm',
+    name: 'FireAlarm',
+    component: FireAlarm,
+    meta: {
+      requireLogin: true
+    }
+  },
+  {
+    path: '/dashboard/epsalarm',
+    name: 'EPSAlarm',
+    component: EPSAlarm,
+    meta: {
+      requireLogin: true
+    }
+  },
+  {
+    path: '/dashboard/crimealert',
+    name: 'CrimeAlert',
+    component: CrimeAlert,
     meta: {
       requireLogin: true
     }

@@ -1,64 +1,113 @@
-<template>
-  <div class="home mt-5">
-    <div class="hero is-medium">
-      <div class="has-text-centered pt-5">
-        <h1 class="title">Welcome to Eco-patrol</h1>
-        <h2 class="subtitle">An online place for searching what you want</h2>
-      </div>
-    </div>
-  </div>
-  
-  <section class="section">
-    <div class="container">
-      <div class="columns is-multiline">
-        <div class="column is-4">
-          <div class="box has-text-centered">
-            <span class="icon is-size-2 is-size-info">
-              <i class="far fa-clock"></i>
-            </span>
-            <h2 class="is-size-4 mt-4 mb-4">
-              Էկոպարեկային ծառայության աշխատակիցներ
-            </h2>
-            <p>Ներկա պահին գործող</p>
-          </div>
+<template>  
+  <div class="login">
+        <div class="hero">
+            <div class="hero-body has-text-centered">
+                <h1 class="title">Մուտք դեպի <br/> <span style="font-size: 50px">1-07</span> <br/> ահազանգերի գրանցման համակարգ</h1>
+            </div>
         </div>
+    
+        <section class="section">
+            <div class="container">
+                <div class="columns">
+                    <div class="column is-4 is-offset-4">
+                        <form action="" v-on:submit.prevent="submitForm">
+                            <div class="field">
+                                <label for="">Օգտագործողի անուն</label>
+                                <div class="control">
+                                    <input type="text" class="input" v-model="username"/>
+                                </div>
+                            </div>
 
-        <div class="column is-4">
-          <div class="box has-text-centered">
-            <span class="icon is-size-2 is-size-info">
-              <i class="far fa-comments"></i>
-            </span>
-            <h2 class="is-size-4 mt-4 mb-4">
-              Էկոպարեկային ծառայության դիմորտներ
-            </h2>
-            <p>Դիմել են կամ դեռ ընթացքի մեջ է</p>
-          </div>
-        </div>
+                            <div class="field">
+                                <label for="">Գախտնաբառ</label>
+                                <div class="control">
+                                    <input type="password" class="input" v-model="password"/>
+                                </div>
+                            </div>
 
-        <div class="column is-4">
-          <div class="box has-text-centered" href="/log-in">
-            <span class="icon is-size-2 is-size-info">
-              <i class="far fa-home"></i>
-            </span>
-            <h2 class="is-size-4 mt-4 mb-4">
-              Էկոպարեկային ծառայության նախքին աշխատակիցներ
-            </h2>
-            <p>Հեռացված կամ դիմումին համաձայն ազատված</p>
-          </div>
-        </div>
-        
-        <div class="column is-12 has-text-centered">
-          <a href="/log-in" class="button is-size-3 mt-6 mb-6" style="background: #163820; color:#ffffff;">
-            Մուտք գքրծել համակարգ
-          </a>
-        </div>
-      </div>
+                            <div class="notification is-danger" v-if="errors.length">
+                                <p v-for="error in errors" v-bind:key="erre">
+                                    {{ error }}
+                                </p>
+                            </div>
+
+                            <div class="field">
+                                <div class="control">
+                                    <button class="button" style="background: #163820; color: #ffffff;">Log in</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
-  </section>
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
-  name: 'Home'
+    name: 'SignUp',
+    data() {
+        return {
+            username: '',
+            password: '',
+            errors: []
+        }
+    },
+    methods: {
+        async submitForm() {
+            this.$store.commit('setIsLoading', true)
+
+            axios.defaults.headers.common['Authorization'] = ""
+
+            localStorage.removeItem('token')
+            
+            this.errors = []
+            
+            if (this.username === ''){
+                this.errors.push('The username is missing!')
+            }
+            if (this.password === ''){
+                this.errors.push('The password is missing!')
+            }
+
+            if (!this.errors.length) {
+                const formData = {
+                    username: this.username,
+                    password: this.password
+                }
+
+                await axios
+                    .post('/api/ekopatrol/token/login/', formData)
+                    .then(response => {
+                        const token = response.data.auth_token
+                        
+                        this.$store.commit('setToken', token)
+                        
+                        axios.defaults.headers.common['Authorization'] = "Token " + token
+                        
+                        localStorage.setItem('token', token)
+
+                        console.log(response.data.auth_token)
+                        
+                        this.$router.push('/dashboard')
+                    })
+                    .catch(error => {
+                        if (error.response) {
+                            for (const property in error.response.data) {
+                                this.errors.push(`${property}: ${error.response.data[property]}`)
+                            }
+                            console.log(JSON.stringify(error.response.data))
+                        } else if (error.message) {
+                            this.errors.push('Something went wrong. Please try again')
+                            console.log(JSON.stringify(error))
+                        }
+                    })
+                this.$store.commit('setIsLoading', false) 
+            }
+        }
+    }
 }
 </script>
