@@ -1,142 +1,119 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 # Create your models here.
-class Person(models.Model):
-    img = models.ImageField(upload_to='person', null=True, blank=True)
-    first_name = models.CharField(max_length=15)
-    last_name = models.CharField(max_length=15)
-    birthday = models.DateField(null=True, blank=True)
-    passport = models.CharField(max_length=15, null=True, blank=True)
-    id_card = models.CharField(max_length=15, null=True, blank=True)
-    hvhh = models.CharField(max_length=15, null=True, blank=True)
-    email = models.CharField(max_length=30, null=True, blank=True)
+
+class RegionArmenia(models.Model):
+    region = models.CharField(max_length=200)
     
     def __str__(self):
-        return f'{self.id} {self.first_name} {self.last_name}'
-    
+        return f'{self.region}'
 
-class Phone(models.Model):
-    person = models.ForeignKey(Person, related_name='phone', on_delete=models.CASCADE)
-    phone = models.CharField(max_length=20)
-    home = models.BooleanField(default=False)
-    mobile = models.BooleanField(default=False)
-    viber = models.BooleanField(default=False)
-    whatsUp = models.BooleanField(default=False)
-    telegram = models.BooleanField(default=False)
+class Cities(models.Model):
+    region = models.ForeignKey(RegionArmenia, related_name='Cities', on_delete=models.CASCADE)
+    city = models.CharField(max_length=200)
+    
+    def __str__(self):
+        return f'{self.region} {self.city}'
+    
+class Villages(models.Model):
+    city = models.ForeignKey(Cities, related_name='Cities', on_delete=models.CASCADE)
+    village = models.CharField(max_length=200)
+    
+    def __str__(self):
+        return f'{self.city} {self.village}'
+
+class Region(models.Model):
+    region = models.CharField(max_length=200)
+    
+    def __str__(self):
+        return f'{self.region}'
+    
+class Precinct(models.Model):
+    region = models.ForeignKey(Region, related_name='precinct', on_delete=models.CASCADE)
+    section = models.CharField(max_length=50)
 
     def __str__(self):
-        return f'{self.person} {self.phone }'
+        return f'{self.section}'
     
-
-class Car(models.Model):
-    person = models.ForeignKey(Person, related_name='car', on_delete=models.CASCADE)
-    type = models.CharField(max_length=15)
-    model = models.CharField(max_length=10)
-    year = models.CharField(max_length=4)
-    number = models.CharField(max_length=10)
+class Position(models.Model):
+    position_held = models.CharField(max_length=50)
 
     def __str__(self):
-        return f'{self.person}, {self.type}, {self.model}, {self.year}, {self.number}'
+        return f'{self.position_held}'
     
 
-class Address(models.Model):
-    person = models.ForeignKey(Person, related_name='address', on_delete=models.CASCADE)
+class Employee(models.Model):
+    name = models.CharField(max_length=50)
+    surname = models.CharField(max_length=50)
+    region = models.ForeignKey(Region, related_name='employee', on_delete=models.CASCADE)
+    precinct = models.ForeignKey(Precinct, related_name='employee', on_delete=models.CASCADE, null=True, blank=True)
+    position = models.ForeignKey(Position, related_name='employee', on_delete=models.CASCADE)
+    phone = models.CharField(max_length=20) 
+
+    def __str__(self):
+        return f'{self.name} {self.surname} {self.region}' + (f' {self.precinct.section} ' if self.precinct else ' ') + (f'{self.position}')
+    
+class Citizen(models.Model):
+    name = models.CharField(max_length=50, null=True, blank=True)
+    surname = models.CharField(max_length=50, null=True, blank=True)
     REGISTERED = (
         ("Հաշվառման հասցե", "Հաշվառման"),
-        ("Բնակության հասցե", "Բնակության"),
-        ("Սեփականություն", "Սեփականություն")
+        ("Բնակության հասցե", "Բնակության")
     )
-    registration = models.CharField(max_length=20, choices=REGISTERED)
-    country = models.CharField(max_length=50)
-    city = models.CharField(max_length=50)
-    street = models.CharField(max_length=50)
-    house = models.CharField(max_length=20)
+    registration = models.CharField(max_length=20, choices=REGISTERED, null=True, blank=True)
+    region = models.ForeignKey(RegionArmenia, related_name='citizen', on_delete=models.CASCADE, null=True, blank=True)
+    city = models.ForeignKey(Cities, related_name='citizen', on_delete=models.CASCADE, null=True, blank=True)
+    village = models.ForeignKey(Villages, related_name='citizen', on_delete=models.CASCADE, null=True, blank=True)
+    street = models.CharField(max_length=50, blank=True, null=True)
+    house = models.CharField(max_length=20, blank=True, null=True)
     apartment = models.CharField(max_length=20, blank=True, null=True)
-    img = models.ImageField(upload_to='person_documentation', null=True, blank=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    unknown_person = models.CharField(max_length=250, blank=True, null=True)
 
     def __str__(self):
-        return f'{self.country}, {self.city}, {self.street}, {self.house}' + (f', {self.apartment}' if self.apartment else '')
-
-
-class Study(models.Model):
-    person = models.ForeignKey(Person, related_name='study', on_delete=models.CASCADE)
-    place = models.CharField(max_length=255)
-    educational_institution = models.CharField(max_length=255)
-    facultet = models.CharField(max_length=255)
-    profession = models.CharField(max_length=50)
-    start_year = models.CharField(max_length=4)
-    end_year = models.CharField(max_length=4)
-    img = models.ImageField(upload_to='person_study', null=True, blank=True)
-
-    def __str__(self):
-        return f'{self.person}, {self.educational_institution}, {self.facultet}'
-
-class Soldier(models.Model):
-    person = models.ForeignKey(Person, related_name='soldier', on_delete=models.CASCADE)
-    where = models.CharField(max_length=255)
-    from_year = models.CharField(max_length=4)
-    to_year = models.CharField(max_length=4)
-
-    def __str__(self):
-        return f'{self.person}'
+        return f'{self.name} {self.surname} {self.phone}'
     
-class Conviction(models.Model):
-    person = models.ForeignKey(Person, related_name='conviction', on_delete=models.CASCADE)
-    name_article = models.CharField(max_length=255)
-    from_year = models.CharField(max_length=4)
-    to_year = models.CharField(max_length=4)
-
-class PersonDocumentationImage(models.Model):
-    person = models.ForeignKey(Person, related_name='person_documentation', on_delete=models.CASCADE)
-    img = models.ImageField(upload_to='person_documentation')
-
-class Relatives(models.Model):
-    pal_name = models.CharField(max_length=15)
-    person = models.ForeignKey(Person, related_name='relatives_1', on_delete=models.CASCADE)
-    relatives = models.ForeignKey(Person, related_name='relatives_2', on_delete=models.CASCADE)
+class InfoAboutFire(models.Model):
+    employee = models.ForeignKey(Employee, related_name='infoaboutfire', on_delete=models.CASCADE, null=True, blank=True)
+    citizen = models.ForeignKey(Citizen, related_name='infoaboutfire', on_delete=models.CASCADE, null=True, blank=True)
+    start_of_fire = models.DateTimeField(null=True, blank=True)
+    from_where = models.CharField(max_length=100, null=True, blank=True)
+    the_source_of_the_fire = models.CharField(max_length=250, null=True, blank=True)
     REGISTERED = (
-        ("Հ", "Հարազատներ"),
-        ("Բ", "Բարեկամներ"),
-        ("Ը", "Ընկերներ"),
-        ("Կ", "Կապեր")
+        ("Պ", "Պետական պահպանվող տարածք"),
+        ("Հ", "Համայնքային տարածք")
     )
     registration = models.CharField(max_length=1, choices=REGISTERED)
+    region = models.ForeignKey(RegionArmenia, related_name='infoaboutfire', on_delete=models.CASCADE)
+    section = models.CharField(max_length=250, null=True, blank=True)
+    place = models.CharField(max_length=250, null=True, blank=True)
+    call_ain = models.BooleanField(default=False)
+    call_of_date = models.DateTimeField(null=True, blank=True)
+    why_not = models.CharField(max_length=250, null=True, blank=True)
+    end_of_fire = models.DateTimeField(null=True, blank=True)
+    forest_place_burnt = models.CharField(max_length=4, null=True, blank=True)
+    field_place_burnt = models.CharField(max_length=4, null=True, blank=True)
+    burnt_trees = models.CharField(max_length=3, null=True, blank=True)
+    burnt_animals = models.CharField(max_length=2, null=True, blank=True)
+    eps = models.CharField(max_length=250, null=True, blank=True)
+    ain = models.CharField(max_length=250, null=True, blank=True)
 
+class StartCallDate(models.Model):
+    start_of_call = models.DateTimeField(auto_now_add=True)
     def __str__(self):
-        return f'{self.relatives} - {self.pal_name} - {self.person}'
+        return f'{self.start_of_call}'
+
+class OperationalControlCenter(models.Model):
+    infoaboutfire = models.ForeignKey(InfoAboutFire, related_name='operationalcontrolcenter', on_delete=models.CASCADE)
+    name = models.CharField(max_length=50)
+    surname = models.CharField(max_length=50)
+    start_of_call = models.ForeignKey(StartCallDate, related_name='operationalcontrolcenter', on_delete=models.CASCADE)
+    call_ain = models.DateTimeField(null=True, blank=True)
+    ain_name = models.CharField(max_length=100, null=True, blank=True)
+    call_region = models.DateTimeField(null=True, blank=True)
+    region_name = models.CharField(max_length=100, null=True, blank=True)
+    հead_of_the_occ = models.DateTimeField(null=True, blank=True)
+    հead_of_the_occ_name = models.CharField(max_length=100, null=True, blank=True)
     
 
-class Informations(models.Model):
-    person = models.ForeignKey(Person, related_name='informations', on_delete=models.CASCADE)
-    sex = models.CharField(max_length=255, null=True, blank=True)
-    politics = models.CharField(max_length=255, null=True, blank=True)
-    religion = models.CharField(max_length=255, null=True, blank=True)
-    about = models.TextField(null=True, blank=True)
-
-    def __str__(self):
-        return f'{self.person}'
-
-class Employees(models.Model):
-    employee = models.ForeignKey(Person, related_name='employee', on_delete=models.CASCADE)
-    plase_name = models.CharField(max_length=255)
-    position_start = models.CharField(max_length=255)
-    data_of_start = models.DateField(null=True, blank=True)
-    end_of_start = models.DateField(null=True, blank=True)
-    degree = models.CharField(max_length=255, null=True, blank=True)
-    
-    def __str__(self):
-        return f'{self.plase_name} {self.position_start}`  {self.employee}'
-
-
-class VictimsAwards(models.Model):
-    employee = models.ForeignKey(Employees, related_name='victims_awards', on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-    data_of_victims_or_awards = models.DateField(null=True, blank=True)
-    
-
-class OfficialProperty(models.Model):
-    employee = models.ForeignKey(Employees, related_name='official_property', on_delete=models.CASCADE)
-    type = models.CharField(max_length=20)
-    model = models.CharField(max_length=20)
-    year = models.CharField(max_length=4)
-    number = models.CharField(max_length=20)
