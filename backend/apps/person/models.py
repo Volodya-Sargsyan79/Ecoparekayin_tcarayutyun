@@ -3,6 +3,38 @@ from django.core.exceptions import ValidationError
 
 # Create your models here.
 
+class Region(models.Model):
+    region = models.CharField(max_length=200)
+    
+    def __str__(self):
+        return f'{self.region}'
+    
+class Precinct(models.Model):
+    region = models.ForeignKey(Region, related_name='precinct', on_delete=models.CASCADE)
+    section = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f'{self.section}'
+    
+class Position(models.Model):
+    position_held = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f'{self.position_held}'
+
+class Employee(models.Model):
+    name = models.CharField(max_length=50)
+    surname = models.CharField(max_length=50)
+    region = models.ForeignKey(Region, related_name='employee', on_delete=models.CASCADE)
+    precinct = models.ForeignKey(Precinct, related_name='employee', on_delete=models.CASCADE, null=True, blank=True)
+    position = models.ForeignKey(Position, related_name='employee', on_delete=models.CASCADE)
+    phone = models.CharField(max_length=20) 
+
+    def __str__(self):
+        return f'{self.name} {self.surname} {self.region}' + (f' {self.precinct.section} ' if self.precinct else ' ') + (f'{self.position}')
+
+    #  --------------- Citizen -------------------
+
 class RegionArmenia(models.Model):
     region = models.CharField(max_length=200)
     
@@ -22,46 +54,11 @@ class Villages(models.Model):
     
     def __str__(self):
         return f'{self.city} {self.village}'
-
-class Region(models.Model):
-    region = models.CharField(max_length=200)
-    
-    def __str__(self):
-        return f'{self.region}'
-    
-class Precinct(models.Model):
-    region = models.ForeignKey(Region, related_name='precinct', on_delete=models.CASCADE)
-    section = models.CharField(max_length=50)
-
-    def __str__(self):
-        return f'{self.section}'
-    
-class Position(models.Model):
-    position_held = models.CharField(max_length=50)
-
-    def __str__(self):
-        return f'{self.position_held}'
-    
-
-class Employee(models.Model):
-    name = models.CharField(max_length=50)
-    surname = models.CharField(max_length=50)
-    region = models.ForeignKey(Region, related_name='employee', on_delete=models.CASCADE)
-    precinct = models.ForeignKey(Precinct, related_name='employee', on_delete=models.CASCADE, null=True, blank=True)
-    position = models.ForeignKey(Position, related_name='employee', on_delete=models.CASCADE)
-    phone = models.CharField(max_length=20) 
-
-    def __str__(self):
-        return f'{self.name} {self.surname} {self.region}' + (f' {self.precinct.section} ' if self.precinct else ' ') + (f'{self.position}')
     
 class Citizen(models.Model):
+    unknown_person = models.BooleanField(default=False)
     name = models.CharField(max_length=50, null=True, blank=True)
     surname = models.CharField(max_length=50, null=True, blank=True)
-    REGISTERED = (
-        ("Հաշվառման հասցե", "Հաշվառման"),
-        ("Բնակության հասցե", "Բնակության")
-    )
-    registration = models.CharField(max_length=20, choices=REGISTERED, null=True, blank=True)
     region = models.ForeignKey(RegionArmenia, related_name='citizen', on_delete=models.CASCADE, null=True, blank=True)
     city = models.ForeignKey(Cities, related_name='citizen', on_delete=models.CASCADE, null=True, blank=True)
     village = models.ForeignKey(Villages, related_name='citizen', on_delete=models.CASCADE, null=True, blank=True)
@@ -69,7 +66,6 @@ class Citizen(models.Model):
     house = models.CharField(max_length=20, blank=True, null=True)
     apartment = models.CharField(max_length=20, blank=True, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True)
-    unknown_person = models.CharField(max_length=250, blank=True, null=True)
 
     def __str__(self):
         return f'{self.name} {self.surname} {self.phone}'

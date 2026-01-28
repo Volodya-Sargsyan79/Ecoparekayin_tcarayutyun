@@ -17,15 +17,15 @@
       <div class="columns is-multiline">
 
         <!-- BUTTON 1 -->
-        <router-link to="/dashboard/firealarm" class="column is-4">
-          <div class="box has-text-centered">
+        <div class="column is-4">
+          <div class="box has-text-centered clickable" @click="createFireCall">
             <span class="icon is-size-2">
               <i class="far fa-clock"></i>
             </span>
             <h2 class="is-size-4 mt-4 mb-4">1-07</h2>
             <p>Հրդեհների վերաբերյալ հայտարարություններ</p>
           </div>
-        </router-link>
+        </div>
 
         <!-- BUTTON 2 -->
         <router-link to="/EPSAlarm" class="column is-4">
@@ -55,7 +55,26 @@
 </template>
 
 <script>
+import axios from 'axios';
 export default {
-  name: 'Dashboard'
+  name: 'Dashboard',
+  methods: {
+    async createFireCall() {
+      try {
+        await axios.post('/api/ekopatrol/addDateCall/');
+        this.$router.push('/dashboard/firealarm');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }
 }
 </script>
+
+<style lang="scss">
+
+  .clickable {
+    cursor: pointer;
+  }
+
+</style>

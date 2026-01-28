@@ -1,10 +1,5 @@
 <template>
     <div class="menu">
-        <div class="has-text-centered">
-            <h2 class="is-size-4 mt-4 mb-4" @click="person(this.$store.state.user.persons.id)" style="cursor: pointer;">
-                <br/>{{ $store.state.user.persons.first_name }} {{ $store.state.user.persons.last_name }}<br/>
-            </h2>
-        </div>
         <MenuItem 
             v-for="(item, index) in menuTree"
             :key="index"
@@ -26,78 +21,28 @@
             return {
                 menuTree: [
                     {
-                        label: 'Կապեր',
+                        label: 'Ահազանգող',
                         children: [
                             {
-                                label: 'Հարազատներ',
-                                title: "Հ",
-                                func: this.personRelatives,
+                                label: 'ԷՊԾ աշղատակից',
+                                title: "Է",
+                                func: () => this.personEmployee('ԷՊԾ աշղատակից'),
                             },
                             {
-                                label: 'Բարեկամներ',
-                                title: "Բ",
-                                func: this.personRelatives,
-                            },
-                            {
-                                label: 'Ընկերներ',
-                                title: "Ը",
-                                func: this.personRelatives,
-                            },
-                            {
-                                label: 'Կապեր',
-                                title: "Կ",
-                                func: this.personRelatives,
-                            },
+                                label: 'Քաղաքացի',
+                                title: "Ք",
+                                func: () => this.personRelatives('Քաղաքացի'),
+                            }
                         ]
                     },
                     {
-                        label: 'Ուսում',
+                        label: 'Հրդեհ',
                         func: this.personStudy,
                     },
                     {
-                        label: 'Ծառայություն',
+                        label: 'ՕԿԿ ծառայող',
                         func: this.personSoldier,
-                    },
-                    {
-                        label: 'Աշխատանք',
-                        func: this.personWork,
-                    },
-                    {
-                        label: 'Տուժեր և խրախուսանքներ',
-                         children: [
-                            {
-                                label: 'Տուժեր',
-                            },
-                            {
-                                label: 'Խրախուսանքներ',
-                            },
-                        ]
-                    },
-                    {
-                        label: 'Խախտումներ',
-                         children: [
-                            {
-                                label: 'Վարչական տուժ',
-                            },
-                            {
-                                label: 'Դատվածություն',
-                            },
-                        ]
-                    },
-                    {
-                        label: 'Անշարժ գույք',
-                        func: this.personProperty,
-                    },
-                    {
-                        label: 'Մեքենա',
-                        func: this.personCar,
-                    },
-                    {
-                        label: 'Փաստաթղթեր',
-                    },
-                    {
-                        label: 'Այլ տեղեկատվություն',
-                    },
+                    }
                 ]
             }
             
@@ -106,92 +51,12 @@
             MenuItem
         },
         methods: {
-             async person(id) {
-            
-                this.errors = []
-
-                this.$store.commit('setIsLoading', true)
-
-                try {
-                    // 1. Search for person
-                    const personRes = await axios.get('/api/ekopatrol/person/', {
-                        params: {
-                            id: id
-                        }
-                    });
-    
-                    this.$store.state.user.person = personRes.data[0];
-                     this.$store.state.user.persons = personRes.data[0];
-
-                    const personId = this.$store.state.user.person?.id;
-                    
-                    if (!personId) throw new Error("Person ID not found");
-
-                    // 2. Get phone info
-                    const phoneRes = await axios.get('/api/ekopatrol/person/phone/', {
-                        params: { id: personId }
-                    });
-                    this.$store.state.user.phone = phoneRes.data;
-
-                    // 3. Get address info
-                    const addressRes = await axios.get('/api/ekopatrol/person/address/', {
-                        params: { id: personId }
-                    });
-                    this.$store.state.user.address = addressRes.data;
-
-                    // 4. Navigate
-                    this.$router.push('/dashboard/person_information');
-
-                } catch (error) {
-                    if (error.response && error.response.data) {
-                        for (const property in error.response.data) {
-                            this.errors.push(`${property}: ${error.response.data[property]}`);
-                        }
-                        console.log(JSON.stringify(error.response.data));
-                    } else {
-                        this.errors.push('Something went wrong. Please try again');
-                        console.log(error.message || error);
-                    }
-                } finally {
-                    this.$store.commit('setIsLoading', false);
-                }             
-
-                this.$store.commit('setIsLoading', false)
-            
-            },
-            personRelatives(title) {
-                
-                 axios
-                    .get('/api/ekopatrol/person/relatives/', {
-                        params: {
-                            id: this.$store.state.user.persons.id,
-                            registration: title
-                        }
-                    })
-                    .then(response => {
-                        this.$store.state.user.person = response.data
-                    })
-                    .catch(error => {
-                        if (error.response) {
-                            for (const property in error.response.data) {
-                                this.errors.push(`${property}: ${error.response.data[property]}`)
-                            }
-                            console.log(JSON.stringify(error.response.data))
-                        } else if (error.message) {
-                            this.errors.push('Something went wrong. Please try again')
-                            console.log(JSON.stringify(error))
-                        }
-                    })
-            },
-            personStudy() {
+            personEmployee(lable) {
+                this.$store.state.user.caller = lable
                 axios
-                    .get('/api/ekopatrol/person/study/', {
-                        params: {
-                            id: this.$store.state.user.persons.id
-                        }
-                    })
+                    .get('/api/ekopatrol/regions/')
                     .then(response => {
-                        this.$store.state.user.person = response.data
+                        this.$store.state.user.regions = response.data
                     })
                     .catch(error => {
                         if (error.response) {
@@ -203,7 +68,74 @@
                             this.errors.push('Something went wrong. Please try again')
                             console.log(JSON.stringify(error))
                         }
-                    }) 
+                    })
+                axios
+                    .get('/api/ekopatrol/position/')
+                    .then(response => {
+                        this.$store.state.user.position = response.data
+                    })
+                    .catch(error => {
+                        if (error.response) {
+                            for (const property in error.response.data) {
+                                this.errors.push(`${property}: ${error.response.data[property]}`)
+                            }
+                            console.log(JSON.stringify(error.response.data))
+                        } else if (error.message) {
+                            this.errors.push('Something went wrong. Please try again')
+                            console.log(JSON.stringify(error))
+                        }
+                    })
+            },
+            personRelatives(lable) {
+                this.$store.state.user.caller = lable
+                axios
+                    .get('/api/ekopatrol/regionArmenia/')
+                    .then(response => {
+                        this.$store.state.user.regions = response.data
+                    })
+                    .catch(error => {
+                        if (error.response) {
+                            for (const property in error.response.data) {
+                                this.errors.push(`${property}: ${error.response.data[property]}`)
+                            }
+                            console.log(JSON.stringify(error.response.data))
+                        } else if (error.message) {
+                            this.errors.push('Something went wrong. Please try again')
+                            console.log(JSON.stringify(error))
+                        }
+                    })
+                //  axios
+                //     .get('/api/ekopatrol/cities/')
+                //     .then(response => {
+                //         this.$store.state.user.position = response.data
+                //     })
+                //     .catch(error => {
+                //         if (error.response) {
+                //             for (const property in error.response.data) {
+                //                 this.errors.push(`${property}: ${error.response.data[property]}`)
+                //             }
+                //             console.log(JSON.stringify(error.response.data))
+                //         } else if (error.message) {
+                //             this.errors.push('Something went wrong. Please try again')
+                //             console.log(JSON.stringify(error))
+                //         }
+                //     })
+                // axios
+                //     .get('/api/ekopatrol/villages/')
+                //     .then(response => {
+                //         this.$store.state.user.position = response.data
+                //     })
+                //     .catch(error => {
+                //         if (error.response) {
+                //             for (const property in error.response.data) {
+                //                 this.errors.push(`${property}: ${error.response.data[property]}`)
+                //             }
+                //             console.log(JSON.stringify(error.response.data))
+                //         } else if (error.message) {
+                //             this.errors.push('Something went wrong. Please try again')
+                //             console.log(JSON.stringify(error))
+                //         }
+                //     })
             },
             personSoldier() {
                 axios
