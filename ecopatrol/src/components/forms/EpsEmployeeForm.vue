@@ -1,7 +1,7 @@
 <template>
     <form class="box">
         <h3 class="title is-5 has-text-centered mb-4">
-            {{ this.$store.state.user.caller }}
+            ԷՊԾ աշխատակից
         </h3>
 
         <!-- Name & Surname $ Phone-->
@@ -36,17 +36,17 @@
 
         <!-- Region -->
         <div class="field">
-            <label class="label">{{ $store.state.user.caller === "ԷՊԾ աշխատակից" ? "Մարզային վարչություն" : "Մարզ" }}</label>
+            <label class="label">Մարզային վարչություն</label>
             <div class="control">
                 <div class="select is-fullwidth">
-                    <select v-model="form.region_id" @change="loadPrecincts">
+                    <select v-model="form.region_id" @change="loadRegion">
                         <option value="">Ընտրել</option>
                         <option
                             v-for="region in $store.state.user.regions"
                             :key="region.id"
                             :value="region.id"
                         >
-                            {{ region.region }}
+                            {{ region.name }}
                         </option>
                     </select>
                 </div>
@@ -55,17 +55,17 @@
 
         <!-- Precinct -->
         <div class="field">
-            <label class="label">{{ $store.state.user.caller === "ԷՊԾ աշխատակից" ? "Տեղամաս" : "Քաղաք" }}</label>
+            <label class="label">Տեղամաս</label>
             <div class="control">
                 <div class="select is-fullwidth">
-                    <select v-model="form.precinct_id" @change="loadVillage">
+                    <select v-model="form.precinct_id" @change="loadSesion">
                         <option value="">Ընտրել</option>
                         <option
                             v-for="precinct in $store.state.user.precincts"
                             :key="precinct.id"
                             :value="precinct.id"
                         >
-                            {{ $store.state.user.caller === "ԷՊԾ աշխատակից" ? precinct.section : precinct.city }}
+                            {{ precinct.name }}
                         </option>
                     </select>
                 </div>
@@ -74,7 +74,7 @@
 
         <!-- Position -->
         <div class="field">
-            <label class="label">{{ $store.state.user.caller === "ԷՊԾ աշխատակից" ? "Պաշտոն" : "Գյուղ" }}</label>
+            <label class="label">Պաշտոն</label>
             <div class="control">
             <div class="select is-fullwidth">
                 <select v-model="form.position_id">
@@ -84,55 +84,13 @@
                         :key="position.id"
                         :value="position.id"
                     >
-                        {{ $store.state.user.caller === "ԷՊԾ աշխատակից" ?  position.position_held : position.village }}
+                        {{ position.position_held }}
                     </option>
                 </select>
             </div>
             </div>
         </div>
 
-        <!-- Street, House, Apartment -->
-        <div v-if="$store.state.user.caller !== 'ԷՊԾ աշխատակից'">
-            <div class="columns">
-                <div class="column">
-                    <div class="field">
-                        <label class="label">Փողոց</label>
-                        <div class="control">
-                            <input class="input" v-model="form.street" placeholder="Փողոց">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <div class="field">
-                        <label class="label">Շենք/Տուն</label>
-                        <div class="control">
-                            <input class="input" v-model="form.house" placeholder="Շենք/Տուն">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="column">
-                    <div class="field">
-                        <label class="label">Բնակարան</label>
-                        <div class="control">
-                            <input class="input" v-model="form.apartment" placeholder="Բնակարան">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="columns">
-                <div class="column">
-                    <div class="field">
-                        <label class="checkbox">
-                            <input type="checkbox" v-model="form.unknown_person" />
-                            Չի ցանկացել ներկայանալ
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
         <!-- Submit -->
         <div class="field mt-5 has-text-centered">
             <button
@@ -150,37 +108,27 @@
 import axios from 'axios'
 
 export default {
-    name: 'Form',
+   name: 'EpsEmployeeForm',
 
     data() {
         return {
             form: {
-                unknown_person: false, // ✅ Boolean
                 name: "",
                 surname: "",
                 phone: "",
                 region_id: null,
                 precinct_id: null,
                 position_id: null,
-                apartment: "",
-                house: "",
-                street: ""
             }
         }
     },
 
     methods: {
-        loadPrecincts() {
+        loadRegion() {
             if (!this.form.region_id) return;
 
-            // Determine which URL to call
-            const url =
-            this.$store.state.user.caller === "ԷՊԾ աշխատակից"
-                ? "/api/ekopatrol/precinct/"
-                : "/api/ekopatrol/cities/";
-
             axios
-                .get(url, {
+                .get("/api/ekopatrol/precinct/", {
                     params: { id: this.form.region_id },
                 })
                 .then((res) => {
@@ -191,15 +139,11 @@ export default {
                     console.error(err);
                 });
         },
-        loadVillage() {
+        loadSesion() {
             if (!this.form.precinct_id) return 
             
-            const url =
-            this.$store.state.user.caller === "ԷՊԾ աշխատակից"
-                ? "/api/ekopatrol/position/"
-                : "/api/ekopatrol/villages/";
             axios
-                .get(url, { 
+                .get("/api/ekopatrol/position/", { 
                     params: { id: this.form.precinct_id } 
                 }) 
                 .then(
@@ -210,31 +154,15 @@ export default {
             
         },
         saveCall() {
-            const payload = this.$store.state.user.caller === "ԷՊԾ աշխատակից"
-            ?   {
+            const payload = {
                     ...this.form,
                     precinct_id: this.form.precinct_id || null,
                 }
-            :   {
-                    ...this.form,
-                    name: this.form.name || null,
-                    surname: this.form.surname || null,
-                    phone: this.form.phone || null,
-                    region_id: this.form.region_id || null,
-                    city_id: this.form.precinct_id || null,
-                    village_id: this.form.position_id || null,
-                    street: this.form.street || null,
-                    house: this.form.house || null,
-                    apartment: this.form.apartment || null,
-                    unknown_person: this.form.unknown_person || false,
-                }
-            const url = 
-            this.$store.state.user.caller === "ԷՊԾ աշխատակից"
-            ? '/api/ekopatrol/addEmployeeCaller/'
-            : '/api/ekopatrol/addCitizenCaller/'
 
-            axios.post(url, payload)
-                .then(() => alert('Պահպանված է'))
+            axios.post("/api/ekopatrol/addEmployeeCaller/", payload)
+                .then(() =>
+                    this.$router.push('/dashboard/firealarm/firecaller')
+                )
                 .catch(err => console.error(err))
         }
     }

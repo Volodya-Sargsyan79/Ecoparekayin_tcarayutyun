@@ -49,7 +49,7 @@
                 required: true
             },
             title: {
-                title: String,
+                type: String,
                 required: true
             },
             depth: {

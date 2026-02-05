@@ -44,13 +44,32 @@ const routes = [
       requireLogin: true
     }
   },
+  // {
+  //   path: '/dashboard/firealarm',
+  //   name: 'FireAlarm',
+  //   component: FireAlarm,
+  //   meta: {
+  //     requireLogin: true
+  //   }
+  // },
   {
     path: '/dashboard/firealarm',
-    name: 'FireAlarm',
     component: FireAlarm,
-    meta: {
-      requireLogin: true
-    }
+    meta: { requireLogin: true },
+    children: [
+      {
+        path: 'epsemployee',
+        component: () => import('@/components/forms/EpsEmployeeForm.vue')
+      },
+      {
+        path: 'citizen',
+        component: () => import('@/components/forms/CityCitizenForm.vue')
+      },
+      {
+        path: 'firecaller',
+        component: () => import('@/components/forms/FireAlarmForm.vue')
+      },
+    ]
   },
   {
     path: '/dashboard/epsalarm',

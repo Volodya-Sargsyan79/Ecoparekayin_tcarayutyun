@@ -24,8 +24,9 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="column is-10" v-if="this.$store.state.user.regions.length > 0">
-                                <Form />
+                            <div class="column is-10" v-if="this.$store.state.user.regions.length > 0 || this.$store.state.user.regionArmenia.length > 0">
+                                <!-- FORM CHANGES BASED ON URL -->
+                                <router-view />
                             </div>
                             <div class="column is-10" v-else>
                                 <div class="box">
@@ -48,10 +49,9 @@
 
 <script>
 import Menu from '@/components/Menu.vue'
-import Form from '@/components/Form.vue';
 
 export default {
     name: 'FireAlarm',
-    components: { Menu, Form }
+    components: { Menu }
 }
 </script>

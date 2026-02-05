@@ -24,20 +24,20 @@
                         label: 'Ահազանգող',
                         children: [
                             {
-                                label: 'ԷՊԾ աշղատակից',
+                                label: 'ԷՊԾ աշխատակից',
                                 title: "Է",
-                                func: () => this.personEmployee('ԷՊԾ աշղատակից'),
+                                func: () => this.personEmployee()
                             },
                             {
                                 label: 'Քաղաքացի',
                                 title: "Ք",
-                                func: () => this.personRelatives('Քաղաքացի'),
+                                func: () => this.personRelatives()
                             }
                         ]
                     },
                     {
                         label: 'Հրդեհ',
-                        func: this.personStudy,
+                        func: () => this.fireCall(),
                     },
                     {
                         label: 'ՕԿԿ ծառայող',
@@ -51,8 +51,8 @@
             MenuItem
         },
         methods: {
-            personEmployee(lable) {
-                this.$store.state.user.caller = lable
+            personEmployee() {
+                this.$router.push('/dashboard/firealarm/epsemployee')
                 axios
                     .get('/api/ekopatrol/regions/')
                     .then(response => {
@@ -86,12 +86,12 @@
                         }
                     })
             },
-            personRelatives(lable) {
-                this.$store.state.user.caller = lable
+            personRelatives() {
+                this.$router.push('/dashboard/firealarm/citizen')
                 axios
                     .get('/api/ekopatrol/regionArmenia/')
                     .then(response => {
-                        this.$store.state.user.regions = response.data
+                        this.$store.state.user.regionArmenia = response.data
                     })
                     .catch(error => {
                         if (error.response) {
@@ -104,60 +104,29 @@
                             console.log(JSON.stringify(error))
                         }
                     })
-                //  axios
-                //     .get('/api/ekopatrol/cities/')
-                //     .then(response => {
-                //         this.$store.state.user.position = response.data
-                //     })
-                //     .catch(error => {
-                //         if (error.response) {
-                //             for (const property in error.response.data) {
-                //                 this.errors.push(`${property}: ${error.response.data[property]}`)
-                //             }
-                //             console.log(JSON.stringify(error.response.data))
-                //         } else if (error.message) {
-                //             this.errors.push('Something went wrong. Please try again')
-                //             console.log(JSON.stringify(error))
-                //         }
-                //     })
-                // axios
-                //     .get('/api/ekopatrol/villages/')
-                //     .then(response => {
-                //         this.$store.state.user.position = response.data
-                //     })
-                //     .catch(error => {
-                //         if (error.response) {
-                //             for (const property in error.response.data) {
-                //                 this.errors.push(`${property}: ${error.response.data[property]}`)
-                //             }
-                //             console.log(JSON.stringify(error.response.data))
-                //         } else if (error.message) {
-                //             this.errors.push('Something went wrong. Please try again')
-                //             console.log(JSON.stringify(error))
-                //         }
-                //     })
             },
-            personSoldier() {
-                axios
-                    .get('/api/ekopatrol/person/soldier/', {
-                        params: {
-                            id: this.$store.state.user.persons.id
-                        }
-                    })
-                    .then(response => {
-                        this.$store.state.user.person = response.data
-                    })
-                    .catch(error => {
-                        if (error.response) {
-                            for (const property in error.response.data) {
-                                this.errors.push(`${property}: ${error.response.data[property]}`)
-                            }
-                            console.log(JSON.stringify(error.response.data))
-                        } else if (error.message) {
-                            this.errors.push('Something went wrong. Please try again')
-                            console.log(JSON.stringify(error))
-                        }
-                    }) 
+            fireCall() {
+                this.$router.push('/dashboard/firealarm/firecaller')
+                // axios
+                //     .get('/api/ekopatrol/getLastCaller/', {
+                //         params: {
+                //             name: this.$store.state.user.caller
+                //         }
+                //     })
+                //     .then(response => {
+                //         this.$store.state.user.person = response.data
+                //     })
+                //     .catch(error => {
+                //         if (error.response) {
+                //             for (const property in error.response.data) {
+                //                 this.errors.push(`${property}: ${error.response.data[property]}`)
+                //             }
+                //             console.log(JSON.stringify(error.response.data))
+                //         } else if (error.message) {
+                //             this.errors.push('Something went wrong. Please try again')
+                //             console.log(JSON.stringify(error))
+                //         }
+                //     }) 
             },
             personWork() {
                 axios
@@ -180,57 +149,8 @@
                             console.log(JSON.stringify(error))
                         }
                     }) 
-            },
-            personProperty() {
-
-                axios
-                    .get('/api/ekopatrol/person/address/', {
-                        params: {
-                            id: this.$store.state.user.persons.id
-                        }
-                    })
-                    .then(response => {
-                        
-                        this.$store.state.user.person = response.data.filter(item => item.registration === "Սեփականություն")
-
-                    })
-                    .catch(error => {
-                        if (error.response) {
-                            for (const property in error.response.data) {
-                                this.errors.push(`${property}: ${error.response.data[property]}`)
-                            }
-                            console.log(JSON.stringify(error.response.data))
-                        } else if (error.message) {
-                            this.errors.push('Something went wrong. Please try again')
-                            console.log(JSON.stringify(error))
-                        }
-                    }) 
-            },
-            personCar() {
-
-                axios
-                    .get('/api/ekopatrol/person/car/', {
-                        params: {
-                            id: this.$store.state.user.persons.id
-                        }
-                    })
-                    .then(response => {
-                        
-                        this.$store.state.user.person = response.data
-
-                    })
-                    .catch(error => {
-                        if (error.response) {
-                            for (const property in error.response.data) {
-                                this.errors.push(`${property}: ${error.response.data[property]}`)
-                            }
-                            console.log(JSON.stringify(error.response.data))
-                        } else if (error.message) {
-                            this.errors.push('Something went wrong. Please try again')
-                            console.log(JSON.stringify(error))
-                        }
-                    }) 
             }
+
         }
     }
 </script>

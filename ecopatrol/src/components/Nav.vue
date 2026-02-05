@@ -10,7 +10,7 @@
         </div>
         <div class="navbar-brand">
           <a class="navbar-item" href="/">
-            <p style="color: #ffffff;">Հայաստանի Հանրապետության</p>
+            <p style="color: #ffffff;">Հայաստանի Հանրապետություն</p>
             <img src="https://ecopatrolservice.am/image/gerb-logo.png" alt style="max-height: 5rem;" class="img"/>
           </a>
           <div v-if=this.$store.state.user.isAuthenticated>

@@ -8,7 +8,12 @@ from .views import (
     GetRegionArmeniaList,
     GetCitiesList,
     GetVillagesList,
-    AddCitizenCaller
+    GetProtectedAreasList,
+    AddCitizenCaller,
+    GetLastEmployee,
+    GetLastCitizen,
+    AddFireCall,
+    GetReserveList
 )
 
 urlpatterns = [
@@ -20,5 +25,11 @@ urlpatterns = [
     path('regionArmenia/', GetRegionArmeniaList.as_view()),
     path('cities/', GetCitiesList.as_view()),
     path('villages/', GetVillagesList.as_view()),
+    path('protectedAreasList/', GetProtectedAreasList.as_view()),
+    path('reserveList/', GetReserveList.as_view()),
     path('addCitizenCaller/', AddCitizenCaller.as_view()),
+    path('getLastEmployee/', GetLastEmployee.as_view()),
+    path('getLastCitizen/', GetLastCitizen.as_view()),
+    path('addFireCall/', AddFireCall.as_view()),
+    
 ]

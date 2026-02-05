@@ -159,8 +159,8 @@ class GetCitiesList(APIView):
         id = request.GET.get('id') or ''
 
         sql = '''
-            SELECT * FROM person_cities
-            WHERE person_cities.region_id = %s;
+            SELECT * FROM person_community
+            WHERE person_community.region_id = %s;
         '''
 
         try:
@@ -184,7 +184,55 @@ class GetVillagesList(APIView):
 
         sql = '''
             SELECT * FROM person_villages
-            WHERE person_villages.city_id = %s;
+            WHERE person_villages.community_id = %s;
+        '''
+
+        try:
+            cursor = connection.cursor()
+            cursor.execute(sql, [id])
+            columns = [col[0] for col in cursor.description]  # <-- Get column names
+            results = [
+                dict(zip(columns, row)) for row in cursor.fetchall()
+            ]
+            
+            return Response(results, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            # Log the error using log_error function
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class GetProtectedAreasList(APIView):
+    def get(self, request):
+    
+        id = request.GET.get('id') or ''
+
+        sql = '''
+            SELECT * FROM person_protectedareas
+            WHERE person_protectedareas.region_id = %s;
+        '''
+
+        try:
+            cursor = connection.cursor()
+            cursor.execute(sql, [id])
+            columns = [col[0] for col in cursor.description]  # <-- Get column names
+            results = [
+                dict(zip(columns, row)) for row in cursor.fetchall()
+            ]
+            
+            return Response(results, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            # Log the error using log_error function
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class GetReserveList(APIView):
+    def get(self, request):
+    
+        id = request.GET.get('id') or ''
+
+        sql = '''
+            SELECT * FROM person_reserve
+            WHERE person_reserve.protected_areas_id = %s;
         '''
 
         try:
@@ -207,7 +255,7 @@ class AddCitizenCaller(APIView):
         name = request.data.get('name')
         surname = request.data.get('surname')
         region_id = request.data.get('region_id')
-        city_id = request.data.get('city_id')
+        community_id = request.data.get('city_id')
         village_id = request.data.get('village_id')  # ✅ fixed
         street = request.data.get('street')
         house = request.data.get('house')
@@ -215,15 +263,13 @@ class AddCitizenCaller(APIView):
         phone = request.data.get('phone')
         unknown_person = request.data.get('unknown_person', False)
 
-        print("DATA:", request.data)  # Debug
-
         sql = '''
             INSERT INTO person_citizen
             (
                 name,
                 surname,
                 region_id,
-                city_id,
+                community_id,
                 village_id,
                 street,
                 house,
@@ -240,13 +286,142 @@ class AddCitizenCaller(APIView):
                     name,
                     surname,
                     region_id,
-                    city_id,
+                    community_id,
                     village_id,
                     street,
                     house,
                     apartment,
                     phone,
                     unknown_person
+                ])
+
+            return Response({"message": "Employee caller added successfully"}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+class GetLastEmployee(APIView):
+    def get(self, request):
+
+        sql = '''
+            SELECT id, name, surname 
+            FROM person_employee 
+            ORDER BY id DESC 
+            LIMIT 1;
+        '''
+
+        try:
+            cursor = connection.cursor()
+            cursor.execute(sql)
+            columns = [col[0] for col in cursor.description]  # <-- Get column names
+            results = [
+                dict(zip(columns, row)) for row in cursor.fetchall()
+            ]
+            
+            print(results)
+
+            return Response(results, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            # Log the error using log_error function
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class GetLastCitizen(APIView):
+    def get(self, request):
+
+        sql = '''
+            SELECT id, name, surname, unknown_person 
+            FROM person_citizen 
+            ORDER BY id DESC 
+            LIMIT 1;
+        '''
+
+        try:
+            cursor = connection.cursor()
+            cursor.execute(sql)
+            columns = [col[0] for col in cursor.description]  # <-- Get column names
+            results = [
+                dict(zip(columns, row)) for row in cursor.fetchall()
+            ]
+            
+            print(results)
+
+            return Response(results, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            # Log the error using log_error function
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    
+class AddFireCall(APIView):
+    def  post(self, request):
+
+        employee_id = request.data.get('employee_id')
+        citizen_id = request.data.get('citizen_id')
+        start_of_fire = request.data.get('date_of_fire', False)
+        date_and_time = request.data.get('start_of_fire', False)
+        from_where = request.data.get('from_where')
+        the_source_of_the_fire = request.data.get('the_source_of_the_fire')
+        registration = request.data.get('registration')
+        region_id = request.data.get('region_id')
+        regionArmenia_id = request.data.get('region_id')
+        protected_areas_id = request.data.get('protected_areas_id')
+        community_id = request.data.get('community_id')
+        village_id = request.data.get('village_id')
+        cordinat = request.data.get('cordinats')
+        call_ain = request.data.get('yesCall', False)
+        name = request.data.get('name')
+        surname = request.data.get('surname')
+        call_of_date = request.data.get('call_of_date')
+        why_not = request.data.get('why_not')
+
+        sql = '''
+            INSERT INTO person_infoaboutfire
+            (
+                employee_id,
+                citizen_id,
+                start_of_fire,
+                date_and_time,
+                from_where,
+                the_source_of_the_fire,
+                registration,
+                region_id,
+                regionArmenia_id,
+                protected_areas_id,
+                community_id,
+                village_id,
+                cordinat,
+                call_ain,
+                name,
+                surname,
+                call_of_date,
+                why_not
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        '''
+
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, [
+                    employee_id,
+                    citizen_id,
+                    start_of_fire,
+                    date_and_time,
+                    from_where,
+                    the_source_of_the_fire,
+                    registration,
+                    region_id,
+                    regionArmenia_id,
+                    protected_areas_id,
+                    community_id,
+                    village_id,
+                    cordinat,
+                    call_ain,
+                    name,
+                    surname,
+                    call_of_date,
+                    why_not
                 ])
 
             return Response({"message": "Employee caller added successfully"}, status=status.HTTP_201_CREATED)
