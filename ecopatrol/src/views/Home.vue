@@ -2,7 +2,8 @@
   <div class="login">
         <div class="hero">
             <div class="hero-body has-text-centered">
-                <h1 class="title">Մուտք դեպի <br/> <span style="font-size: 50px">1-07</span> <br/> ահազանգերի գրանցման համակարգ</h1>
+                <h1 class="title" style="font-size: 50px">Էկոպարեկային ծառայության</h1>
+                <h1 class="title">տեղամասերի հերթապահության համակարգ</h1>
             </div>
         </div>
     

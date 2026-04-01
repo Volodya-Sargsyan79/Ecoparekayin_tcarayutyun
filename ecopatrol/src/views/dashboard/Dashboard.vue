@@ -5,8 +5,7 @@
         <h1 class="title">
           Բարի գալուստ <br />
           Էկոպարեկային ծառայության <br />
-          1-07 <br />
-          ահազանգերի գրանցման համակարգ
+          հերթապահության գրանցման համակարգ
         </h1>
       </div>
     </div>
@@ -17,35 +16,34 @@
       <div class="columns is-multiline">
 
         <!-- BUTTON 1 -->
-        <div class="column is-4">
-          <div class="box has-text-centered clickable" @click="createFireCall">
+        <router-link to="/dashboard/register" class="column is-4">
+          <div class="box has-text-centered">
             <span class="icon is-size-2">
               <i class="far fa-clock"></i>
             </span>
-            <h2 class="is-size-4 mt-4 mb-4">1-07</h2>
-            <p>Հրդեհների վերաբերյալ հայտարարություններ</p>
-          </div>
-        </div>
-
-        <!-- BUTTON 2 -->
-        <router-link to="/EPSAlarm" class="column is-4">
-          <div class="box has-text-centered">
-            <span class="icon is-size-2">
-              <i class="far fa-comments"></i>
-            </span>
-            <h2 class="is-size-4 mt-4 mb-4">1-07</h2>
-            <p>Էկոպարեկային ծառայության խախտումների վերաբերյալ հայտարարություններ</p>
+            <h2 class="title is-4 mt-4 mb-4">Տեղամասերի</h2>
+            <p class="title is-5">Անձնակազմի, երթուղիների և հերթափոխերի գրանցում</p>
           </div>
         </router-link>
 
+        <!-- BUTTON 2 -->
+        <div class=" column is-4">
+          <div class="box has-text-centered clickable" @click="shitԼist">
+            <span class="icon is-size-2">
+              <i class="far fa-comments"></i>
+            </span>
+            <h2 class="title is-4 mt-4 mb-4">Տեղամասերի</h2>
+            <p class="title is-5">Ներկա 12 ժամյա հերթափոխերի ցանկ</p>
+          </div>
+        </div>
         <!-- BUTTON 3 -->
         <router-link to="/CrimeAlert" class="column is-4">
           <div class="box has-text-centered">
             <span class="icon is-size-2">
               <i class="far fa-home"></i>
             </span>
-            <h2 class="is-size-4 mt-4 mb-4">1-07</h2>
-            <p>Հանցագործությունների վերաբերյալ հայտարարություններ</p>
+            <h2 class="title is-4 mt-4 mb-4">1-07</h2>
+            <p class="title is-5">Հանցագործությունների վերաբերյալ հայտարարություններ</p>
           </div>
         </router-link>
 
@@ -59,13 +57,15 @@ import axios from 'axios';
 export default {
   name: 'Dashboard',
   methods: {
-    async createFireCall() {
-      try {
-        await axios.post('/api/ekopatrol/addDateCall/');
-        this.$router.push('/dashboard/firealarm');
-      } catch (e) {
-        console.error(e);
-      }
+    shitԼist(){
+      axios
+        .get('/api/ekopatrol/getstationshiftlist/') 
+        .then((res) => {
+            // Store the response in precincts
+            this.$store.state.user.stationshif = res.data;
+            this.$router.push('/dashboard/regioninfo') 
+        })
+        .catch(err => { console.error(err) }) 
     }
   }
 }

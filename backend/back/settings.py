@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'djoser',
     
+    'apps.monthly_duty',
     'apps.person',
 
 ]

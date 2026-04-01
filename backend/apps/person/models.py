@@ -1,61 +1,29 @@
+from io import BytesIO
+from django.core.files import File
 from django.db import models
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from django.conf import settings
+from PIL import Image
+import zipfile
+import os
 
 # Create your models here.
 
 class Region(models.Model):
-    name = models.CharField(max_length=200)
+    region = models.CharField(max_length=200)
     
     def __str__(self):
-        return f'{self.name}'
-
-
-class RegionArmenia(models.Model):
-    name = models.CharField(max_length=200)
-    
-    def __str__(self):
-        return f'{self.name}'
+        return f'{self.region}'
 
 
 class Precinct(models.Model):
     region = models.ForeignKey(Region, related_name='precinct', on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
+    precinct = models.CharField(max_length=50)
 
     def __str__(self):
-        return f'{self.name}'
+        return f'{self.precinct}'
 
-
-class Community(models.Model):
-    region = models.ForeignKey(RegionArmenia, related_name='ցommunity', on_delete=models.CASCADE)
-    name = models.CharField(max_length=200)
-    
-    def __str__(self):
-        return f'{self.region} {self.name}'
-
-
-class ProtectedAreas(models.Model):
-    region = models.ForeignKey(Region, related_name='protectedareas', on_delete=models.CASCADE)
-    name = models.CharField(max_length=50, null=True, blank=True)
-
-    def __str__(self):
-        return f'{self.region} {self.name}'
-
-
-class Reserve(models.Model):
-    protected_areas = models.ForeignKey(ProtectedAreas, related_name='reserve', on_delete=models.CASCADE)
-    name = models.CharField(max_length=50, null=True, blank=True)
-
-    def __str__(self):
-        return f'{self.protected_areas} {self.name}'    
-
-
-class Villages(models.Model):
-    community = models.ForeignKey(Community, related_name='villages', on_delete=models.CASCADE)
-    name = models.CharField(max_length=200)
-    
-    def __str__(self):
-        return f'{self.community} {self.name}'
-    
 
 class Position(models.Model):
     position_held = models.CharField(max_length=50)
@@ -64,87 +32,129 @@ class Position(models.Model):
         return f'{self.position_held}'
 
 
-class StartCallDate(models.Model):
-    start_of_call = models.DateTimeField(auto_now_add=True)
-    def __str__(self):
-        return f'{self.start_of_call}'
+class Car(models.Model):
+    car_number = models.CharField(max_length=7)
+    board_number = models.IntegerField()
+    deviceId = models.IntegerField(unique=True, null=True, blank=True)
+    region = models.ForeignKey(Region, related_name='car', on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f'{self.car_number} {self.board_number}'
+
+def extract_kml(kmz_path, extract_to):
+    with zipfile.ZipFile(kmz_path, 'r') as z:
+        z.extractall(extract_to)
+    
+class Route(models.Model):
+    region = models.ForeignKey(Region, related_name='route', on_delete=models.CASCADE)
+    precinct = models.ForeignKey(Precinct, related_name='route', on_delete=models.CASCADE)
+    route_number = models.CharField(max_length=15)
+    route_length = models.IntegerField()
+    image = models.ImageField(null=True, blank=True)
+    thumbnail = models.ImageField(upload_to='map', null=True, blank=True)
+    kmz_file = models.FileField(upload_to='kmz/', null=True, blank=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='route', on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        if self.image: 
+            self.thumbnail = self.make_thumbnail(self.image)
+        super().save(*args, **kwargs)
+    
+        if self.kmz_file:
+            extract_path = os.path.join(settings.MEDIA_ROOT, "kml", str(self.id))
+            os.makedirs(extract_path, exist_ok=True)
+
+            with zipfile.ZipFile(self.kmz_file.path, 'r') as z:
+                z.extractall(extract_path)
+
+            kml_file = None
+
+            for root, dirs, files in os.walk(extract_path):
+                for file in files:
+                    if file.endswith('.kml'):
+                        kml_file = os.path.join(root, file)
+                        break
+
+            if kml_file:
+                final_path = os.path.join(extract_path, "doc.kml")
+                os.replace(kml_file, final_path)
+
+    def make_thumbnail(self, image, size=(300, 200)):
+        img = Image.open(image)
+        img = img.convert('RGB')
+        img.thumbnail(size)
+
+        thumb_io = BytesIO()
+        img.save(thumb_io, 'JPEG', quality=85)
+
+        thumbnail = File(thumb_io, name=image.name)
+
+        return thumbnail
+    
+    def __str__(self):
+        return f'{self.precinct} {self.route_number} երթուղի'
+   
 
 class Employee(models.Model):
-    name = models.CharField(max_length=50)
-    surname = models.CharField(max_length=50)
-    region = models.ForeignKey(Region, related_name='employee', on_delete=models.CASCADE)
-    precinct = models.ForeignKey(Precinct, related_name='employee', on_delete=models.CASCADE, null=True, blank=True)
-    position = models.ForeignKey(Position, related_name='employee', on_delete=models.CASCADE)
-    phone = models.CharField(max_length=20) 
+    name = models.CharField(max_length=50, verbose_name="Անուն")
+    surname = models.CharField(max_length=50, verbose_name="Ազգանուն")
+    region = models.ForeignKey(Region, related_name='employee', on_delete=models.CASCADE, verbose_name="Վարչություն")
+    precinct = models.ForeignKey(Precinct, related_name='employee', on_delete=models.CASCADE, null=True, blank=True, verbose_name="Տեղամաս")
+    position = models.ForeignKey(Position, related_name='employee', on_delete=models.CASCADE, verbose_name="Պաշտոն")
+    phone = models.CharField(max_length=9, null=True, blank=True, verbose_name="Հեռ.")
+    camera = models.IntegerField(unique=True, verbose_name="Տեսախցիկ")
+    image = models.ImageField(upload_to='person', null=True, blank=True, verbose_name="Նկար")
+    birth_day = models.DateField(null=True, blank=True, verbose_name="Ծննդյան ամսաթիվ")
+    order_day = models.DateField(null=True, blank=True, verbose_name="Հրամանի ամսաթիվ")
+    residential_address = models.CharField(max_length=250, null=True, blank=True, verbose_name="Բնակության հասցե")
+    service_number = models.CharField(max_length=5, null=True, blank=True, verbose_name="Ծառայողական համար")
+    passport = models.CharField(max_length=10, null=True, blank=True, verbose_name="Անձնագիր")
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='employee', on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        if self.image:
+            self.image = self.make_thumbnail(self.image)
+        super().save(*args, **kwargs)
+
+    def make_thumbnail(self, image, size=(300, 400)):
+        img = Image.open(image)
+        img = img.convert('RGB')
+        img = img.resize(size) 
+
+        thumb_io = BytesIO()
+        img.save(thumb_io, 'JPEG', quality=85)
+
+        image = File(thumb_io, name=image.name)
+
+        return image
 
     def __str__(self):
-        return f'{self.name} {self.surname} {self.phone}'
+        return f'{self.camera} {self.position} {self.name} {self.surname} {self.phone}'
+    
 
+class StationShift(models.Model):
+    start_shift = models.DateTimeField()
+    end_shift = models.DateTimeField()
+    region = models.ForeignKey(Region, related_name='stationshift', on_delete=models.CASCADE)
+    precinct = models.ForeignKey(Precinct, related_name='stationshift', on_delete=models.CASCADE)
+    employee_01 = models.ForeignKey(Employee, related_name='stationshift', on_delete=models.CASCADE)
+    employee_02 = models.ForeignKey(Employee, related_name='stationshift_02', on_delete=models.CASCADE)
+    employee_03 = models.ForeignKey(Employee, related_name='stationshift_03', on_delete=models.CASCADE, null=True, blank=True)
+    employee_04 = models.ForeignKey(Employee, related_name='stationshift_04', on_delete=models.CASCADE, null=True, blank=True)
+    car = models.ForeignKey(Car, related_name='stationshift', on_delete=models.CASCADE)
+    route = models.ForeignKey(Route, related_name='stationshift', on_delete=models.CASCADE)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='stationshift', on_delete=models.CASCADE)
 
-class Citizen(models.Model):
-    unknown_person = models.BooleanField(default=False)
-    name = models.CharField(max_length=50, null=True, blank=True)
-    surname = models.CharField(max_length=50, null=True, blank=True)
-    region = models.ForeignKey(RegionArmenia, related_name='citizen', on_delete=models.CASCADE, null=True, blank=True)
-    community = models.ForeignKey(Community, related_name='citizen', on_delete=models.CASCADE, null=True, blank=True)
-    village = models.ForeignKey(Villages, related_name='citizen', on_delete=models.CASCADE, null=True, blank=True)
-    street = models.CharField(max_length=50, blank=True, null=True)
-    house = models.CharField(max_length=20, blank=True, null=True)
-    apartment = models.CharField(max_length=20, blank=True, null=True)
-    phone = models.CharField(max_length=20, blank=True, null=True)
 
     def __str__(self):
-        return f'{self.name} {self.surname} {self.phone}'
-    
-    
-class InfoAboutFire(models.Model):
-    employee = models.ForeignKey(Employee, related_name='infoaboutfire', on_delete=models.CASCADE, null=True, blank=True)
-    citizen = models.ForeignKey(Citizen, related_name='infoaboutfire', on_delete=models.CASCADE, null=True, blank=True)
-    start_of_fire = models.BooleanField(default=False)
-    date_and_time = models.DateTimeField(null=True, blank=True)
-    from_where = models.CharField(max_length=100, null=True, blank=True)
-    the_source_of_the_fire = models.CharField(max_length=250, null=True, blank=True)
-    REGISTERED = (
-        ("Պ", "Պետական պահպանվող տարածք"),
-        ("Հ", "Համայնքային տարածք")
-    )
-    registration = models.CharField(max_length=1, choices=REGISTERED)
-    region = models.ForeignKey(Region, related_name='infoaboutfire', on_delete=models.CASCADE, null=True, blank=True)
-    regionArmenia = models.ForeignKey(RegionArmenia, related_name='infoaboutfire', on_delete=models.CASCADE, null=True, blank=True)
-    protected_areas = models.ForeignKey(ProtectedAreas, related_name='infoaboutfire', on_delete=models.CASCADE, null=True, blank=True)
-    community = models.ForeignKey(Community, related_name='infoaboutfire', on_delete=models.CASCADE, null=True, blank=True)
-    reserve = models.ForeignKey(Reserve, related_name='reserve', on_delete=models.CASCADE, null=True, blank=True)
-    village = models.ForeignKey(Villages, related_name='infoaboutfire', on_delete=models.CASCADE, null=True, blank=True)
-    cordinat = models.CharField(max_length=250, null=True, blank=True)
-    call_ain = models.BooleanField(default=False)
-    name = models.CharField(max_length=50, null=True, blank=True)
-    seurname = models.CharField(max_length=50, null=True, blank=True)
-    call_of_date = models.DateTimeField(null=True, blank=True)
-    why_not = models.CharField(max_length=250, null=True, blank=True)
+        return f'{self.start_shift} {self.end_shift} {self.car} {self.route}'
 
 
-class OperationalControlCenter(models.Model):
-    infoaboutfire = models.ForeignKey(InfoAboutFire, related_name='operationalcontrolcenter', on_delete=models.CASCADE)
-    name = models.CharField(max_length=50)
-    surname = models.CharField(max_length=50)
-    start_of_call = models.ForeignKey(StartCallDate, related_name='operationalcontrolcenter', on_delete=models.CASCADE)
-    call_ain = models.DateTimeField(null=True, blank=True)
-    ain_name = models.CharField(max_length=100, null=True, blank=True)
-    call_region = models.DateTimeField(null=True, blank=True)
-    region_name = models.CharField(max_length=100, null=True, blank=True)
-    head_of_the_occ = models.DateTimeField(null=True, blank=True)
-    head_of_the_occ_name = models.CharField(max_length=100, null=True, blank=True)
-    
+class UserAccess(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    region = models.ForeignKey(Region, on_delete=models.CASCADE)
+    precinct = models.ForeignKey(Precinct, on_delete=models.CASCADE)
 
-class EndFire(models.Model):
-    infoaboutfire = models.ForeignKey(OperationalControlCenter, related_name='endfire', on_delete=models.CASCADE)
-    end_of_fire = models.DateTimeField(null=True, blank=True)
-    forest_place_burnt = models.CharField(max_length=4, null=True, blank=True)
-    field_place_burnt = models.CharField(max_length=4, null=True, blank=True)
-    burnt_trees = models.CharField(max_length=3, null=True, blank=True)
-    burnt_animals = models.CharField(max_length=2, null=True, blank=True)
-    eps = models.CharField(max_length=250, null=True, blank=True)
-    ain = models.CharField(max_length=250, null=True, blank=True)
-
+    def __str__(self):
+        return f'{self.user}'
 

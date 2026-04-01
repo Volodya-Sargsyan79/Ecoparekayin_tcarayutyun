@@ -14,8 +14,8 @@
 
 <script>
 import axios from 'axios'
-import Nav from '@/components/Nav'
-import Footer from '@/components/Footer'
+import Nav from '@/components/nav/Nav'
+import Footer from '@/components/nav/Footer'
 
 export default {
   name: 'App',

@@ -4,23 +4,15 @@ export default createStore({
   state: {
     user: {
       token: '',
-      workList: "",
       relatives: "",
       regions: "",
       precincts: "",
       position: "",
-      regionArmenia: "",
-      city: "",
-      village: "",
-      regionofall: "",
-      villageall: "",
-      protectedAreas: "",
+      stationshif: null,
       employee: null,
-      citizen: null,
-      caller: "",
-      persons: "",
-      phone: "",
-      address: "",
+      car: null,
+      route: null,
+      persons: null,
       isLoading: false,
       isAuthenticated: false
     }
@@ -47,6 +39,9 @@ export default createStore({
     removeToken(state) {
       state.user.token = ''
       state.user.isAuthenticated = false
+    },
+    SET_FIRELIST(state, payload) {
+      state.user.firelist = payload
     }
   },
   actions: {

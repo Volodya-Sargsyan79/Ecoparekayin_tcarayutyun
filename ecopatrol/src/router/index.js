@@ -3,11 +3,11 @@ import store from '@/store'
 import Home  from '../views/Home.vue'
 import LogIn from '@/views/LogIn.vue'
 import Dashboard from '@/views/dashboard/Dashboard.vue'
-import MyAccount from '@/views/dashboard/MyAccount.vue'
-import PersonInformation from '@/views/dashboard/PersonInformation.vue'
-import FireAlarm from '@/views/dashboard/FireAlarm.vue'
-import EPSAlarm from '@/views/dashboard/EPSAlarm.vue'
-import CrimeAlert from '@/views/dashboard/CrimeAlert.vue'
+import RegionInfo from '@/views/dashboard/RegionInfo.vue'
+import Register from '@/views/dashboard/ShitRegister.vue'
+import CreateMonthlyDuty from '@/views/dashboard/CreateMonthlyDuty.vue'
+import ShitDuty from '@/views/dashboard/ShitDuty.vue'
+import CreateDuty from '@/views/dashboard/CreateDuty.vue'
 
 const routes = [
   {
@@ -29,32 +29,83 @@ const routes = [
     }
   },
   {
-    path: '/dashboard/person_information',
-    name: 'PersonInformation',
-    component: PersonInformation,
+    path: '/dashboard/regioninfo',
+    name: 'RegionInfo',
+    component: RegionInfo,
+    meta: { requireLogin: true },
+    children: [
+      {
+        path: 'employeelist',
+         component: () => import('@/components/forms/EmployeeList.vue')
+      },
+      {
+        path: 'routelist',
+        component: () => import('@/components/forms/RouteList.vue')
+      },
+      {
+        path: 'shitlist',
+        component: () => import('@/components/forms/ShitListForm.vue')
+      },
+      {
+        path: "route/:id",
+        name: "route-detail",
+        component: () => import('@/components/detail/RouteDetail.vue')
+      },
+      {
+        path: "person/:id",
+        name: "person-detail",
+        component: () => import('@/components/detail/PersonDetail.vue')
+      },
+      {
+        path: "shift/:id",
+        name: "shift-detail",
+        component: () => import('@/components/detail/ShiftDetail.vue')
+      },
+    ]
+  },
+  {
+    path: '/dashboard/createmonthlyduty',
+    name: 'CreateMonthlyDuty',
+    component: CreateMonthlyDuty,
     meta: {
       requireLogin: true
     }
   },
   {
-    path: '/dashboard/my-account',
-    name: 'MyAccount',
-    component: MyAccount,
+    path: '/dashboard/createmonthlyduty/shitduty',
+    name: 'ShitDuty',
+    component: ShitDuty,
     meta: {
       requireLogin: true
-    }
+    },
+    children: [
+      {
+        path: 'shitlist',
+        component: () => import('@/components/forms/ShitListForm.vue')
+      }
+    ]
   },
-  // {
-  //   path: '/dashboard/firealarm',
-  //   name: 'FireAlarm',
-  //   component: FireAlarm,
-  //   meta: {
-  //     requireLogin: true
-  //   }
-  // },
   {
-    path: '/dashboard/firealarm',
-    component: FireAlarm,
+    path: '/dashboard/createmonthlyduty/createduty',
+    name: 'CreateDuty',
+    component: CreateDuty,
+    meta: {
+      requireLogin: true
+    },
+    children: [
+      {
+        path: 'shitlist',
+        component: () => import('@/components/forms/ShitListForm.vue')
+      },
+       {
+        path: 'createshit',
+        component: () => import('@/components/forms/CreateShit.vue')
+      }
+    ]
+  },
+  {
+    path: '/dashboard/register',
+    component: Register,
     meta: { requireLogin: true },
     children: [
       {
@@ -62,30 +113,26 @@ const routes = [
         component: () => import('@/components/forms/EpsEmployeeForm.vue')
       },
       {
-        path: 'citizen',
-        component: () => import('@/components/forms/CityCitizenForm.vue')
+        path: 'regionshift',
+        component: () => import('@/components/forms/RegionShift.vue')
       },
       {
-        path: 'firecaller',
-        component: () => import('@/components/forms/FireAlarmForm.vue')
+        path: 'regionroute',
+        component: () => import('@/components/forms/RegionRouteForm.vue')
       },
+      {
+        path: 'employeelist',
+        component: () => import('@/components/forms/EmployeeList.vue')
+      },
+      {
+        path: 'shitlist',
+        component: () => import('@/components/forms/ShitListForm.vue')
+      },
+      {
+        path: 'routelist',
+        component: () => import('@/components/forms/RouteList.vue')
+      }
     ]
-  },
-  {
-    path: '/dashboard/epsalarm',
-    name: 'EPSAlarm',
-    component: EPSAlarm,
-    meta: {
-      requireLogin: true
-    }
-  },
-  {
-    path: '/dashboard/crimealert',
-    name: 'CrimeAlert',
-    component: CrimeAlert,
-    meta: {
-      requireLogin: true
-    }
   }
 ]
 

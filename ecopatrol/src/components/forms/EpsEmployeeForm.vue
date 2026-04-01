@@ -12,6 +12,9 @@
                     <div class="control">
                         <input class="input" v-model="form.name" placeholder="Անուն">
                     </div>
+                    <p v-if="!form.name" class="help is-danger">
+                        Պարտադիր է մուտքագրել անունը
+                    </p>
                 </div>
             </div>
 
@@ -21,6 +24,9 @@
                     <div class="control">
                         <input class="input" v-model="form.surname" placeholder="Ազգանուն">
                     </div>
+                    <p v-if="!form.surname" class="help is-danger">
+                        Պարտադիր է մուտքագրել ազգանունը
+                    </p>
                 </div>
             </div>
 
@@ -28,8 +34,23 @@
                 <div class="field">
                     <label class="label">Հեռախոս</label>
                     <div class="control">
-                        <input class="input" v-model="form.phone" placeholder="(+374)">
+                        <input class="input" v-model="form.phone" placeholder="(099)000000">
                     </div>
+                    <p v-if="!form.phone" class="help is-danger">
+                        Պարտադիր է մուտքագրել հեռախոսահամարը
+                    </p>
+                </div>
+            </div>
+            <div class="column">
+                <div class="field">
+                    <label class="label">Տեսախցիկ</label>
+                    <div class="control">
+                        <input class="input" type="number" v-model="form.camera" placeholder="Տեսախցիկի համարը">
+                    </div>
+                    <p v-if="!form.camera" class="help is-danger">
+                        Պարտադիր է մուտքագրել տեսախցիկի համարը
+                    </p>
+                    <p v-if="errors.camera" class="help is-danger">{{ errors.camera }}</p>
                 </div>
             </div>
         </div>
@@ -46,11 +67,14 @@
                             :key="region.id"
                             :value="region.id"
                         >
-                            {{ region.name }}
+                            {{ region.region }}
                         </option>
                     </select>
                 </div>
             </div>
+            <p v-if="!form.region_id" class="help is-danger">
+                Պարտադիր է ընտրել Մարզային վարչություն
+            </p>
         </div>
 
         <!-- Precinct -->
@@ -65,30 +89,36 @@
                             :key="precinct.id"
                             :value="precinct.id"
                         >
-                            {{ precinct.name }}
+                            {{ precinct.precinct }}
                         </option>
                     </select>
                 </div>
             </div>
+             <p v-if="!form.precinct_id" class="help is-danger">
+                Պարտադիր է ընտրել տեղամասը
+            </p>
         </div>
 
         <!-- Position -->
         <div class="field">
             <label class="label">Պաշտոն</label>
             <div class="control">
-            <div class="select is-fullwidth">
-                <select v-model="form.position_id">
-                    <option value="">Ընտրել</option>
-                    <option
-                        v-for="position in $store.state.user.position"
-                        :key="position.id"
-                        :value="position.id"
-                    >
-                        {{ position.position_held }}
-                    </option>
-                </select>
+                <div class="select is-fullwidth">
+                    <select v-model="form.position_id">
+                        <option value="">Ընտրել</option>
+                        <option
+                            v-for="position in $store.state.user.position"
+                            :key="position.id"
+                            :value="position.id"
+                        >
+                            {{ position.position_held }}
+                        </option>
+                    </select>
+                </div>
             </div>
-            </div>
+             <p v-if="!form.position_id" class="help is-danger">
+                Պարտադիր է ընտրել պաշտոնը
+            </p>
         </div>
 
         <!-- Submit -->
@@ -96,7 +126,7 @@
             <button
             type="submit"
             class="button is-primary is-medium"
-            @click.prevent="saveCall"
+            @click.prevent="saveEmployee"
             >
             Պահպանել
             </button>
@@ -116,9 +146,13 @@ export default {
                 name: "",
                 surname: "",
                 phone: "",
+                camera: "",
                 region_id: null,
                 precinct_id: null,
                 position_id: null,
+            },
+            errors: {
+                camera: ""   // <-- this will hold the phone error message
             }
         }
     },
@@ -153,17 +187,39 @@ export default {
                 .catch(err => { console.error(err) }) 
             
         },
-        saveCall() {
+        saveEmployee() {
             const payload = {
-                    ...this.form,
-                    precinct_id: this.form.precinct_id || null,
-                }
+                ...this.form,
+                camera: this.form.camera ? parseInt(this.form.camera) : null,
+                precinct_id: this.form.precinct_id || null,
+            }
 
-            axios.post("/api/ekopatrol/addEmployeeCaller/", payload)
-                .then(() =>
-                    this.$router.push('/dashboard/firealarm/firecaller')
-                )
-                .catch(err => console.error(err))
+            axios.post("/api/ekopatrol/addEmployee/", payload)
+                .then(() => {
+                    axios
+                        .get("/api/ekopatrol/getlastemployee/", {
+                            params: { id: this.form.precinct_id }
+                        })
+                        .then(res => {
+                             this.$store.state.user.employee = res.data 
+                             this.$router.push('/dashboard/register/employeelist')
+                        })
+                        .catch(err => { console.error(err) })
+                })
+                .catch(err => {
+                    // Reset previous errors
+                    this.errors.phone = "";
+
+                    // Check if backend returned a validation error for phone
+                    if (err.response && err.response.data) {
+                        const data = err.response.data;
+                        if (data.error) {
+                            this.errors.camera = "Այս տեսախցիկը արդեն ավելացված է"; // "Phone is already added"
+                        }
+                    }
+
+                    console.error(err)
+                })
         }
     }
 }

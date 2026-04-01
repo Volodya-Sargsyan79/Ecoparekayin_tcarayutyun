@@ -24,6 +24,7 @@ urlpatterns = [
     path('api/ekopatrol/', include('djoser.urls')),
     path('api/ekopatrol/', include('djoser.urls.authtoken')),
     path('api/ekopatrol/', include('apps.person.urls')),
+    path('api/ekopatrol_duty/', include('apps.monthly_duty.urls')),
 ]
 
 urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
