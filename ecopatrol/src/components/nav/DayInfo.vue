@@ -25,23 +25,87 @@
                         children: [
                             {
                                 label: 'Կապանի տեղամաս',
-                                title: "Կ",
-                                func: () => this.registrationEmployee()
+                                children: [
+                                    {
+                                        label: "Անձնակազմ",
+                                        title: "Ա",
+                                        func: () => this.employeeKeeper(1)
+                                    },
+                                    {
+                                        label: "Երթուղի",
+                                        title: "Ե",
+                                        func: () => this.routeKeeper(1)
+                                    },
+                                    {
+                                        label: "Հերթափոխ",
+                                        title: "Հ",
+                                        func: () => this.placeKeeper(1)
+                                    },
+                                    
+                                ]
                             },
                             {
                                 label: 'Գորիսի տեղամաս',
-                                title: "Գ",
-                                func: () => this.registrationEmployee()
+                                children: [
+                                    {
+                                        label: "Անձնակազմ",
+                                        title: "Ա",
+                                        func: () => this.employeeKeeper(2)
+                                    },
+                                    {
+                                        label: "Երթուղի",
+                                        title: "Ե",
+                                        func: () => this.routeKeeper(2)
+                                    },
+                                    {
+                                        label: "Հերթափոխ",
+                                        title: "Հ",
+                                        func: () => this.placeKeeper(2)
+                                    },
+                                    
+                                ]
                             },
                             {
                                 label: 'Սիսիանի տեղամաս',
-                                title: "Ս",
-                                func: () => this.registrationEmployee()
+                                children: [
+                                    {
+                                        label: "Անձնակազմ",
+                                        title: "Ա",
+                                        func: () => this.employeeKeeper(3)
+                                    },
+                                    {
+                                        label: "Երթուղի",
+                                        title: "Ե",
+                                        func: () => this.routeKeeper(3)
+                                    },
+                                    {
+                                        label: "Հերթափոխ",
+                                        title: "Հ",
+                                        func: () => this.placeKeeper(3)
+                                    },
+                                    
+                                ]
                             },
                             {
                                 label: 'Մեղրու տեղամաս',
-                                title: "Մ",
-                                func: () => this.registrationEmployee()
+                                children: [
+                                    {
+                                        label: "Անձնակազմ",
+                                        title: "Ա",
+                                        func: () => this.employeeKeeper(4)
+                                    },
+                                    {
+                                        label: "Երթուղի",
+                                        title: "Ե",
+                                        func: () => this.routeKeeper(4)
+                                    },
+                                    {
+                                        label: "Հերթափոխ",
+                                        title: "Հ",
+                                        func: () => this.placeKeeper(4)
+                                    },
+                                    
+                                ]
                             }
                         ]
                     },

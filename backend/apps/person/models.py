@@ -46,6 +46,7 @@ def extract_kml(kmz_path, extract_to):
         z.extractall(extract_to)
     
 class Route(models.Model):
+    registration_day = models.DateTimeField(auto_now_add=True)
     region = models.ForeignKey(Region, related_name='route', on_delete=models.CASCADE)
     precinct = models.ForeignKey(Precinct, related_name='route', on_delete=models.CASCADE)
     route_number = models.CharField(max_length=15)
@@ -92,7 +93,7 @@ class Route(models.Model):
         return thumbnail
     
     def __str__(self):
-        return f'{self.precinct} {self.route_number} երթուղի'
+        return f'{self.registration_day} {self.precinct} {self.route_number} երթուղի'
    
 
 class Employee(models.Model):

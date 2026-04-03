@@ -3,9 +3,12 @@
     <div class="columns">
       <div class="column is-3">
         <div class="field">
+            <!-- <img 
+              :src="`http://${$hostname}:8000/media/${person.image}`" 
+            /> -->
             <img 
-                  :src="`http://localhost:8000/media/${person.image}`" 
-              />
+              :src="`http://127.0.0.1:8000/media/${person.image}`" 
+            />
         </div>
       </div>
       <div class="column is-9">
@@ -53,8 +56,6 @@ export default {
         );
 
         this.person = res.data[0];
-
-        console.log(this.person)
 
       } catch (err) {
         console.error("ERROR:", err);

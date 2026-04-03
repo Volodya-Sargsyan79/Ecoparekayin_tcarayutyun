@@ -25,9 +25,8 @@
                                 </div>
                             </div>
                             <div class="column is-10" 
-                                v-if="this.$store.state.user.employee != NULL || this.$store.state.user.route != NULL || this.$store.state.user.stationshif != NULL"
+                                v-if="$route.path != '/dashboard/precinct_shift/search_information'"
                             >
-                                <!-- FORM CHANGES BASED ON URL -->
                                 <router-view />
                             </div>
                             <div class="column is-10" v-else>
@@ -50,10 +49,10 @@
 </template>
 
 <script>
-import Filters from '@/components/nav/Filters.vue';
+    import Filters from '@/components/nav/Filters.vue';
 
-export default {
-    name: 'RegionInfo',
-    components: { Filters }
-}
+    export default {
+        name: 'SearchInformation',
+        components: { Filters }
+    }
 </script>

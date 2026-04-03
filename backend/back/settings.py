@@ -39,6 +39,9 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^http://192\.168\.88\.\d{1,3}:8080$"
 ]
 
+
+# CORS_URLS_REGEX = r'^.*$'
+
 CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {

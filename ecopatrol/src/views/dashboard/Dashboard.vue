@@ -5,7 +5,7 @@
         <h1 class="title">
           Բարի գալուստ <br />
           Էկոպարեկային ծառայության <br />
-          հերթապահության գրանցման համակարգ
+          տեղեկատվական համակարգ
         </h1>
       </div>
     </div>
@@ -16,13 +16,13 @@
       <div class="columns is-multiline">
 
         <!-- BUTTON 1 -->
-        <router-link to="/dashboard/register" class="column is-4">
+        <router-link to="/dashboard/precinct_shift" class="column is-4">
           <div class="box has-text-centered">
             <span class="icon is-size-2">
               <i class="far fa-clock"></i>
             </span>
-            <h2 class="title is-4 mt-4 mb-4">Տեղամասերի</h2>
-            <p class="title is-5">Անձնակազմի, երթուղիների և հերթափոխերի գրանցում</p>
+            <h2 class="title is-4 mt-4 mb-4">Տեղեկատվություն</h2>
+            <p class="title is-5">երթուղիների և հերթափոխերի վերաբերյալ</p>
           </div>
         </router-link>
 
@@ -53,22 +53,9 @@
 </template>
 
 <script>
-import axios from 'axios';
-export default {
-  name: 'Dashboard',
-  methods: {
-    shitԼist(){
-      axios
-        .get('/api/ekopatrol/getstationshiftlist/') 
-        .then((res) => {
-            // Store the response in precincts
-            this.$store.state.user.stationshif = res.data;
-            this.$router.push('/dashboard/regioninfo') 
-        })
-        .catch(err => { console.error(err) }) 
-    }
+  export default {
+    name: 'Dashboard'
   }
-}
 </script>
 
 <style lang="scss">

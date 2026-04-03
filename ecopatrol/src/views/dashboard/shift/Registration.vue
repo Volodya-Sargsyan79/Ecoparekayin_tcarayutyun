@@ -14,7 +14,7 @@
                                             </span>
                                             <br/>
                                             <span class="is-size-4">
-                                                <strong>հերթափոխերի էլեկտրոնային գրանցում</strong>
+                                                <strong>էլեկտրոնային գրանցում</strong>
                                             </span>
                                              
                                         </h2>
@@ -24,8 +24,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="column is-10" v-if="this.$store.state.user.regions.length > 0">
-                                <!-- FORM CHANGES BASED ON URL -->
+                            <div class="column is-10" v-if="$route.path != '/dashboard/precinct_shift/registration'">
                                 <router-view />
                             </div>
                             <div class="column is-10" v-else>
@@ -48,10 +47,10 @@
 </template>
 
 <script>
-import Menu from '@/components/nav/Menu.vue'
+    import Menu from '@/components/nav/Menu.vue'
 
-export default {
-    name: 'ShitRegister',
-    components: { Menu }
-}
+    export default {
+        name: 'Registration',
+        components: { Menu }
+    }
 </script>

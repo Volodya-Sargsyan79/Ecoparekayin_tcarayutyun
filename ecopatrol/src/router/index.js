@@ -3,11 +3,10 @@ import store from '@/store'
 import Home  from '../views/Home.vue'
 import LogIn from '@/views/LogIn.vue'
 import Dashboard from '@/views/dashboard/Dashboard.vue'
-import RegionInfo from '@/views/dashboard/RegionInfo.vue'
-import Register from '@/views/dashboard/ShitRegister.vue'
-import CreateMonthlyDuty from '@/views/dashboard/CreateMonthlyDuty.vue'
-import ShitDuty from '@/views/dashboard/ShitDuty.vue'
-import CreateDuty from '@/views/dashboard/CreateDuty.vue'
+import Registration from '@/views/dashboard/shift/Registration.vue'
+import PrecinctShift from '@/views/dashboard/shift/PrecinctShift.vue'
+import Information from '@/views/dashboard/shift/Information.vue'
+import SearchInformation from '@/views/dashboard/shift/SearchInformation.vue'
 
 const routes = [
   {
@@ -29,112 +28,80 @@ const routes = [
     }
   },
   {
-    path: '/dashboard/regioninfo',
-    name: 'RegionInfo',
-    component: RegionInfo,
-    meta: { requireLogin: true },
-    children: [
-      {
-        path: 'employeelist',
-         component: () => import('@/components/forms/EmployeeList.vue')
-      },
-      {
-        path: 'routelist',
-        component: () => import('@/components/forms/RouteList.vue')
-      },
-      {
-        path: 'shitlist',
-        component: () => import('@/components/forms/ShitListForm.vue')
-      },
-      {
-        path: "route/:id",
-        name: "route-detail",
-        component: () => import('@/components/detail/RouteDetail.vue')
-      },
-      {
-        path: "person/:id",
-        name: "person-detail",
-        component: () => import('@/components/detail/PersonDetail.vue')
-      },
-      {
-        path: "shift/:id",
-        name: "shift-detail",
-        component: () => import('@/components/detail/ShiftDetail.vue')
-      },
-    ]
-  },
-  {
-    path: '/dashboard/createmonthlyduty',
-    name: 'CreateMonthlyDuty',
-    component: CreateMonthlyDuty,
+    path: '/dashboard/precinct_shift',
+    name: 'PrecinctShift',
+    component: PrecinctShift,
     meta: {
       requireLogin: true
     }
   },
   {
-    path: '/dashboard/createmonthlyduty/shitduty',
-    name: 'ShitDuty',
-    component: ShitDuty,
-    meta: {
-      requireLogin: true
-    },
-    children: [
-      {
-        path: 'shitlist',
-        component: () => import('@/components/forms/ShitListForm.vue')
-      }
-    ]
-  },
-  {
-    path: '/dashboard/createmonthlyduty/createduty',
-    name: 'CreateDuty',
-    component: CreateDuty,
-    meta: {
-      requireLogin: true
-    },
-    children: [
-      {
-        path: 'shitlist',
-        component: () => import('@/components/forms/ShitListForm.vue')
-      },
-       {
-        path: 'createshit',
-        component: () => import('@/components/forms/CreateShit.vue')
-      }
-    ]
-  },
-  {
-    path: '/dashboard/register',
-    component: Register,
+    path: '/dashboard/precinct_shift/registration',
+    component: Registration,
     meta: { requireLogin: true },
     children: [
       {
-        path: 'epsemployee',
-        component: () => import('@/components/forms/EpsEmployeeForm.vue')
+        path: 'employee',
+        component: () => import('@/components/registration/RegistrationEmployee.vue')
       },
       {
-        path: 'regionshift',
-        component: () => import('@/components/forms/RegionShift.vue')
+        path: 'shift',
+        component: () => import('@/components/registration/RegistrationShift.vue')
       },
       {
-        path: 'regionroute',
-        component: () => import('@/components/forms/RegionRouteForm.vue')
-      },
-      {
-        path: 'employeelist',
-        component: () => import('@/components/forms/EmployeeList.vue')
-      },
-      {
-        path: 'shitlist',
-        component: () => import('@/components/forms/ShitListForm.vue')
-      },
-      {
-        path: 'routelist',
-        component: () => import('@/components/forms/RouteList.vue')
+        path: 'route',
+        component: () => import('@/components/registration/RegistrationRoute.vue')
       }
     ]
-  }
-]
+  },
+  {
+      path: '/dashboard/precinct_shift/information',
+      name: 'Information',
+      component: Information,
+      meta: {
+        requireLogin: true
+      },
+      children: [
+        {
+          path: 'employeelist',
+          component: () => import('@/components/information/EmployeeList.vue')
+        },
+        {
+          path: 'routelist',
+          component: () => import('@/components/information/RouteList.vue')
+        },
+        {
+          path: 'shitlist',
+          component: () => import('@/components/information/ShiftList.vue')
+        },
+        {
+          path: "employee/:id",
+          name: "person-detail",
+          component: () => import('@/components/detail/PersonDetail.vue')
+        },
+        {
+          path: "route/:id",
+          name: "route-detail",
+          component: () => import('@/components/detail/RouteDetail.vue')
+        },
+        {
+          path: "shift/:id",
+          name: "shift-detail",
+          component: () => import('@/components/detail/ShiftDetail.vue')
+        },
+      ]
+    },
+    {
+      path: '/dashboard/precinct_shift/search_information',
+      name: 'SearchInformation',
+      component: SearchInformation,
+      meta: {
+        requireLogin: true
+      },
+      children: [
+      ]
+    }
+  ]
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),

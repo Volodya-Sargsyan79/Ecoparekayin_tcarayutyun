@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import LogOut from './../LogOut.vue';
+import LogOut from '../../views/LogOut.vue';
 
 export default {
     name: 'Nav',

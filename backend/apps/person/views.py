@@ -433,15 +433,39 @@ class AddStationShift(APIView):
         precinct_id = request.data.get('precinct_id')
         route_id = request.data.get('route_id')
 
-        sql = '''
-            INSERT INTO person_stationshift 
-            (start_shift, end_shift, employee_01_id, employee_02_id, employee_03_id, employee_04_id, region_id, precinct_id, car_id, route_id, created_by_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        '''
-
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql, [
+                # Ստուգում ենք կա՞ արդեն նույն start_shift և car_id-ով
+                cursor.execute('''
+                    SELECT COUNT(*) FROM person_stationshift
+                    WHERE start_shift = %s AND car_id = %s
+                ''', [start_shift, car_id])
+
+                exists = cursor.fetchone()[0]
+
+                if exists:
+                    return Response(
+                        {"error": "Այս start_shift և car_id-ով գրառում արդեն գոյություն ունի"},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                # Եթե չկա — գրանցում ենք
+                cursor.execute('''
+                    INSERT INTO person_stationshift 
+                    (
+                        start_shift, 
+                        end_shift, 
+                        employee_01_id, 
+                        employee_02_id, 
+                        employee_03_id, 
+                        employee_04_id, 
+                        region_id, 
+                        precinct_id, 
+                        car_id,
+                        route_id, 
+                        created_by_id)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ''', [
                     start_shift,
                     end_shift,
                     employee_01_id,

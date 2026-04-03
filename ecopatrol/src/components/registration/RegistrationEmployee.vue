@@ -152,7 +152,7 @@ export default {
                 position_id: null,
             },
             errors: {
-                camera: ""   // <-- this will hold the phone error message
+                camera: "" 
             }
         }
     },
@@ -166,7 +166,6 @@ export default {
                     params: { id: this.form.region_id },
                 })
                 .then((res) => {
-                    // Store the response in precincts
                     this.$store.state.user.precincts = res.data;
                 })
                 .catch((err) => {
@@ -201,20 +200,19 @@ export default {
                             params: { id: this.form.precinct_id }
                         })
                         .then(res => {
-                             this.$store.state.user.employee = res.data 
-                             this.$router.push('/dashboard/register/employeelist')
+                            this.$store.state.user.employee = res.data
+                            alert("Գրանցումը հաջողությամբ կատարվել է:") 
+                            this.$router.push('/dashboard/precinct_shift/registration')
                         })
                         .catch(err => { console.error(err) })
                 })
                 .catch(err => {
-                    // Reset previous errors
                     this.errors.phone = "";
 
-                    // Check if backend returned a validation error for phone
                     if (err.response && err.response.data) {
                         const data = err.response.data;
                         if (data.error) {
-                            this.errors.camera = "Այս տեսախցիկը արդեն ավելացված է"; // "Phone is already added"
+                            this.errors.camera = "Այս տեսախցիկը արդեն ավելացված է";
                         }
                     }
 

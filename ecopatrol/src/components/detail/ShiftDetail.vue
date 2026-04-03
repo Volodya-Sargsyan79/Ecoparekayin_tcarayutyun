@@ -198,102 +198,49 @@ export default {
       marker: null,    // store marker instance
     };
   },
-
   async mounted() {
-  this.$nextTick(async () => {
-    try {
-      const id = this.$route.params.id;
+    this.$nextTick(async () => {
+      try {
+        const id = this.$route.params.id;
 
-      const res = await axios.get(`/api/ekopatrol/getstationshift/${id}/`);
-      
-      this.shift_info = res.data[0];
+        const res = await axios.get(`/api/ekopatrol/getstationshift/${id}/`);
+        
+        this.shift_info = res.data[0];
 
-      const route_id = this.shift_info.route_id
+        const route_id = this.shift_info.route_id
 
-      const kmlUrl = `http://localhost:8000/media/kml/${route_id}/doc.kml`;
+        // const kmlUrl = `http://${window.location.hostname}:8000/media/kml/${route_id}/doc.kml`;
+        const kmlUrl = `http://127.0.0.1:8000/media/kml/${route_id}/doc.kml`;
 
-      this.map = L.map("map").setView([40.1792, 44.4991], 10);
 
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 30,
-        attribution: "© OpenStreetMap contributors",
-      }).addTo(this.map);
+        this.map = L.map("map").setView([40.1792, 44.4991], 10);
 
-      omnivore
-        .kml(kmlUrl)
-        .on("ready", (e) => {
-          this.map.fitBounds(e.target.getBounds()); // ✅ fixed
-        })
-        .on("error", (e) => {
-          console.error("KML LOAD ERROR:", e);
-        })
-        .addTo(this.map);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 30,
+          attribution: "© OpenStreetMap contributors",
+        }).addTo(this.map);
 
-      setTimeout(() => {
-        this.map.invalidateSize();
-      }, 500);
+        omnivore
+          .kml(kmlUrl)
+          .on("ready", (e) => {
+            this.map.fitBounds(e.target.getBounds()); // ✅ fixed
+          })
+          .on("error", (e) => {
+            console.error("KML LOAD ERROR:", e);
+          })
+          .addTo(this.map);
 
-    } catch (err) {
-      console.error("ERROR:", err);
-    }
-  });
-},
+        setTimeout(() => {
+          this.map.invalidateSize();
+        }, 500);
 
+      } catch (err) {
+        console.error("ERROR:", err);
+      }
+    });
+  },
   methods: {
     async goToCoordinate() {
-    try {
-      const TOKEN = "RzBFAiA5UB9KYvQkmg9kRf1crNeXR7kmTsKY9KFBN03to_0K_gIhALBskv28tPHdwY47wVWS-M_9LkdIFsETEuzAP1JrmSS1eyJ1IjoyLCJlIjoiMjAyNi0wNC0wNVQyMDowMDowMC4wMDArMDA6MDAifQ";
-
-      const res = await axios.get(
-        "https://gps.eps.am/api/positions",
-        {
-          params: {
-            deviceId: this.shift_info.deviceId,
-            to: new Date().toISOString()
-          },
-          headers: {
-            Authorization: `Bearer ${TOKEN}` // 🔥 հիմնական տարբերակ
-          }
-        }
-      );
-
-      console.log("GPS DATA:", res.data);
-
-      // օրինակ՝ քարտեզի համար
-      if (res.data.length > 0) {
-        const last = res.data[0];
-
-        const lat = last.latitude;
-        const lng = last.longitude;
-
-        console.log("COORD:", lat, lng);
-
-        // եթե Leaflet ես օգտագործում
-         if (!lat || !lng) {
-          alert("Մեքենայի տեղորոշման կոորդինատները հասանելի չեն:");
-          return;
-        }
-
-        const latLng = [parseFloat(lat), parseFloat(lng)];
-
-        // ✅ Remove old marker if exists
-        if (this.marker) {
-          this.map.removeLayer(this.marker);
-        }
-
-        // ✅ Add new marker and fly to location
-        this.marker = L.marker(latLng)
-          .addTo(this.map)
-          .bindPopup(`📍 ${lat}, ${lng}`)
-          .openPopup();
-
-        this.map.flyTo(latLng, 14);  // ✅ smooth animation to location
-      }
-
-    } catch (err) {
-      console.error("GPS API ERROR:", err);
-
-      // 🔁 fallback (եթե Bearer չաշխատի)
       try {
         const TOKEN = "RzBFAiA5UB9KYvQkmg9kRf1crNeXR7kmTsKY9KFBN03to_0K_gIhALBskv28tPHdwY47wVWS-M_9LkdIFsETEuzAP1JrmSS1eyJ1IjoyLCJlIjoiMjAyNi0wNC0wNVQyMDowMDowMC4wMDArMDA6MDAifQ";
 
@@ -301,20 +248,48 @@ export default {
           "https://gps.eps.am/api/positions",
           {
             params: {
-              deviceId: 7,
-              to: new Date().toISOString(),
-              token: TOKEN // 🔥 fallback տարբերակ
+              deviceId: this.shift_info.deviceId,
+              to: new Date().toISOString()
+            },
+            headers: {
+              Authorization: `Bearer ${TOKEN}`
             }
           }
         );
 
-        console.log("GPS DATA (fallback):", res.data);
+        console.log("GPS DATA:", res.data);
 
-      } catch (err2) {
-        console.error("GPS API ERROR (fallback):", err2);
+        if (res.data.length > 0) {
+          const last = res.data[0];
+
+          const lat = last.latitude;
+          const lng = last.longitude;
+
+          console.log("COORD:", lat, lng);
+
+          if (!lat || !lng) {
+            alert("Մեքենայի տեղորոշման կոորդինատները հասանելի չեն:");
+            return;
+          }
+
+          const latLng = [parseFloat(lat), parseFloat(lng)];
+
+          if (this.marker) {
+            this.map.removeLayer(this.marker);
+          }
+
+          this.marker = L.marker(latLng)
+            .addTo(this.map)
+            .bindPopup(`📍 ${lat}, ${lng}`)
+            .openPopup();
+
+          this.map.flyTo(latLng, 14); 
+        }
+
+      } catch (err) {
+        console.error("GPS API ERROR:", err);
       }
     }
-  }
   },
 };
 </script>

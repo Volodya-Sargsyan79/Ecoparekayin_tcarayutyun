@@ -130,7 +130,6 @@ export default {
                     params: { id: this.form.region_id },
                 })
                 .then((res) => {
-                    // Store the response in precincts
                     this.$store.state.user.precincts = res.data;
                 })
                 .catch((err) => {
@@ -141,7 +140,6 @@ export default {
                     params: { id: this.form.region_id },
                 })
                 .then((res) => {
-                    // Store the response in precincts
                     this.$store.state.user.car = res.data;
                 })
                 .catch((err) => {
@@ -176,7 +174,9 @@ export default {
                         })
                         .then((res) => {
                             this.$store.state.user.route = res.data;
-                            this.$router.push('/dashboard/register/routelist')
+                            alert("Գրանցումը հաջողությամբ կատարվել է:")
+                            this.$router.push('/dashboard/precinct_shift/registration')
+                            
                         })
                         .catch(err => console.error(err))
                 })

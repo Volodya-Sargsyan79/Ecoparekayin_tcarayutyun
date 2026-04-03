@@ -20,13 +20,25 @@
                                         </h2>
                                     </div>
                                     <div class="has-text-centered">
-                                        <Filters />                                     
+                                        <DayInfo />                                     
                                     </div>
                                 </div>
                             </div>
-                            <div class="column is-10">
-                                <!-- FORM CHANGES BASED ON URL -->
+                            <div class="column is-10" 
+                                v-if="$route.path != '/dashboard/precinct_shift/information'"
+                            >
                                 <router-view />
+                            </div>
+                            <div class="column is-10" v-else>
+                                <div class="box">
+                                    <div class="has-text-centered column is-12">                                                
+                                        <div class="has-text-centered">
+                                            <h2 class="is-size-4 mt-4 mb-4 name_title" >
+                                               Տվյալներ չեն գտնվել... 
+                                            </h2>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -37,10 +49,10 @@
 </template>
 
 <script>
-import Filters from '@/components/nav/Filters.vue';
+    import DayInfo from '@/components/nav/DayInfo.vue';
 
-export default {
-    name: 'ShitInfo',
-    components: { Filters }
-}
+    export default {
+        name: 'Information',
+        components: { DayInfo }
+    }
 </script>

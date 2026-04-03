@@ -25,18 +25,18 @@
                         // children: [
                             {
                                 label: 'ԷՊԾ աշխատակցի գրանցում',
-                                title: "Ա",
-                                func: () => this.personEmployee()
+                                title: "Է",
+                                func: () => this.registrationEmployee()
                             },
                             {
                                 label: 'Հերթափոխի գրանցում',
                                 title: "Հ",
-                                func: () => this.personRelatives()
+                                func: () => this.registrationShift()
                             },
                             {
                                 label: 'Երթուղու գրանցում',
-                                title: "Ս",
-                                func: () => this.createRoute()
+                                title: "Ե",
+                                func: () => this.registrationRoute()
                             },
                         // ]
                     
@@ -48,7 +48,7 @@
             MenuItem
         },
         methods: {
-            personEmployee() {
+            registrationEmployee() {
                 axios
                     .get('/api/ekopatrol/regions/')
                     .then(response => {
@@ -81,9 +81,9 @@
                             console.log(JSON.stringify(error))
                         }
                     })
-                    this.$router.push('/dashboard/register/epsemployee')
+                    this.$router.push('/dashboard/precinct_shift/registration/employee')
             },
-            personRelatives() {
+            registrationShift() {
                 axios
                     .get('/api/ekopatrol/regions/')
                     .then(response => {
@@ -100,9 +100,9 @@
                             console.log(JSON.stringify(error))
                         }
                     })
-                this.$router.push('/dashboard/register/regionshift')
+                this.$router.push('/dashboard/precinct_shift/registration/shift')
             },
-            createRoute() {
+            registrationRoute() {
                 axios
                     .get('/api/ekopatrol/regions/')
                     .then(response => {
@@ -119,7 +119,7 @@
                             console.log(JSON.stringify(error))
                         }
                     })
-                this.$router.push('/dashboard/register/regionroute')
+                this.$router.push('/dashboard/precinct_shift/registration/route')
             }
         }
     }

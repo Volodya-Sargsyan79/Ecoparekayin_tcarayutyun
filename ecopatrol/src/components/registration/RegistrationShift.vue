@@ -252,7 +252,6 @@ export default {
                     params: { id: this.form.region_id },
                 })
                 .then((res) => {
-                    // Store the response in precincts
                     this.$store.state.user.precincts = res.data;
                 })
                 .catch((err) => {
@@ -263,7 +262,6 @@ export default {
                     params: { id: this.form.region_id },
                 })
                 .then((res) => {
-                    // Store the response in precincts
                     this.$store.state.user.car = res.data;
                 })
                 .catch((err) => {
@@ -278,7 +276,6 @@ export default {
                     params: { id: this.form.precinct_id },
                 })
                 .then((res) => {
-                    // Store the response in precincts
                     this.$store.state.user.route = res.data;
                 })
                 .catch((err) => {
@@ -301,15 +298,21 @@ export default {
                             params: { id: this.form.precinct_id }
                         }) 
                         .then((res) => {
-                            // Store the response in precincts
-                            this.$store.state.user.stationshif = res.data;
-                            this.$router.push('/dashboard/register/shitlist')
+                            this.$store.state.user.stationshif = res.data
+                            alert("Գրանցումը հաջողությամբ կատարվել է:")
+                            this.$router.push('/dashboard/precinct_shift/registration')
+                            
                         })
-                        .catch(err => { console.error(err) }) 
+                        .catch(err => { 
+                            console.error(err) 
+                        }) 
                     
                    
                 )
-                .catch(err => console.error(err))
+                .catch(err => {
+                    alert("Հերթափոխն արդեն գրանցված է:")
+                    console.error(err)
+                })
         }
     }
 }
