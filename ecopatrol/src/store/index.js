@@ -4,9 +4,12 @@ export default createStore({
   state: {
     user: {
       token: '',
+      id: null,
+      is_admin: false,
       relatives: "",
       regions: "",
       precincts: "",
+      region_id: null,
       position: "",
       stationshif: null,
       employee: null,
@@ -42,7 +45,11 @@ export default createStore({
     },
     SET_FIRELIST(state, payload) {
       state.user.firelist = payload
-    }
+    },
+    setUser(state, user) {
+      state.user.id = user.id
+      state.user.is_admin = user.is_admin
+    },
   },
   actions: {
   },

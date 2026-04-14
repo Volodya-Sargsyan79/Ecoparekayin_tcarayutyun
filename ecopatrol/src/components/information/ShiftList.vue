@@ -1,7 +1,7 @@
 <template>
     <div class="box">
         <h3 class="title is-5 has-text-centered mb-4">
-            Հրդեհների վերաբերյալ տեղեկություն
+            Հերթապոխերի վերաբերյալ տեղեկատվություն
         </h3>
 
         <div class="columns">

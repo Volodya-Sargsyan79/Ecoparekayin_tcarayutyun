@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import store from '@/store'
-import Home  from '../views/Home.vue'
 import LogIn from '@/views/LogIn.vue'
 import Dashboard from '@/views/dashboard/Dashboard.vue'
 import Registration from '@/views/dashboard/shift/Registration.vue'
@@ -11,11 +10,6 @@ import SearchInformation from '@/views/dashboard/shift/SearchInformation.vue'
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: Home
-  },
-  {
-    path: '/log-in',
     name: 'LogIn',
     component: LogIn
   },
@@ -89,6 +83,11 @@ const routes = [
           name: "shift-detail",
           component: () => import('@/components/detail/ShiftDetail.vue')
         },
+        {
+          path: "shift/edit/:id",
+          name: "shift-edit",
+          component: () => import('@/components/edit/EditShift.vue')
+        },
       ]
     },
     {
@@ -99,8 +98,17 @@ const routes = [
         requireLogin: true
       },
       children: [
+        {
+          path: 'searchshift',
+          component: () => import('@/components/search/SearchShift.vue')
+        },
+        {
+          path: "shift/:id",
+          name: "search-shift-detail",
+          component: () => import('@/components/search/SearchShiftDetail.vue')
+        },
       ]
-    }
+    },
   ]
 
 const router = createRouter({
@@ -110,10 +118,12 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if(to.matched.some(record => record.meta.requireLogin)  && !store.state.user.isAuthenticated) {
-    next('/log-in')
+    next('/')
   } else {
     next()
   }
 })
 
 export default router
+
+

@@ -10,3 +10,5 @@ admin.site.register(models.Employee)
 admin.site.register(models.StationShift)
 admin.site.register(models.Route)
 admin.site.register(models.UserAccess)
+admin.site.register(models.InformationForShift)
+

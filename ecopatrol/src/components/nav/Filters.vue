@@ -22,153 +22,38 @@
                 menuTree: [
                     {
                         label: 'ՀՀ Սյունիքի',
-                        children: [
-                            {
-                                label: 'Կապանի տեղամաս',
-                                title: "Կ",
-                                func: () => this.registrationEmployee()
-                            },
-                            {
-                                label: 'Գորիսի տեղամաս',
-                                title: "Գ",
-                                func: () => this.registrationEmployee()
-                            },
-                            {
-                                label: 'Սիսիանի տեղամաս',
-                                title: "Ս",
-                                func: () => this.registrationEmployee()
-                            },
-                            {
-                                label: 'Մեղրու տեղամաս',
-                                title: "Մ",
-                                func: () => this.registrationEmployee()
-                            }
-                        ]
+                        title: "Ս",
+                        func: () => this.searchShifth(1)
                     },
                     {
                         label: 'ՀՀ Կոտայք և Գեղարքունիք',
-                        children: [
-                            {
-                                label: 'Սևանի տեղամաս',
-                                title: "Կ",
-                                func: () => this.personEmployee()
-                            },
-                            {
-                                label: 'Հրազդանի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
-                            },
-                            {
-                                label: 'Ճամբարակի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
-                            }
-                        ]
+                        title: "Կ",
+                        func: () => this.searchShifth(2)
                     },
                     {
                         label: 'ՀՀ Տավուշ',
-                        children: [
-                            {
-                                label: 'Սևքարի տեղամաս',
-                                title: "Կ",
-                                func: () => this.personEmployee()
-                            },
-                            {
-                                label: 'Նոյեմբերյանի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
-                            },
-                            {
-                                label: 'Դիլիջանի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
-                            },
-                            {
-                                label: 'Իջևանի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
-                            },
-                            {
-                                label: 'Բերդի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
-                            }
-                        ]
+                        title: "Տ",
+                        func: () => this.searchShifth(3)
                     },
                     {
                         label: 'ՀՀ Լոռի',
-                        children: [
-                            {
-                                label: 'Ստեփանավանի և Տաշիր տեղամաս',
-                                title: "Կ",
-                                func: () => this.personEmployee()
-                            },
-                            {
-                                label: 'Վայոցձորի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
-                            },
-                            {
-                                label: 'Թումանյանի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
-                            },
-                            {
-                                label: 'Ախթալայի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
-                            },
-                            {
-                                label: 'Ալավերդու տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
-                            }
-                        ]
+                        title: "Լ",
+                        func: () => this.searchShifth(4)
                     },
                     {
                         label: 'ՀՀ Վայոց ձոր և Արարատ',
-                        children: [
-                            {
-                                label: 'Վեդու տեղամաս',
-                                title: "Կ",
-                                func: () => this.personEmployee()
-                            },
-                            {
-                                label: 'Ջերմուկի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
-                            }
-                        ]
+                        title: "Վ",
+                        func: () => this.searchShifth(5)
                     },
                     {
                         label: 'ՀՀ Շիրակ և Արագածոտն',
-                        children: [
-                            {
-                                label: 'Գյումրու տեղամաս',
-                                title: "Կ",
-                                func: () => this.personEmployee()
-                            },
-                            {
-                                label: 'Ապարանի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
-                            },
-                            {
-                                label: 'Աշոցքի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
-                            }
-                        ]
+                        title: "Շ",
+                        func: () => this.searchShifth(6)
                     },
                     {
                         label: 'Երևան և ՀՀ Արմավիր',
-                        children: [
-                            {
-                                label: 'Երևանի տեղամաս',
-                                title: "Կ",
-                                func: () => this.personEmployee()
-                            }
-                        ]
+                        title: "Ե",
+                        func: () => this.searchShifth(7)
                     }
                 ],
                 limit: 10,
@@ -180,27 +65,19 @@
             MenuItem
         },
         methods: {
-            employeeKeeper(e){
+            searchShifth(e){
+
                 axios
-                    .get("/api/ekopatrol/getlastemployee/", {
-                        params: { id: e},
-                    })
-                    .then(res => {
-                            this.$store.state.user.employee = res.data 
-                            this.$router.push('/dashboard/precinct_shift/information/employeelist')
-                    })
-                    .catch(err => { console.error(err) })
-            },
-            routeKeeper(e){
-                axios
-                    .get('/api/ekopatrol/getlastroute/', {
-                        params: { id: e},
+                    .get("/api/ekopatrol/precinct/", {
+                        params: { id: e },
                     })
                     .then((res) => {
-                        this.$store.state.user.route = res.data;
-                        this.$router.push('/dashboard/precinct_shift/information/routelist')
+                        this.$store.state.user.precincts = res.data;
+                        this.$router.push('/dashboard/precinct_shift/search_information/searchshift')
                     })
-                    .catch(err => console.error(err))
+                    .catch((err) => {
+                        console.error(err);
+                    });
             },
             placeKeeper(e){
                 axios

@@ -2,10 +2,11 @@ from io import BytesIO
 from django.core.files import File
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from django.conf import settings
 from PIL import Image
 import zipfile
+import uuid
 import os
 
 # Create your models here.
@@ -46,13 +47,13 @@ def extract_kml(kmz_path, extract_to):
         z.extractall(extract_to)
     
 class Route(models.Model):
-    registration_day = models.DateTimeField(auto_now_add=True)
+    registration_day = models.DateField(auto_now_add=True)
     region = models.ForeignKey(Region, related_name='route', on_delete=models.CASCADE)
     precinct = models.ForeignKey(Precinct, related_name='route', on_delete=models.CASCADE)
     route_number = models.CharField(max_length=15)
     route_length = models.IntegerField()
     image = models.ImageField(null=True, blank=True)
-    thumbnail = models.ImageField(upload_to='map', null=True, blank=True)
+    thumbnail = models.ImageField(upload_to='map/', null=True, blank=True)
     kmz_file = models.FileField(upload_to='kmz/', null=True, blank=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='route', on_delete=models.CASCADE)
 
@@ -133,22 +134,36 @@ class Employee(models.Model):
         return f'{self.camera} {self.position} {self.name} {self.surname} {self.phone}'
     
 
-class StationShift(models.Model):
-    start_shift = models.DateTimeField()
-    end_shift = models.DateTimeField()
-    region = models.ForeignKey(Region, related_name='stationshift', on_delete=models.CASCADE)
-    precinct = models.ForeignKey(Precinct, related_name='stationshift', on_delete=models.CASCADE)
-    employee_01 = models.ForeignKey(Employee, related_name='stationshift', on_delete=models.CASCADE)
-    employee_02 = models.ForeignKey(Employee, related_name='stationshift_02', on_delete=models.CASCADE)
-    employee_03 = models.ForeignKey(Employee, related_name='stationshift_03', on_delete=models.CASCADE, null=True, blank=True)
-    employee_04 = models.ForeignKey(Employee, related_name='stationshift_04', on_delete=models.CASCADE, null=True, blank=True)
-    car = models.ForeignKey(Car, related_name='stationshift', on_delete=models.CASCADE)
-    route = models.ForeignKey(Route, related_name='stationshift', on_delete=models.CASCADE)
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='stationshift', on_delete=models.CASCADE)
+def upload_to(instance, filename):
+    ext = filename.split('.')[-1]
+    return f'pdf/{uuid.uuid4()}.{ext}'   # 🔥 unique անուն
 
+
+class StationShift(models.Model):
+    start_shift = models.DateTimeField(verbose_name="Հերթափոխի սկիզբ")
+    end_shift = models.DateTimeField(verbose_name="Հերթափոխի ավարտ")
+
+    region = models.ForeignKey('Region', related_name='stationshift', on_delete=models.CASCADE, verbose_name="Մարզ")
+    precinct = models.ForeignKey('Precinct', related_name='stationshift', on_delete=models.CASCADE, verbose_name="Տեղամաս")
+
+    employee_01 = models.ForeignKey('Employee', related_name='stationshift', on_delete=models.CASCADE, verbose_name="Հերթափոխ 1")
+    employee_02 = models.ForeignKey('Employee', related_name='stationshift_02', on_delete=models.CASCADE, verbose_name="Հերթափոխ 2")
+    employee_03 = models.ForeignKey('Employee', related_name='stationshift_03', on_delete=models.CASCADE, null=True, blank=True, verbose_name="Հերթափոխ 3")
+    employee_04 = models.ForeignKey('Employee', related_name='stationshift_04', on_delete=models.CASCADE, null=True, blank=True, verbose_name="Հերթափոխ 4")
+
+    car = models.ForeignKey('Car', related_name='stationshift', on_delete=models.CASCADE, verbose_name="Ծառայողական մեքենան")
+    route = models.ForeignKey('Route', related_name='stationshift', on_delete=models.CASCADE, verbose_name="Երթուղի")
+
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='stationshift', on_delete=models.CASCADE, verbose_name="Գրանցող օգտատեր")
 
     def __str__(self):
         return f'{self.start_shift} {self.end_shift} {self.car} {self.route}'
+
+
+class InformationForShift(models.Model):
+    text_info = models.TextField(null=True, blank=True, verbose_name="Հերթափոխի վերաբերյալ տեղեկություն")
+    pdf_file = models.FileField(upload_to='pdf/', validators=[FileExtensionValidator(allowed_extensions=['pdf'])], null=True, blank=True, verbose_name="Հերթափոխի վերաբերյալ զեկուցագիր")
+    shift = models.ForeignKey('StationShift', related_name='informationforshift', on_delete=models.CASCADE, verbose_name="Հերթափոխ")
 
 
 class UserAccess(models.Model):
@@ -158,4 +173,5 @@ class UserAccess(models.Model):
 
     def __str__(self):
         return f'{self.user}'
+    
 

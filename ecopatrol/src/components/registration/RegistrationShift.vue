@@ -196,7 +196,7 @@
                                     :key="route.id"
                                     :value="route.id"
                                 >
-                                    {{ route.route_number }} երթուղի {{ route.route_length }}կմ
+                                    {{ route.route_number }} երթուղի {{ route.route_length }}կմ {{ route.registration_day }} ստեղծման ամսաթիվ
                                 </option>
                             </select>
                         </div>

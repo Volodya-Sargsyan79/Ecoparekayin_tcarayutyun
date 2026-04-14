@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import (
+    GetMe,
     GetRegionList,
     GetPrecinctList,
     GetPositionList,
@@ -8,14 +9,18 @@ from .views import (
     GetLastCar,
     GetLastRoute,
     GetStationShiftList,
+    FilterStationShift,
     AddStationShift,
     GetStationShift,
     AddRoute,
     GetEmployee,
-    GetRouteMap
+    GetRouteMap,
+    AddInformationForShift,
+    GetInformationForShift
 )
 
 urlpatterns = [
+    path('getme/', GetMe.as_view()),
     path('regions/', GetRegionList.as_view()),
     path('precinct/', GetPrecinctList.as_view()),
     path('position/', GetPositionList.as_view()),
@@ -25,8 +30,11 @@ urlpatterns = [
     path('getlastcar/', GetLastCar.as_view()),
     path('getlastroute/', GetLastRoute.as_view()),
     path('getstationshiftlist/', GetStationShiftList.as_view()),
+    path('filterstationshift/', FilterStationShift.as_view()),
     path('getstationshift/<int:pk>/', GetStationShift.as_view()),
     path('addstationshift/', AddStationShift.as_view()),
     path('addroute/', AddRoute.as_view()),
     path('routes/<int:pk>/', GetRouteMap.as_view()),
+    path('addinformationforshift/', AddInformationForShift.as_view()),
+    path('getinformationforshift/', GetInformationForShift.as_view()),
 ]

@@ -1,7 +1,7 @@
 <template>
     <div class="box">
         <h3 class="title is-5 has-text-centered mb-4">
-            Հրդեհների վերաբերյալ տեղեկություն
+            Երթուղիների վերաբերյալ տեղեկատվություն
         </h3>
 
         <div class="columns">
@@ -31,6 +31,7 @@ export default {
                 "#", 
                 "Երթուղու համարը",
                 "Երթուղու երկարություն",
+                "Ստեղծման ամսաթիվ",
                 "Քարտեզ"
             ]
         },
@@ -41,6 +42,7 @@ export default {
                 id: item.id,
                 name: item.route_number,
                 route: item.route_length,
+                create: item.registration_day,
                 image: item.thumbnail,
                 kmz: item.kmz_file
             }))

@@ -250,7 +250,9 @@
                         params: { id: e},
                     })
                     .then(res => {
-                            this.$store.state.user.employee = res.data 
+                            this.$store.state.user.employee = res.data
+                            
+                            console.log(res.data)
                             this.$router.push('/dashboard/precinct_shift/information/employeelist')
                     })
                     .catch(err => { console.error(err) })
@@ -262,6 +264,7 @@
                     })
                     .then((res) => {
                         this.$store.state.user.route = res.data;
+                        console.log(res.data)
                         this.$router.push('/dashboard/precinct_shift/information/routelist')
                     })
                     .catch(err => console.error(err))

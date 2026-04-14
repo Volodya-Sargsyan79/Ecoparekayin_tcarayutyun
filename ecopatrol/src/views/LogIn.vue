@@ -1,8 +1,9 @@
-<template>
-    <div class="login">
+<template>  
+  <div class="login">
         <div class="hero">
             <div class="hero-body has-text-centered">
-                <h1 class="title">Log in</h1>
+                <h1 class="title" style="font-size: 50px">Էկոպարեկային ծառայության</h1>
+                <h1 class="title">տեղամասերի հերթապահության համակարգ</h1>
             </div>
         </div>
     
@@ -12,14 +13,14 @@
                     <div class="column is-4 is-offset-4">
                         <form action="" v-on:submit.prevent="submitForm">
                             <div class="field">
-                                <label for="">Username</label>
+                                <label for="">Օգտագործողի անուն</label>
                                 <div class="control">
                                     <input type="text" class="input" v-model="username"/>
                                 </div>
                             </div>
 
                             <div class="field">
-                                <label for="">Password</label>
+                                <label for="">Գախտնաբառ</label>
                                 <div class="control">
                                     <input type="password" class="input" v-model="password"/>
                                 </div>
@@ -81,7 +82,7 @@ export default {
 
                 await axios
                     .post('/api/ekopatrol/token/login/', formData)
-                    .then(response => {
+                    .then(async response => {
                         const token = response.data.auth_token
                         
                         this.$store.commit('setToken', token)
@@ -90,7 +91,13 @@ export default {
                         
                         localStorage.setItem('token', token)
 
-                        console.log(response.data.auth_token)
+                        try {
+                            const userRes = await axios.get('/api/ekopatrol/getme/')
+                            console.log('USER:', userRes.data)
+                            this.$store.commit('setUser', userRes.data)
+                        } catch (err) {
+                            console.error('GETME ERROR:', err)
+                        }
                         
                         this.$router.push('/dashboard')
                     })

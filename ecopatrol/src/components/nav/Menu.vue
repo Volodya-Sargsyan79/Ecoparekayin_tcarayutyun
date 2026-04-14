@@ -20,32 +20,60 @@
         data() {
             return {
                 menuTree: [
-                    
-                        // label: 'Հերթապահություն',
-                        // children: [
-                            {
-                                label: 'ԷՊԾ աշխատակցի գրանցում',
-                                title: "Է",
-                                func: () => this.registrationEmployee()
-                            },
-                            {
-                                label: 'Հերթափոխի գրանցում',
-                                title: "Հ",
-                                func: () => this.registrationShift()
-                            },
-                            {
-                                label: 'Երթուղու գրանցում',
-                                title: "Ե",
-                                func: () => this.registrationRoute()
-                            },
-                        // ]
-                    
+                    {
+                        label: 'ԷՊԾ աշխատակցի գրանցում',
+                        title: "Է",
+                        func: () => this.registrationEmployee()
+                    },
+                    {
+                        label: 'Հերթափոխի գրանցում',
+                        title: "Հ",
+                        func: () => this.registrationShift()
+                    },
+                    {
+                        label: 'Երթուղու գրանցում',
+                        title: "Ե",
+                        func: () => this.registrationRoute()
+                    },
                 ]
             }
             
         },
         components: {
             MenuItem
+        },
+        computed: {
+            
+            menuTree() {
+                console.log("USER", this.$store.state.user)
+
+                const user = this.$store.state.user;
+                const isAdmin = user?.is_admin || user?.id === 1;
+
+                const common = [
+                    {
+                        label: 'Հերթափոխի գրանցում',
+                        title: "Հ",
+                        func: () => this.registrationShift()
+                    }
+                ];
+
+                if (!isAdmin) return common;
+
+                return [
+                    {
+                        label: 'ԷՊԾ աշխատակցի գրանցում',
+                        title: "Է",
+                        func: () => this.registrationEmployee()
+                    },
+                    ...common,
+                    {
+                        label: 'Երթուղու գրանցում',
+                        title: "Ե",
+                        func: () => this.registrationRoute()
+                    }
+                ];
+            }
         },
         methods: {
             registrationEmployee() {

@@ -13,8 +13,18 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.http import JsonResponse
-from .models import Route
+from .models import InformationForShift
 
+
+
+class GetMe(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({
+            'id': request.user.id,
+            'username': request.user.username,
+        })
 
 class GetRegionList(APIView):
     def get(self, request):
@@ -247,7 +257,7 @@ class GetLastRoute(APIView):
             cursor = connection.cursor()
 
             sql = '''
-                SELECT person_route.id, route_number, route_length, thumbnail
+                SELECT person_route.id, route_number, route_length, registration_day, thumbnail
                 FROM person_route 
                 LEFT JOIN person_useraccess 
                 ON person_route.precinct_id = person_useraccess.precinct_id
@@ -297,23 +307,6 @@ class GetRouteMap(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# def route_detail(request, pk):
-#     try:
-#         route = Route.objects.get(pk=pk)
-
-#         data = {
-#             "id": route.id,
-#             "route_number": route.route_number,
-#             "route_length": route.route_length,
-#             "thumbnail": route.thumbnail.url if route.thumbnail else None,
-#             "kmz_file": route.kmz_file.url if route.kmz_file else None,
-#         }
-
-#         return JsonResponse(data)
-
-#     except Route.DoesNotExist:
-#         return JsonResponse({"error": "Not found"}, status=404)
-
 
 class GetStationShiftList(APIView):
     permission_classes = [IsAuthenticated]
@@ -343,6 +336,78 @@ class GetStationShiftList(APIView):
                 dict(zip(columns, row)) for row in cursor.fetchall()
             ]
 
+            return Response(results, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+class FilterStationShift(APIView):
+    permission_classes = [IsAuthenticated]
+
+    # def get(self, request):
+    #     id = request.GET.get('id') or ''
+    #     date_from = request.GET.get('date_from') or ''
+    #     date_to = request.GET.get('date_to') or ''
+
+    #     try:
+    #         cursor = connection.cursor()
+    #         sql = '''
+    #             SELECT person_stationshift.id, start_shift, end_shift, precinct, car_number, board_number, route_number, route_length, thumbnail 
+    #             FROM ekopatrol.person_stationshift 
+    #             JOIN person_precinct ON person_stationshift.precinct_id = person_precinct.id 
+    #             JOIN person_car ON person_stationshift.car_id = person_car.id
+    #             JOIN person_route ON person_stationshift.route_id = person_route.id
+    #             LEFT JOIN person_useraccess 
+    #                 ON person_stationshift.precinct_id = person_useraccess.precinct_id
+    #             WHERE person_precinct.id = %s
+    #             AND person_useraccess.user_id = %s
+    #             AND DATE(person_stationshift.start_shift) BETWEEN %s AND %s
+    #         '''
+
+    #         params = [id, request.user.id, date_from, date_to]
+
+
+    #         cursor.execute(sql, params)
+
+    #         columns = [col[0] for col in cursor.description]
+
+    #         results = [
+    #             dict(zip(columns, row)) for row in cursor.fetchall()
+    #         ]
+    #         print(results, 11111)
+    #         return Response(results, status=status.HTTP_200_OK)
+
+    #     except Exception as e:
+    #         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    def get(self, request):
+        id = request.GET.get('id') or ''
+        date_from = request.GET.get('date_from') or ''
+        date_to = request.GET.get('date_to') or ''
+
+        print(request.GET.get, 00000)
+        try:
+            cursor = connection.cursor()
+            sql = '''
+                SELECT person_stationshift.id, start_shift, end_shift, precinct, car_number, board_number, route_number, route_length, thumbnail 
+                FROM ekopatrol.person_stationshift 
+                JOIN person_precinct ON person_stationshift.precinct_id = person_precinct.id 
+                JOIN person_car ON person_stationshift.car_id = person_car.id
+                JOIN person_route ON person_stationshift.route_id = person_route.id
+                LEFT JOIN person_useraccess 
+                    ON person_stationshift.precinct_id = person_useraccess.precinct_id
+                WHERE person_precinct.id = %s
+                AND person_useraccess.user_id = %s
+                AND DATE(person_stationshift.start_shift) BETWEEN %s AND %s
+            '''
+            cursor.execute(sql, [id, request.user.id, date_from, date_to])
+
+            columns = [col[0] for col in cursor.description]
+
+            results = [
+                dict(zip(columns, row)) for row in cursor.fetchall()
+            ]
             return Response(results, status=status.HTTP_200_OK)
 
         except Exception as e:
@@ -554,5 +619,55 @@ class AddRoute(APIView):
             return Response({'error': str(e)}, status=500)
 
         
+class AddInformationForShift(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        text_info = request.data.get('text')
+        shift_id = request.data.get('shift')
+        pdf_file = request.FILES.get('PDF')
 
+        try:
+            instance = InformationForShift(
+                text_info=text_info,
+                shift_id=shift_id
+            )
+            
+            if pdf_file:
+                instance.pdf_file = pdf_file  # Django-ն ինքը կպահի pdf/ թղթապանակում
+            
+            instance.save()
 
+            return Response({
+                "message": "Info for shift added successfully",
+                "pdf_file": instance.pdf_file.url if instance.pdf_file else None,
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class GetInformationForShift(APIView):
+    
+    def get(self, request):
+
+        id = request.GET.get('id')
+
+        try:
+            cursor = connection.cursor()
+
+            sql = '''
+                SELECT * FROM ekopatrol.person_informationforshift 
+                WHERE person_informationforshift.shift_id = %s;
+            '''
+            cursor.execute(sql, [id])
+
+            columns = [col[0] for col in cursor.description]
+
+            results = [
+                dict(zip(columns, row)) for row in cursor.fetchall()
+            ]
+
+            return Response(results, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

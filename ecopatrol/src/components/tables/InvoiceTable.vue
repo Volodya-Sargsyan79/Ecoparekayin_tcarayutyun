@@ -8,7 +8,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr v-for="(item, rowIndex) in invoice" :key="rowIndex" @click="handleClick(item)" style="cursor: pointer;">
+            <tr v-for="(item, rowIndex) in invoice" :key="rowIndex" @click="handleClick(item)" style="cursor: pointer; vertical-align: middle; ">
                 <td>{{ rowIndex + 1 }}</td>
 
                 <template v-for="(value, key) in item" :key="key">
