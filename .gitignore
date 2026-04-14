@@ -1,7 +1,7 @@
 # Ignore Python virtual environment
 .venv/
 venv/
-backend/media/
+backend/media
 
 # Byte-compiled / cache files
 __pycache__/
