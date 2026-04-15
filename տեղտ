@@ -6,3 +6,145 @@
 🔥 Django + call API
 🔥 Vue softphone UI (call button, incoming popup)
 🔥 Recording save + play system
+
+// CallComponent.vue
+<template>
+  <div>
+    <input v-model="phoneNumber" placeholder="Phone number" />
+    <button @click="makeCall" :disabled="calling">
+      {{ calling ? 'Calling...' : 'Call' }}
+    </button>
+    <div v-if="recordings.length">
+      <h3>Recordings:</h3>
+      <div v-for="record in recordings" :key="record.id">
+        <p>{{ record.phone_number }} - {{ record.call_date }}</p>
+        <audio :src="record.recording_file" controls></audio>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      phoneNumber: '',
+      calling: false,
+      recordings: []
+    }
+  },
+  methods: {
+    async makeCall() {
+      this.calling = true;
+      try {
+        const response = await fetch('/api/make-call/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': this.getCsrfToken()
+          },
+          body: JSON.stringify({
+            phone_number: this.phoneNumber
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'call_initiated') {
+          alert('Զանգը սկսվել է');
+          // Poll for call status
+          this.checkCallStatus(result.call_id);
+        } else {
+          alert('Սխալ: ' + result.error);
+        }
+      } catch (error) {
+        alert('Կապի խնդիր: ' + error.message);
+      } finally {
+        this.calling = false;
+      }
+    },
+
+    async checkCallStatus(callId) {
+      // Check every 2 seconds if call ended and recording ready
+      const interval = setInterval(async () => {
+        try {
+          const response = await fetch(`/api/call-status/${callId}/`);
+          const data = await response.json();
+          
+          if (data.status === 'completed' && data.recording_file) {
+            clearInterval(interval);
+            this.loadRecordings(); // Refresh recordings list
+          }
+        } catch (error) {
+          console.error('Status check error:', error);
+        }
+      }, 2000);
+    },
+
+    async loadRecordings() {
+      try {
+        const response = await fetch('/api/recordings/');
+        this.recordings = await response.json();
+      } catch (error) {
+        console.error('Loading recordings error:', error);
+      }
+    },
+
+    getCsrfToken() {
+      return document.querySelector('[name=csrfmiddlewaretoken]').value;
+    }
+  },
+
+  mounted() {
+    this.loadRecordings();
+  }
+}
+</script>
+
+class MakeCallView(APIView):
+    def post(self, request):
+        phone_number = request.data.get('phone_number')
+        
+        # AMI connection
+        client = AMIClient(
+            address=settings.ASTERISK_CONFIG['host'],
+            port=settings.ASTERISK_CONFIG['port']
+        )
+        
+        try:
+            client.login(
+                username=settings.ASTERISK_CONFIG['username'],
+                secret=settings.ASTERISK_CONFIG['password']
+            )
+            
+            # Originate call
+            response = client.send_action({
+                'Action': 'Originate',
+                'Channel': f'SIP/trunk/{phone_number}',  # trunk անունը
+                'Context': 'from-internal',
+                'Exten': phone_number,
+                'Priority': 1,
+                'CallerID': 'Your System <1000>',
+                'Variable': 'MONITOR_FILENAME=/var/spool/asterisk/monitor/recording'
+            })
+            
+            return Response({'status': 'call_initiated', 'call_id': response.ActionID})
+            
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)
+
+
+            class CallRecord(models.Model):
+    phone_number = models.CharField(max_length=20)
+    call_duration = models.IntegerField()
+    recording_file = models.FileField(upload_to='recordings/')
+    call_date = models.DateTimeField(auto_now_add=True)
+    call_id = models.CharField(max_length=50)
+
+    
+ASTERISK_CONFIG = {
+    'host': 'UCM6300_IP',
+    'port': 5038,
+    'username': 'admin',  # AMI user
+    'password': 'your_password'
+}

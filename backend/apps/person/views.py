@@ -14,6 +14,8 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.http import JsonResponse
 from .models import InformationForShift
+from asterisk.ami import AMIClient
+import asyncio
 
 
 
@@ -671,3 +673,6 @@ class GetInformationForShift(APIView):
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+
+
