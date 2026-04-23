@@ -10,8 +10,9 @@ import { createVuetify } from 'vuetify'
 import 'vuetify/styles'
 
 // Axios configuration
-// axios.defaults.baseURL = `http://${window.location.hostname}:8000`
-axios.defaults.baseURL = 'http://127.0.0.1:8000'
+axios.defaults.baseURL = `http://${window.location.hostname}:8000`
+
+// axios.defaults.baseURL = 'http://127.0.0.1:8000'
 axios.defaults.withCredentials = true
 
 // Create Vuetify instance
@@ -21,7 +22,7 @@ const vuetify = createVuetify()
 const app = createApp(App)
 
 // Global properties
-// app.config.globalProperties.$hostname = window.location.hostname
+app.config.globalProperties.$hostname = window.location.hostname
 
 // Use plugins
 app.use(store)

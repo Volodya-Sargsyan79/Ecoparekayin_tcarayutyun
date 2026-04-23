@@ -231,8 +231,8 @@ export default {
 
         const route_id = this.shift_info.route_id
 
-        // const kmlUrl = `http://${window.location.hostname}:8000/media/kml/${route_id}/doc.kml`;
-        const kmlUrl = `http://127.0.0.1:8000/media/kml/${route_id}/doc.kml`;
+        const kmlUrl = `http://${window.location.hostname}:8000/media/kml/${route_id}/doc.kml`;
+        // const kmlUrl = `http://127.0.0.1:8000/media/kml/${route_id}/doc.kml`;
 
 
         this.map = L.map("map").setView([40.1792, 44.4991], 10);
@@ -277,7 +277,7 @@ export default {
       }
 
       try {
-        const TOKEN = "RjBEAiBU_uoM5J7R6xs7LDCwCQxvDRsBpBAUwk3UwbNbXn3pjAIgOumaesKHD7DSuRnakhKuie3TTun4tI5vkAKMxDX66c17InUiOjIsImUiOiIyMDI2LTA0LTE5VDIwOjAwOjAwLjAwMCswMDowMCJ9";
+        const TOKEN = "RjBEAiBNqznm3YuIuUodgC_Ur-hJ-hwKUbCxYA_WUYaUPjUZRAIgMVHw66rraqKVJ0mhB3EEKToZrZr_4Hm5GsUt2KhZZix7InUiOjIsImUiOiIyMDI2LTA0LTI3VDIwOjAwOjAwLjAwMCswMDowMCJ9";
 
         const res = await axios.get(
           "https://gps.eps.am/api/positions",

@@ -68,8 +68,8 @@ export default {
 
         this.map_info = res.data;
 
-        // const kmlUrl = `http://${window.location.hostname}:8000/media/kml/${id}/doc.kml`;
-        const kmlUrl = `http://127.0.0.1:8000/media/kml/${id}/doc.kml`;
+        const kmlUrl = `http://${window.location.hostname}:8000/media/kml/${id}/doc.kml`;
+        // const kmlUrl = `http://127.0.0.1:8000/media/kml/${id}/doc.kml`;
 
         const map = L.map("map").setView([40.1792, 44.4991], 10);
 

@@ -32,15 +32,16 @@ ALLOWED_HOSTS = ['*']
 
 CORS_ALLOWED_ORIGINS = [
   "http://localhost:8080",
-  "http://127.0.0.1:8000"
+  "http://127.0.0.1:8000",
+  "https://192.168.88.111:8080",
 ]
 
 CORS_ALLOWED_ORIGIN_REGEXES = [
-    r"^http://192\.168\.88\.\d{1,3}:8080$"
+    r"^https://192\.168\.88\.\d{1,3}:8080$"
 ]
 
 
-# CORS_URLS_REGEX = r'^.*$'
+CORS_URLS_REGEX = r'^.*$'
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -62,6 +63,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
 
     'rest_framework',
     'rest_framework.authtoken',
@@ -70,6 +72,7 @@ INSTALLED_APPS = [
     
     'apps.monthly_duty',
     'apps.person',
+    'apps.phone',
 
 ]
 

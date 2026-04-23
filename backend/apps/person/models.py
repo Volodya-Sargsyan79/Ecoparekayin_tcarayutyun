@@ -105,7 +105,7 @@ class Employee(models.Model):
     position = models.ForeignKey(Position, related_name='employee', on_delete=models.CASCADE, verbose_name="Պաշտոն")
     phone = models.CharField(max_length=9, null=True, blank=True, verbose_name="Հեռ.")
     camera = models.IntegerField(unique=True, verbose_name="Տեսախցիկ")
-    image = models.ImageField(upload_to='person', null=True, blank=True, verbose_name="Նկար")
+    image = models.ImageField(upload_to='person/', null=True, blank=True, verbose_name="Նկար")
     birth_day = models.DateField(null=True, blank=True, verbose_name="Ծննդյան ամսաթիվ")
     order_day = models.DateField(null=True, blank=True, verbose_name="Հրամանի ամսաթիվ")
     residential_address = models.CharField(max_length=250, null=True, blank=True, verbose_name="Բնակության հասցե")

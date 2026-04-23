@@ -98,7 +98,6 @@ export default {
                         } catch (err) {
                             console.error('GETME ERROR:', err)
                         }
-                        
                         this.$router.push('/dashboard')
                     })
                     .catch(error => {

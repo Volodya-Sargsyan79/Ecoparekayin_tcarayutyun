@@ -13,16 +13,16 @@
 
                 <template v-for="(value, key) in item" :key="key">
                     <td v-if="key !== 'id'">
-                        <!-- <img 
+                        <img 
                             v-if="key === 'image'" 
                             :src="`http://${$hostname}:8000/media/${value}`" 
                             width="100"
-                        /> -->
-                        <img 
+                        />
+                        <!-- <img 
                             v-if="key === 'image'" 
                             :src="`http://127.0.0.1:8000/media/${value}`" 
                             width="100"
-                        />
+                        /> -->
                         <span v-else>
                             {{ value }}
                         </span>
