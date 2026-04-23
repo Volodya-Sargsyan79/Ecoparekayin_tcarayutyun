@@ -4,9 +4,11 @@ import logging
 
 def originate_ami_call(phone_number, ami_user, ami_pass, pbx_ip, caller_id='809'):
     try:
+        # Կապ Asterisk AMI-ի հետ
         tn = telnetlib.Telnet(pbx_ip, 7777, timeout=5)
         tn.read_until(b"Asterisk Call Manager")
 
+        # LOGIN
         tn.write(f"""Action: Login
 Username: {ami_user}
 Secret: {ami_pass}
@@ -16,6 +18,7 @@ Events: off
 
         time.sleep(0.5)
 
+        # Զանգ նշված համարին
         tn.write(f"""Action: Originate
 Channel: PJSIP/809
 Context: from-internal
