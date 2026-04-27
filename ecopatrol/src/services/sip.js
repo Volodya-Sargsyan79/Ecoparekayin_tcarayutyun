@@ -2,6 +2,8 @@
 import { UserAgent, Inviter } from "sip.js";
 
 let ua = null;
+let mediaRecorder = null;
+let recordedChunks = [];
 
 export async function initSip() {
   if (ua) return;
@@ -42,19 +44,17 @@ export async function callNumber(number) {
 
       // 🔥 ԱՀԱ ՍԱ Է քո audio-ի լուծումը
       pc.ontrack = (event) => {
-        console.log("🎧 Remote audio received");
+        const stream = event.streams[0];
 
+        // 🔊 PLAY
         const audio = document.getElementById("remoteAudio");
-
         if (audio) {
-          audio.srcObject = event.streams[0];
-          audio.muted = false;
-          audio.volume = 1;
-
-          audio.play().catch((e) => {
-            console.error("Play error:", e);
-          });
+          audio.srcObject = stream;
+          audio.play();
         }
+
+        // 🎙 RECORD START
+        startRecording(stream);
       };
     },
 
@@ -68,4 +68,24 @@ export async function callNumber(number) {
   };
 
   await inviter.invite();
+}
+
+function startRecording(stream) {
+  recordedChunks = [];
+
+  mediaRecorder = new MediaRecorder(stream);
+
+  mediaRecorder.ondataavailable = (e) => {
+    if (e.data.size > 0) {
+      recordedChunks.push(e.data);
+    }
+  };
+
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(recordedChunks, { type: "audio/webm" });
+    console.log("🎧 Recorded file:", blob);
+  };
+
+  mediaRecorder.start();
+  console.log("🎙 Recording started");
 }
