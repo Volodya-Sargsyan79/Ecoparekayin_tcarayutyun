@@ -14,6 +14,11 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.http import JsonResponse
 from .models import InformationForShift
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import LunchTime, StationShift
+import json
+from datetime import datetime
 
 
 
@@ -674,3 +679,84 @@ class GetInformationForShift(APIView):
         
 
 
+@csrf_exempt
+def start_lunch(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    shift_id = request.POST.get("shift_id")
+    start = request.POST.get("start_lanch")
+
+    if not shift_id or not start:
+        return JsonResponse({"error": "missing data"}, status=400)
+
+    lunch = LunchTime.objects.create(
+        shift_id=shift_id,
+        start_lanch=start
+    )
+
+    return JsonResponse({
+        "ok": True,
+        "id": lunch.id,
+        "start_lanch": str(lunch.start_lanch)
+    })
+
+@csrf_exempt
+def end_lunch(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST required"}, status=405)
+
+    shift_id = request.POST.get("shift_id")
+    end = request.POST.get("end_lanch")
+
+    if not shift_id or not end:
+        return JsonResponse({"error": "missing data"}, status=400)
+
+    lunch = LunchTime.objects.filter(
+        shift_id=shift_id,
+        end_lanch__isnull=True
+    ).order_by("-id").first()
+
+    if not lunch:
+        return JsonResponse({"error": "no active lunch found"}, status=404)
+
+    # convert safely
+    start_dt = datetime.combine(datetime.today(), lunch.start_lanch)
+    end_dt = datetime.strptime(end, "%H:%M:%S")
+
+    # fix midnight case
+    if end_dt < start_dt:
+        end_dt = end_dt.replace(day=start_dt.day + 1)
+
+    duration_minutes = int((end_dt - start_dt).seconds / 60)
+
+    lunch.end_lanch = end
+    lunch.duration = duration_minutes
+    lunch.save()
+
+    return JsonResponse({
+        "ok": True,
+        "id": lunch.id,
+        "start": str(lunch.start_lanch),
+        "end": str(lunch.end_lanch),
+        "duration": duration_minutes
+    })
+
+def get_lunches(request):
+    shift_id = request.GET.get("shift_id")
+
+    lunches = LunchTime.objects.filter(
+        shift_id=shift_id
+    ).order_by("id")
+
+    data = []
+
+    for l in lunches:
+        data.append({
+            "id": l.id,
+            "start": str(l.start_lanch),
+            "end": str(l.end_lanch),
+            "duration": l.duration if hasattr(l, "duration") and l.duration else 0
+        })
+
+    return JsonResponse(data, safe=False)

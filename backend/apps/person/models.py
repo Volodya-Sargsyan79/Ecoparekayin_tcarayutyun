@@ -174,6 +174,12 @@ class UserAccess(models.Model):
     def __str__(self):
         return f'{self.user}'
     
+class LunchTime(models.Model):
+    start_lanch = models.TimeField(null=True, blank=True)
+    end_lanch = models.TimeField(null=True, blank=True)
+    duration = models.IntegerField(null=True, blank=True)
+    shift = models.ForeignKey('StationShift', related_name='lunchtime', on_delete=models.CASCADE, verbose_name="Հերթափոխ")
+    
 
 
 

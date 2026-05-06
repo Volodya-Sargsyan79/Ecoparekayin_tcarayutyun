@@ -26,8 +26,6 @@
           >
             <template v-if="isPerson && cellIndex === 3 && cell">
               {{ cell }}
-
-              <!-- 🔥 Զանգ -->
               <button @click="startCall(350)">📞</button>
             </template>
 
@@ -39,11 +37,8 @@
       </tbody>
     </table>
 
-    <!-- 🔥 ԱՀԱ ՍԱ ՊԱՐՏԱԴԻՐ Է -->
     <audio id="remoteAudio" autoplay playsinline></audio>
 
-    <!-- 🔥 Chrome unlock -->
-    <button @click="unlockAudio">🔊 Enable Sound</button>
   </div>
 </template>
 
@@ -61,12 +56,10 @@ export default {
   methods: {
     async startCall(number) {
       try {
-        // 🔥 unlock audio (շատ կարևոր)
-        this.unlockAudio();
-
         await initSip();
 
-        // backend call (եթե պետք է)
+        const shiftIdParam = this.$route.params.id;
+        
         const response = await axios.post(
           "http://192.168.88.111:8000/api/phone/call/",
           {
@@ -75,23 +68,13 @@ export default {
         );
 
         if (response.data.status === "call_sent") {
-          await callNumber(number);
+          await callNumber(number, shiftIdParam);
         }
       } catch (error) {
         console.error("CALL ERROR:", error);
       }
     },
-
-    unlockAudio() {
-      const audio = document.getElementById("remoteAudio");
-
-      if (audio) {
-        audio.muted = false;
-        audio.volume = 1;
-
-        audio.play().catch(() => {});
-      }
-    },
+    
   },
 };
 </script>

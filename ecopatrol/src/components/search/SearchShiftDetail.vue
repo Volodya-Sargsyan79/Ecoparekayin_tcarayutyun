@@ -56,7 +56,7 @@
         </div>
     </div>
     <h3 class="title is-5 has-text-centered mb-4">
-      Սարքի հաշվետվություն
+      Հերթափոխի հաշվետվություն
     </h3>
     <div class="columns">
       <div class="column">
@@ -158,8 +158,8 @@ export default {
             "Միջին արագություն",
             "Առավելագույն արագություն", 
             "Վազք",
-            "Արագացուցիչի վազքը <br> հետթափոխի սկզբին",
-            "Արագացուցիչի վազքը <br> հետթափոխի ավարտին",
+            "Արագացուցիչի վազքը <br> հերթափոխի սկզբին",
+            "Արագացուցիչի վազքը <br> հերթափոխի ավարտին",
             "Շարժիչի աշխատանք",
             
            
@@ -282,7 +282,7 @@ export default {
           return;
         }
 
-        const TOKEN = "RjBEAiBNqznm3YuIuUodgC_Ur-hJ-hwKUbCxYA_WUYaUPjUZRAIgMVHw66rraqKVJ0mhB3EEKToZrZr_4Hm5GsUt2KhZZix7InUiOjIsImUiOiIyMDI2LTA0LTI3VDIwOjAwOjAwLjAwMCswMDowMCJ9";
+        const TOKEN = "RjBEAiBCuH_SKGfbJ43SjUmiZ6ya-hMZDHFeKGCExUNpuuUL1AIgU5yrqPiiA1sWcjnTFfxkyzEglQKNxxoSkkzrGKt8lAt7InUiOjIsImUiOiIyMDI2LTA1LTEyVDIwOjAwOjAwLjAwMCswMDowMCJ9";
 
         // ✅ ժամանակների ֆորմատավորում
         const from = new Date(

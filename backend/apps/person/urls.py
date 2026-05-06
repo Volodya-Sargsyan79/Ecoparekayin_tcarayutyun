@@ -16,7 +16,10 @@ from .views import (
     GetEmployee,
     GetRouteMap,
     AddInformationForShift,
-    GetInformationForShift
+    GetInformationForShift,
+    start_lunch,
+    end_lunch,
+    get_lunches
 )
 
 urlpatterns = [
@@ -37,4 +40,7 @@ urlpatterns = [
     path('routes/<int:pk>/', GetRouteMap.as_view()),
     path('addinformationforshift/', AddInformationForShift.as_view()),
     path('getinformationforshift/', GetInformationForShift.as_view()),
+    path('lunch_start/', start_lunch, name='start_lunch'),
+    path("lunch_end/", end_lunch, name="end_lunch"),
+    path("lunches/", get_lunches, name="get_lunches"),
 ]

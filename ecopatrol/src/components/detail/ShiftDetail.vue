@@ -55,6 +55,147 @@
                 />
             </div>
         </div>
+    </div>
+
+🎨 Թարմացված UI (սկզբնական վիճակով)
+<h3 class="title is-5 has-text-centered mb-5">
+  ☕ Հանգստի գրանցումներ
+</h3>
+
+<!-- ACTION BUTTONS -->
+<div class="columns mb-4">
+  
+  <div class="column">
+    <button
+      class="button is-warning is-fullwidth"
+      @click="startLunch"
+      :disabled="isOnBreak"
+    >
+      ☕ Գնում եմ հանգստի
+    </button>
+  </div>
+
+  <div class="column">
+    <button
+      class="button is-success is-fullwidth"
+      @click="endLunch"
+      :disabled="!isOnBreak"
+    >
+      🟢 Վերադարձա
+    </button>
+  </div>
+
+</div>
+
+<!-- STATS -->
+<div class="columns mb-4">
+
+  <div class="column">
+    <div class="box has-text-centered">
+      <p class="heading">Օգտագործված</p>
+      <p class="title is-4 has-text-info">
+        {{ formatMinutes(stats.used) }}
+      </p>
+    </div>
+  </div>
+
+  <div class="column">
+    <div class="box has-text-centered">
+      <p class="heading">Մնացած</p>
+      <p 
+        class="title is-4"
+        :class="stats.remaining >= 0 ? 'has-text-success' : 'has-text-danger'"
+      >
+        {{ formatMinutes(Math.abs(stats.remaining)) }}
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<!-- INITIAL MESSAGE -->
+<div v-if="!lunches.length" class="notification is-info is-light has-text-centered">
+  ⏱ Դուք ունեք <strong>2 ժամ (02:00)</strong> հանգստի ժամանակ
+</div>
+
+<!-- TABLE -->
+<div v-else class="box">
+  <table class="table is-fullwidth is-striped">
+
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Սկիզբ</th>
+        <th>Ավարտ</th>
+        <th>Տևողություն</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr v-for="(l, index) in lunches" :key="index">
+        <td>{{ index + 1 }}</td>
+
+        <td>{{ l.start }}</td>
+
+        <td>
+          <span v-if="l.end && l.end !== 'None'">
+            {{ l.end }}
+          </span>
+          <span v-else class="has-text-warning">
+            ընթացքի մեջ...
+          </span>
+        </td>
+
+        <td>
+          <span v-if="l.duration">
+            {{ formatMinutes(l.duration) }}
+          </span>
+          <span v-else>—</span>
+        </td>
+      </tr>
+    </tbody>
+
+  </table>
+</div>
+    
+    <h3 class="title is-5 has-text-centered mb-4">
+        Զանգեր հերթափոխի հետ
+    </h3>
+
+    <div class="columns">
+      <div class="column">
+        <div class="field">
+          <table class="table is-fullwidth">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Ժամ</th>
+                <th>Ումից</th>
+                <th>Ում</th>
+                <th>Լսել</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr v-for="(call, index) in callList" :key="index">
+                <td>{{ index + 1 }}</td>
+                <td>{{ call.call_start }}</td>
+                <td>{{ call.caller_number }}</td>
+                <td>{{ call.called_number }}</td>
+
+                <td>
+                  <button @click="playAudio(call.recording_url)">
+                    ▶️ Play
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Player -->
+          <audio id="recordedAudio" controls style="width:100%; margin-top:20px;"></audio>
+        </div>
+      </div>
     </div>           
 
     <!-- Information Section -->
@@ -126,13 +267,24 @@ export default {
       marker: null,    // store marker instance
       file: null,
       previewUrl: null,
-      previewType: null
+      previewType: null,
+      lunches: [],
+      stats: {
+        used: 0,
+        remaining: 120,
+        overused: 0
+      },
+      currentLunch: null,
+      isOnBreak: false
     };
   },
     components: {
     SearchTable
   },
   computed: {
+      // hasActiveLunch() {
+      //   return this.lunches.some(l => !l.end || l.end === 'None');
+      // },
       header() {
         return {
           carHeader: [
@@ -218,9 +370,51 @@ export default {
             this.formatHours(this.summary.engineHours),
           ]
         ];
+      },
+      callList() {
+        return this.$store.state.user.call_list || [];
       }
   },
   async mounted() {
+    const shiftId = this.$route.params.id;
+    axios
+      .get('/api/phone/call_list/', {
+          params: { shift_id: shiftId},
+      }) 
+      .then((res) => {
+          this.$store.state.user.call_list = res.data;
+      })
+      .catch(err => { console.error(err) })
+    
+    window.addEventListener("new-call", this.onNewCall);
+
+    // ⬇️ GET lunches from backend
+    axios.get("/api/ekopatrol/lunches/", {
+      params: { shift_id: shiftId }
+    })
+    .then(res => {
+      this.lunches = res.data;
+
+      // 🔥 ստուգում ենք՝ կա՞ open lunch
+      const active = this.lunches.find(l => !l.end || l.end === "None");
+
+      if (active) {
+        this.isOnBreak = true;
+        this.currentLunch = {
+          start: active.start,
+          end: null,
+          duration: null
+        };
+      } else {
+        this.isOnBreak = false;
+        this.currentLunch = null;
+      }
+
+      this.recalculateStats?.();
+    });
+
+    this.recalculateStats();
+
     this.$nextTick(async () => {
       try {
         const id = this.$route.params.id;
@@ -277,7 +471,7 @@ export default {
       }
 
       try {
-        const TOKEN = "RjBEAiBNqznm3YuIuUodgC_Ur-hJ-hwKUbCxYA_WUYaUPjUZRAIgMVHw66rraqKVJ0mhB3EEKToZrZr_4Hm5GsUt2KhZZix7InUiOjIsImUiOiIyMDI2LTA0LTI3VDIwOjAwOjAwLjAwMCswMDowMCJ9";
+        const TOKEN = "RjBEAiBCuH_SKGfbJ43SjUmiZ6ya-hMZDHFeKGCExUNpuuUL1AIgU5yrqPiiA1sWcjnTFfxkyzEglQKNxxoSkkzrGKt8lAt7InUiOjIsImUiOiIyMDI2LTA1LTEyVDIwOjAwOjAwLjAwMCswMDowMCJ9";
 
         const res = await axios.get(
           "https://gps.eps.am/api/positions",
@@ -332,6 +526,9 @@ export default {
       }
     });
   },
+  beforeUnmount() {
+    window.removeEventListener("new-call", this.onNewCall);
+  },
   methods: {
     formatSpeed(value, type = "knots") {
       if (!value) return "0 կմ/ժ";
@@ -344,7 +541,124 @@ export default {
 
         return `${kmh.toFixed(2)} կմ/ժ`;
     },
+
+    startLunch() {
+      const now = this.getTime();
+      const shiftId = this.$route.params.id;
+
+      const fd = new FormData();
+
+      fd.append("shift_id", shiftId);
+      fd.append("start_lanch", now);
+
+      const lunch = {
+        start: now,
+        end: null,
+        duration: null
+      };
+      console.log(now, shiftId, lunch)
+      
+      this.currentLunch = lunch;
+      this.lunches.push(lunch);
+      this.isOnBreak = true;
+
+
+
+    axios.post("/api/ekopatrol/lunch_start/", fd)
+      .then(() => {
+        console.log("ok");
+      })
+      .catch(err => {
+        console.error(err.response?.data || err);
+      });
+
+    },
+
+    endLunch() {
+      const now = this.getTime();
+      const shiftId = this.$route.params.id;
+
+      const fd = new FormData();
+
+      fd.append("shift_id", shiftId);
+      fd.append("end_lanch", now);
+
+      if (!this.currentLunch) return;
+
+      const index = this.lunches.findIndex(
+        l => !l.end || l.end === "None"
+      );
+
+      if (index !== -1) {
+        const updated = {
+          ...this.lunches[index],
+          end: now,
+          duration: this.diffMinutes(this.lunches[index].start, now)
+        };
+
+        // 🔥 Vue 3 correct reactive update
+        this.lunches.splice(index, 1, updated);
+      }
+
+      const duration = this.diffMinutes(this.currentLunch.start, now);
+
+      this.updateStats(duration);
+
+      this.currentLunch = null;
+      this.isOnBreak = false;
+
+      this.recalculateStats();
+
+      // optional API
+      axios.post("/api/ekopatrol/lunch_end/", fd)
+      .then(() => {
+        console.log("ok");
+      })
+      .catch(err => {
+        console.error(err.response?.data || err);
+      });
+    },
     
+    recalculateStats() {
+      let used = 0;
+
+      this.lunches.forEach(l => {
+        if (l.start && l.end && l.end !== "None") {
+          const [sh, sm] = l.start.split(":").map(Number);
+          const [eh, em] = l.end.split(":").map(Number);
+
+          used += (eh * 60 + em) - (sh * 60 + sm);
+        }
+      });
+
+      this.stats.used = used;
+      this.stats.remaining = 120 - used;
+    },
+    getTime() {
+      return new Date().toTimeString().slice(0, 8); // HH:MM:SS
+    },
+
+    diffMinutes(start, end) {
+      const [sh, sm] = start.split(":").map(Number);
+      const [eh, em] = end.split(":").map(Number);
+
+      return (eh * 60 + em) - (sh * 60 + sm);
+    },
+
+    updateStats(mins) {
+      this.stats.used += mins;
+      this.stats.remaining = 120 - this.stats.used;
+    },
+
+    formatMinutes(mins) {
+      if (!mins && mins !== 0) return "00:00";
+
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+
+      return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    },
+
     handleFileUpload(event) {
       const selectedFile = event.target.files[0];
       if (!selectedFile) return;
@@ -365,13 +679,29 @@ export default {
         this.previewType = null;
       }
     },
+
     handleClick() {
       this.$router.push({
         name: "shift-edit",
         params: { id: this.shift_info.id }
       })
     },
-}
+
+    playAudio(url) {
+      const audio = document.getElementById("recordedAudio");
+
+      if (audio) {
+        audio.src = url;
+        audio.load();
+        audio.play();
+      }
+    },
+    onNewCall(event) {
+      const newCall = event.detail;
+
+      this.$store.state.user.call_list.unshift(newCall);
+    }
+  }
 };
 </script>
 
