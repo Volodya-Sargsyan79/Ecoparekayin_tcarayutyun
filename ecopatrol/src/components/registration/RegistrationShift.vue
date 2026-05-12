@@ -289,8 +289,19 @@ export default {
                     this.$store.state.user.employee = res.data
                 })
                 .catch(err => { console.error(err) })
+            axios
+                .get("/api/ekopatrol/creater/",{
+                    params: { id: this.form.precinct_id },
+                })
+                .then(res => {
+                    this.$store.state.user.creater = res.data[1]
+                })
+                .catch(err => { console.error(err) })
         },
         saveCall() {
+            
+            this.form.user_id = this.$store.state.user.creater.user_id
+
             axios.post("/api/ekopatrol/addstationshift/", this.form)
                 .then(() => 
                      axios

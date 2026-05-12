@@ -16,6 +16,7 @@ export default createStore({
       car: null,
       route: null,
       persons: null,
+      creater: null,
       call_list: null,
       isLoading: false,
       isAuthenticated: false

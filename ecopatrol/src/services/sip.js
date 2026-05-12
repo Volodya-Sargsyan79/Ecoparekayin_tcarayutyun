@@ -6,6 +6,7 @@ let mediaRecorder = null;
 let recordedChunks = [];
 let localStreamRef = null;
 let audioContextRef = null;
+let eventSocket = null;  // WebSocket for Asterisk events
 
 // metadata placeholders — դրանք պետք է լրացվեն ձեր լոգիկայով երբ սկսվում է զանգը
 let shiftId = null;
@@ -15,10 +16,56 @@ let calledNumber = null;
 let callStartISOString = null;
 let callEndISOString = null;
 let callDurationSeconds = 0;
+let alreadySaved = false;
+let ringbackAudio = null;
+let dialToneAudio = null;
+
+// Connect to WebSocket for Asterisk events
+function connectToEventSocket() {
+  // Force ws:// for development (backend is running on HTTP)
+  const protocol = 'ws:';
+  const backendHost = '192.168.88.111:8000';
+  const eventSocketUrl = `${protocol}//${backendHost}/ws/asterisk-events/`;
+
+  console.log("🔌 Connecting to event socket:", eventSocketUrl);
+  
+  eventSocket = new WebSocket(eventSocketUrl);
+  
+  eventSocket.onopen = () => {
+    console.log("✅ Event socket connected");
+  };
+  
+  eventSocket.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      console.log("📨 Event received:", data);
+      
+      // Handle incoming call notifications from Asterisk
+      if (data.type === 'incoming_call') {
+        console.log(`📞 Incoming call from ${data.caller_id}`);
+        window.dispatchEvent(new CustomEvent('asterisk-incoming-call', { detail: data }));
+      }
+    } catch (err) {
+      console.error("Error parsing event:", err);
+    }
+  };
+  
+  eventSocket.onerror = (err) => {
+    console.error("❌ Event socket error:", err);
+  };
+  
+  eventSocket.onclose = () => {
+    console.warn("⚠️ Event socket disconnected, reconnecting in 3s...");
+    setTimeout(() => connectToEventSocket(), 3000);
+  };
+}
 
 // initialize SIP UA
 export async function initSip() {
   if (ua) return;
+
+  // Connect to event socket first
+  connectToEventSocket();
 
   ua = new UserAgent({
     uri: UserAgent.makeURI("sip:809@192.168.1.5"),
@@ -35,13 +82,98 @@ export async function initSip() {
 
   await ua.start();
   console.log("✅ SIP started");
+
+  // Handle incoming calls
+  ua.delegate = {
+    onInvite: async (inviter) => {
+      console.log("📞 Incoming call from:", inviter.nameAddrHeader.uri.user);
+      
+      // Reset variables for incoming call
+      alreadySaved = false;
+      callId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2);
+      callerNumber = inviter.nameAddrHeader.uri.user;
+      calledNumber = "809";
+      callStartISOString = new Date().toISOString();
+      callEndISOString = null;
+      callDurationSeconds = 0;
+      
+      currentSession = inviter;
+
+      // Auto-answer the call
+      inviter.delegate = {
+        onSessionDescriptionHandler: async (sdh) => {
+          const pc = sdh.peerConnection;
+
+          pc.ontrack = async (event) => {
+            const remoteStream = event.streams[0];
+            const remoteAudio = document.getElementById("remoteAudio");
+            if (remoteAudio) {
+              remoteAudio.srcObject = remoteStream;
+              remoteAudio.play().catch(() => {});
+            }
+
+            try {
+              const localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+              localStreamRef = localStream;
+              const mixedStream = await mixAudioStreams(localStream, remoteStream);
+              startRecording(mixedStream);
+            } catch (err) {
+              console.error("Could not get local microphone:", err);
+            }
+          };
+
+          pc.onconnectionstatechange = () => {
+            console.log("PC connectionState:", pc.connectionState);
+            if (["disconnected", "failed", "closed"].includes(pc.connectionState)) stopAndCleanup();
+          };
+          pc.oniceconnectionstatechange = () => {
+            console.log("PC iceConnectionState:", pc.iceConnectionState);
+            if (["disconnected", "failed", "closed"].includes(pc.iceConnectionState)) stopAndCleanup();
+          };
+        },
+
+        onConnected: () => {
+          console.log("📞 Incoming call connected");
+        },
+
+        onBye: () => {
+          console.log("👋 Incoming call ended by remote");
+          callEndISOString = new Date().toISOString();
+          callDurationSeconds = calcCallDuration(callStartISOString, callEndISOString);
+          stopAndCleanup();
+        },
+
+        onTerminated: () => {
+          console.log("🔚 Incoming session terminated");
+          callEndISOString = callEndISOString || new Date().toISOString();
+          callDurationSeconds = calcCallDuration(callStartISOString, callEndISOString);
+          stopAndCleanup();
+        },
+      };
+
+      inviter.stateChange.addListener((state) => {
+        console.log("INCOMING CALL STATE:", state);
+      });
+
+      try {
+        await inviter.accept();
+        console.log("✅ Incoming call accepted");
+      } catch (err) {
+        console.error("❌ Failed to accept incoming call:", err);
+      }
+    },
+  };
 }
 
 // call a number
 export async function callNumber(number, shiftIdParam) {
+  
   if (!ua) throw new Error("UA not initialized. Call initSip() first.");
-
+  
+  alreadySaved = false;
+  
   // set metadata for this call
+
   shiftId = shiftIdParam;
   callId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2);
   callerNumber = "809"; // փոխարինեք ճիշտ caller-ի արժեքով եթե պետք է
@@ -52,7 +184,47 @@ export async function callNumber(number, shiftIdParam) {
 
   const target = UserAgent.makeURI(`sip:${number}@192.168.1.5`);
   const inviter = new Inviter(ua, target);
+  
   currentSession = inviter;
+  dialToneAudio = new Audio("/sounds/dialtone.mp3");
+  dialToneAudio.loop = true;
+  dialToneAudio.play().catch(() => {});
+  ringbackAudio = new Audio("/sounds/ringback.mp3");
+  ringbackAudio.loop = true;
+
+inviter.stateChange.addListener((state) => {
+  console.log("CALL STATE:", state);
+
+  // 📡 anything except established → ringing state
+  if (state === "Initial" || state === "Progressing" || state === "Early") {
+    if (dialToneAudio) {
+      dialToneAudio.pause();
+      dialToneAudio.currentTime = 0;
+    }
+
+    if (ringbackAudio) {
+      ringbackAudio.play().catch(() => {});
+    }
+  }
+
+  // ☎️ answered
+  if (state === "Established") {
+    dialToneAudio?.pause();
+    ringbackAudio?.pause();
+
+    dialToneAudio.currentTime = 0;
+    ringbackAudio.currentTime = 0;
+  }
+
+  // 🔚 end
+  if (state === "Terminated") {
+    dialToneAudio?.pause();
+    ringbackAudio?.pause();
+
+    dialToneAudio.currentTime = 0;
+    ringbackAudio.currentTime = 0;
+  }
+});
 
   inviter.delegate = {
     onSessionDescriptionHandler: async (sdh) => {
@@ -90,6 +262,10 @@ export async function callNumber(number, shiftIdParam) {
 
     onConnected: () => {
       console.log("📞 Call connected");
+      if (ringbackAudio) {
+        ringbackAudio.pause();
+        ringbackAudio.currentTime = 0;
+      }
     },
 
     // when remote hangs up (BYE)
@@ -110,7 +286,9 @@ export async function callNumber(number, shiftIdParam) {
     },
   };
 
-  await inviter.invite();
+  await inviter.invite({
+    
+  });
 }
 
 function calcCallDuration(startISO, endISO) {
@@ -176,6 +354,9 @@ export function stopRecording() {
 }
 
 async function saveRecording() {
+  if (alreadySaved) return; // 🔥 ԱՅՍՏԵՂ է կարևորը
+  alreadySaved = true;
+
   if (recordedChunks.length === 0) return;
 
   const blob = new Blob(recordedChunks, { type: "audio/webm" });
@@ -190,19 +371,17 @@ async function saveRecording() {
   };
 
   try {
-    // 🔥 ԱՅՍ Է ԿԱՐԵՎՈՐԸ
     const response = await uploadWebm(blob, meta);
 
     console.log("✅ Uploaded in server");
 
-    // 🔥 dispatch event
     window.dispatchEvent(
       new CustomEvent("new-call", {
         detail: {
           call_start: meta.call_start,
           caller_number: meta.caller_number,
           called_number: meta.called_number,
-          recording_url: response.recording_url, // ✅ հիմա կա
+          recording_url: response.recording_url,
         },
       })
     );
@@ -239,6 +418,11 @@ function stopAndCleanup() {
   const remoteAudio = document.getElementById("remoteAudio");
   if (remoteAudio) remoteAudio.srcObject = null;
 
+  if (ringbackAudio) {
+    ringbackAudio.pause();
+    ringbackAudio.currentTime = 0;
+  }
+
   // reset call metadata (optional)
   currentSession = null;
   // note: do not clear callId/callerNumber immediately if you need them for upload; they are used in saveRecording
@@ -257,6 +441,25 @@ export function endCall() {
   } else {
     stopAndCleanup();
   }
+}
+
+// Shutdown SIP and close WebSocket
+export async function shutdownSip() {
+  if (currentSession) {
+    endCall();
+  }
+  
+  if (ua) {
+    await ua.stop();
+    ua = null;
+  }
+  
+  if (eventSocket) {
+    eventSocket.close();
+    eventSocket = null;
+  }
+  
+  console.log("✅ SIP shutdown complete");
 }
 
 /* ---------- Upload helper ---------- */

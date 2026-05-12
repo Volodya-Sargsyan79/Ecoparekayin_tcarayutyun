@@ -100,7 +100,7 @@ class GetPrecinctList(APIView):
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+   
 
 class GetPositionList(APIView):
     def get(self, request):
@@ -123,6 +123,32 @@ class GetPositionList(APIView):
             # Log the error using log_error function
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+class GetCreater(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+    
+        precinct_id = request.GET.get('id') or ''
+
+        try:
+            cursor = connection.cursor()
+
+            sql = '''
+                SELECT user_id FROM ekopatrol.person_useraccess 
+                WHERE precinct_id=%s;
+            '''
+            cursor.execute(sql, [precinct_id])
+
+            columns = [col[0] for col in cursor.description]
+
+            results = [
+                dict(zip(columns, row)) for row in cursor.fetchall()
+            ]
+
+            return Response(results, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class AddEmployee(APIView):
     permission_classes = [IsAuthenticated]
@@ -494,7 +520,7 @@ class AddStationShift(APIView):
         start_shift = request.data.get('start_shift')
         end_shift = request.data.get('end_shift')
         car_id = request.data.get('car_id')
-        created_by_id = request.user.id
+        created_by_id = request.data.get('user_id')
         employee_01_id = request.data.get('employee_01_id')
         employee_02_id = request.data.get('employee_02_id')
         employee_03_id = request.data.get('employee_03_id') or None

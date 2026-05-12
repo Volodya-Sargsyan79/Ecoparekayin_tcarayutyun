@@ -57,109 +57,108 @@
         </div>
     </div>
 
-🎨 Թարմացված UI (սկզբնական վիճակով)
-<h3 class="title is-5 has-text-centered mb-5">
-  ☕ Հանգստի գրանցումներ
-</h3>
+    <h3 class="title is-5 has-text-centered mb-5">
+      ☕ Հանգստի գրանցումներ
+    </h3>
 
-<!-- ACTION BUTTONS -->
-<div class="columns mb-4">
-  
-  <div class="column">
-    <button
-      class="button is-warning is-fullwidth"
-      @click="startLunch"
-      :disabled="isOnBreak"
-    >
-      ☕ Գնում եմ հանգստի
-    </button>
-  </div>
+    <!-- ACTION BUTTONS -->
+    <div class="columns mb-4">
+      
+      <div class="column">
+        <button
+          class="button is-warning is-fullwidth"
+          @click="startLunch"
+          :disabled="isOnBreak"
+        >
+          ☕ Կարգախումբը գնում է հանգստի
+        </button>
+      </div>
 
-  <div class="column">
-    <button
-      class="button is-success is-fullwidth"
-      @click="endLunch"
-      :disabled="!isOnBreak"
-    >
-      🟢 Վերադարձա
-    </button>
-  </div>
+      <div class="column">
+        <button
+          class="button is-success is-fullwidth"
+          @click="endLunch"
+          :disabled="!isOnBreak"
+        >
+          🟢 Վերադարձ հանգստից
+        </button>
+      </div>
 
-</div>
-
-<!-- STATS -->
-<div class="columns mb-4">
-
-  <div class="column">
-    <div class="box has-text-centered">
-      <p class="heading">Օգտագործված</p>
-      <p class="title is-4 has-text-info">
-        {{ formatMinutes(stats.used) }}
-      </p>
     </div>
-  </div>
 
-  <div class="column">
-    <div class="box has-text-centered">
-      <p class="heading">Մնացած</p>
-      <p 
-        class="title is-4"
-        :class="stats.remaining >= 0 ? 'has-text-success' : 'has-text-danger'"
-      >
-        {{ formatMinutes(Math.abs(stats.remaining)) }}
-      </p>
+    <!-- STATS -->
+    <div class="columns mb-4">
+
+      <div class="column">
+        <div class="box has-text-centered">
+          <p class="heading">Օգտագործված</p>
+          <p class="title is-4 has-text-info">
+            {{ formatMinutes(stats.used) }}
+          </p>
+        </div>
+      </div>
+
+      <div class="column">
+        <div class="box has-text-centered">
+          <p class="heading">Մնացած</p>
+          <p 
+            class="title is-4"
+            :class="stats.remaining >= 0 ? 'has-text-success' : 'has-text-danger'"
+          >
+            {{ formatMinutes(Math.abs(stats.remaining)) }}
+          </p>
+        </div>
+      </div>
+
     </div>
+
+    <!-- INITIAL MESSAGE -->
+    <div v-if="!lunches.length" class="notification is-info is-light has-text-centered">
+      ⏱ Կարգախումբը ունի <strong>2 ժամ (02:00)</strong> հանգստի ժամանակ
+    </div>
+
+  <!-- TABLE -->
+  <div v-else class="box">
+    <table class="table is-fullwidth is-striped">
+
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Սկիզբ</th>
+          <th>Ավարտ</th>
+          <th>Տևողություն</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr v-for="(l, index) in lunches" :key="index">
+          <td>{{ index + 1 }}</td>
+
+          <td>{{ l.start }}</td>
+
+          <td>
+            <span v-if="l.end && l.end !== 'None'">
+              {{ l.end }}
+            </span>
+            <span v-else class="has-text-warning">
+              ընթացքի մեջ...
+            </span>
+          </td>
+
+          <td>
+            <span v-if="l.duration">
+              {{ formatMinutes(l.duration) }}
+            </span>
+            <span v-else>—</span>
+          </td>
+        </tr>
+      </tbody>
+
+    </table>
   </div>
-
-</div>
-
-<!-- INITIAL MESSAGE -->
-<div v-if="!lunches.length" class="notification is-info is-light has-text-centered">
-  ⏱ Դուք ունեք <strong>2 ժամ (02:00)</strong> հանգստի ժամանակ
-</div>
-
-<!-- TABLE -->
-<div v-else class="box">
-  <table class="table is-fullwidth is-striped">
-
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Սկիզբ</th>
-        <th>Ավարտ</th>
-        <th>Տևողություն</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      <tr v-for="(l, index) in lunches" :key="index">
-        <td>{{ index + 1 }}</td>
-
-        <td>{{ l.start }}</td>
-
-        <td>
-          <span v-if="l.end && l.end !== 'None'">
-            {{ l.end }}
-          </span>
-          <span v-else class="has-text-warning">
-            ընթացքի մեջ...
-          </span>
-        </td>
-
-        <td>
-          <span v-if="l.duration">
-            {{ formatMinutes(l.duration) }}
-          </span>
-          <span v-else>—</span>
-        </td>
-      </tr>
-    </tbody>
-
-  </table>
-</div>
     
     <h3 class="title is-5 has-text-centered mb-4">
-        Զանգեր հերթափոխի հետ
+      Զանգեր հերթափոխի հետ
     </h3>
 
     <div class="columns">
@@ -218,7 +217,7 @@
           <!-- PDF -->
           <a 
             v-if="value.pdf_file"
-            :href="`http://127.0.0.1:8000/media/${value.pdf_file}`" 
+            :href="`http://192.168.88.111:8000/media/${value.pdf_file}`" 
             target="_blank" 
             class="button is-link is-small"
           >
@@ -282,9 +281,6 @@ export default {
     SearchTable
   },
   computed: {
-      // hasActiveLunch() {
-      //   return this.lunches.some(l => !l.end || l.end === 'None');
-      // },
       header() {
         return {
           carHeader: [
@@ -388,14 +384,12 @@ export default {
     
     window.addEventListener("new-call", this.onNewCall);
 
-    // ⬇️ GET lunches from backend
     axios.get("/api/ekopatrol/lunches/", {
       params: { shift_id: shiftId }
     })
     .then(res => {
       this.lunches = res.data;
 
-      // 🔥 ստուգում ենք՝ կա՞ open lunch
       const active = this.lunches.find(l => !l.end || l.end === "None");
 
       if (active) {

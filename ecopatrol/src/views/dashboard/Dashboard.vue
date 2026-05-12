@@ -22,7 +22,7 @@
               <i class="far fa-clock"></i>
             </span>
             <h2 class="title is-4 mt-4 mb-4">Տեղեկատվություն</h2>
-            <p class="title is-5">երթուղիների և հերթափոխերի վերաբերյալ</p>
+            <p class="title is-5">հերթափոխերի վերաբերյալ</p>
           </div>
         </router-link>
 
@@ -32,8 +32,8 @@
             <span class="icon is-size-2">
               <i class="far fa-comments"></i>
             </span>
-            <h2 class="title is-4 mt-4 mb-4">Տեղամասերի</h2>
-            <p class="title is-5">Ներկա 12 ժամյա հերթափոխերի ցանկ</p>
+            <h2 class="title is-4 mt-4 mb-4">Տեղեկատվություն</h2>
+            <p class="title is-5">իրավախախտումների վերաբերյալ</p>
           </div>
         </div>
         <!-- BUTTON 3 -->
@@ -43,7 +43,7 @@
               <i class="far fa-home"></i>
             </span>
             <h2 class="title is-4 mt-4 mb-4">1-07</h2>
-            <p class="title is-5">Հանցագործությունների վերաբերյալ հայտարարություններ</p>
+            <p class="title is-5">ահազանգման համակարգ</p>
           </div>
         </router-link>
 
