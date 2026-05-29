@@ -282,7 +282,7 @@ export default {
           return;
         }
 
-        const TOKEN = "RjBEAiBCuH_SKGfbJ43SjUmiZ6ya-hMZDHFeKGCExUNpuuUL1AIgU5yrqPiiA1sWcjnTFfxkyzEglQKNxxoSkkzrGKt8lAt7InUiOjIsImUiOiIyMDI2LTA1LTEyVDIwOjAwOjAwLjAwMCswMDowMCJ9";
+        const TOKEN = "SDBGAiEAv5Rc5L7LmxRjHReMqaM5LKptTGGGjT1WezwAlyVXDAQCIQCh0lLO_xlVrefOGUUCNTFsBFGU_cdtaqsv4sN0-yRxAnsidSI6MiwiZSI6IjIwMjYtMDYtMDRUMjA6MDA6MDAuMDAwKzAwOjAwIn0";
 
         // ✅ ժամանակների ֆորմատավորում
         const from = new Date(
