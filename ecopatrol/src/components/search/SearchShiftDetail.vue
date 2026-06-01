@@ -30,84 +30,134 @@
         </div>
       </div>
     </div>
-    <div class="columns">
-        <div class="column">
-            <div class="field">
-                <SearchTable 
-                    :header="header.carHeader"
-                    :invoice="invoice.carInfo"
-                />
-            </div>
-        </div>
-    </div>
-    
-    <h3 class="title is-5 has-text-centered mb-4">
-        Հերթափոխ անձնակազմ
-    </h3>
 
     <div class="columns">
       <div class="column">
-            <div class="field">
-                <SearchTable 
-                  :header="header.personHeader"
-                  :invoice="invoice.personInfo"
-                />
-            </div>
+        <h3 class="title is-5 has-text-centered mb-4">
+            Ծառայողական մեքենայի տվյալներ
+        </h3>
+        <div class="box mb-3">
+          <div class="field">
+              <SearchTable 
+                  :header="header.carHeader"
+                  :invoice="invoice.carInfo"
+              />
+          </div>
         </div>
+      </div>
     </div>
-    <h3 class="title is-5 has-text-centered mb-4">
-      Հերթափոխի հաշվետվություն
-    </h3>
-    <div class="columns">
+    <div class="columns" >
       <div class="column">
-        <div class="field">
-          <SearchTable
-            :header="header.summaryHeader"
-            :invoice="summaryInfo"
-          />
+        <h3 class="title is-5 has-text-centered mb-4">
+            Կարգախմբի տվյալներ
+        </h3>
+        <div class="box mb-3">
+          <div class="field">
+              <SearchTable 
+                :header="header.personHeader"
+                :invoice="invoice.personInfo"
+              />
+          </div>
         </div>
       </div>
     </div>
 
-    <h3 class="title is-5 has-text-centered mb-4">
-      Զանգեր հերթափոխի հետ
-    </h3>
-
-    <div class="columns">
+    <div v-if="lunches.length > 0" class="columns">
       <div class="column">
-        <div class="field">
-          <table class="table is-fullwidth">
+        <h3 class="title is-5 has-text-centered mb-5">
+          ☕ Հանգստի ժամանակներ և տևողություն
+        </h3>
+
+        <!-- TABLE -->
+        <div class="box mb-3">
+          <table class="table is-fullwidth is-striped">
             <thead>
               <tr>
                 <th>#</th>
-                <th>Ժամ</th>
-                <th>Ումից</th>
-                <th>Ում</th>
-                <th>Լսել</th>
+                <th>Սկիզբ</th>
+                <th>Ավարտ</th>
+                <th>Տևողություն</th>
               </tr>
             </thead>
 
             <tbody>
-              <tr v-if="!callList.length">
-                <td colspan="5" class="has-text-centered">Զանգեր չկան</td>
-              </tr>
-              <tr v-for="(call, index) in callList" :key="index" v-if="callList.length">
+              <tr v-for="(l, index) in lunches" :key="index">
                 <td>{{ index + 1 }}</td>
-                <td>{{ call.call_start }}</td>
-                <td>{{ call.caller_number }}</td>
-                <td>{{ call.called_number }}</td>
-
+                <td>{{ l.start }}</td>
                 <td>
-                  <button @click="playAudio(call.recording_url)">
-                    ▶️ Play
-                  </button>
+                  <span v-if="l.end && l.end !== 'None'">
+                    {{ l.end }}
+                  </span>
+                  <span v-else class="has-text-warning">
+                    ընթացքի մեջ...
+                  </span>
+                </td>
+                <td>
+                  <span v-if="l.duration">
+                    {{ formatMinutes(l.duration) }}
+                  </span>
+                  <span v-else>—</span>
                 </td>
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
 
-          <!-- Player -->
-          <audio id="recordedAudio" controls style="width:100%; margin-top:20px;"></audio>
+    <div v-if="summary" class="columns">
+      <div class="column">
+        <h3 class="title is-5 has-text-centered mb-4">
+          Հերթափոխի ամփոփ տվյալներ
+        </h3>
+        <div class="box mb-3">
+          <div class="field">
+            <SearchTable
+              :header="header.summaryHeader"
+              :invoice="summaryInfo"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="columns" v-if="callList.length > 0">
+      <div class="column">
+        <h3 class="title is-5 has-text-centered mb-4">
+          Զանգերի պատմություն
+        </h3>
+
+        <div class="box mb-3">
+          <div class="field">
+            <table class="table is-fullwidth">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Ժամ</th>
+                  <th>Ումից</th>
+                  <th>Ում</th>
+                  <th>Լսել</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr v-for="(call, index) in callList" :key="index">
+                  <td>{{ index + 1 }}</td>
+                  <td>{{ call.call_start }}</td>
+                  <td>{{ call.caller_number }}</td>
+                  <td>{{ call.called_number }}</td>
+                  <td>
+                    <button @click="playAudio(call.recording_url)">
+                      ▶️ Play
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- Player -->
+            <audio id="recordedAudio" controls style="width:100%; margin-top:20px;"></audio>
+          </div>
         </div>
       </div>
     </div>           
@@ -116,7 +166,7 @@
     <div class="columns" v-if="shift_pdf?.length > 0">
       <div class="column">
         <h3 class="title is-5 has-text-centered mb-4">
-          Զեկուցագիր / Տեղեկություն
+          Զանգվածային և տեքստային տեղեկություններ հերթափոխի մասին
         </h3>
 
         <div 
@@ -176,6 +226,7 @@ export default {
       marker: null,
       polyline: null,    // store marker instance
       summary: null,
+      lunches: [],
     };
   },
   components: {
@@ -285,6 +336,15 @@ export default {
       console.log('SearchShiftDetail: call list loaded', callsRes.data);
     } catch (err) {
       console.error('CALL LIST ERROR:', err);
+    }
+
+    try {
+      const lunchesRes = await axios.get("/api/ekopatrol/lunches/", {
+        params: { shift_id: shiftId }
+      });
+      this.lunches = lunchesRes.data;
+    } catch (err) {
+      console.error('LUNCHES ERROR:', err);
     }
 
     this.$nextTick(async () => {
@@ -494,6 +554,14 @@ export default {
       audio.src = url;
       audio.load();
       audio.play();
+    },
+    formatMinutes(mins) {
+      if (!mins && mins !== 0) return "00:00";
+
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+
+      return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
     }
   },
 };
