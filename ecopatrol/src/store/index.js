@@ -52,6 +52,9 @@ export default createStore({
       state.user.id = user.id
       state.user.is_admin = user.is_admin
     },
+    setCallList(state, callList) {
+      state.user.call_list = callList
+    },
   },
   actions: {
   },

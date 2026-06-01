@@ -378,7 +378,7 @@ export default {
           params: { shift_id: shiftId},
       }) 
       .then((res) => {
-          this.$store.state.user.call_list = res.data;
+          this.$store.commit('setCallList', res.data);
       })
       .catch(err => { console.error(err) })
     

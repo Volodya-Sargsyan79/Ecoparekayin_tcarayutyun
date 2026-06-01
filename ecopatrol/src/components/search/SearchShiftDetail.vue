@@ -68,6 +68,50 @@
         </div>
       </div>
     </div>
+
+    <h3 class="title is-5 has-text-centered mb-4">
+      Զանգեր հերթափոխի հետ
+    </h3>
+
+    <div class="columns">
+      <div class="column">
+        <div class="field">
+          <table class="table is-fullwidth">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Ժամ</th>
+                <th>Ումից</th>
+                <th>Ում</th>
+                <th>Լսել</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr v-if="!callList.length">
+                <td colspan="5" class="has-text-centered">Զանգեր չկան</td>
+              </tr>
+              <tr v-for="(call, index) in callList" :key="index" v-if="callList.length">
+                <td>{{ index + 1 }}</td>
+                <td>{{ call.call_start }}</td>
+                <td>{{ call.caller_number }}</td>
+                <td>{{ call.called_number }}</td>
+
+                <td>
+                  <button @click="playAudio(call.recording_url)">
+                    ▶️ Play
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Player -->
+          <audio id="recordedAudio" controls style="width:100%; margin-top:20px;"></audio>
+        </div>
+      </div>
+    </div>           
+
      <!-- Information Section -->
     <div class="columns" v-if="shift_pdf?.length > 0">
       <div class="column">
@@ -222,16 +266,27 @@ export default {
             `${this.summary.distance?.toFixed(2)/1000} կմ`,
             `${this.summary.startOdometer?.toFixed(2)/1000} կմ`,
             `${this.summary.endOdometer?.toFixed(2)/1000} կմ`,
-
-           
-
             this.formatHours(this.summary.engineHours),
-
           ]
         ];
+      },
+      callList() {
+        return this.$store.state.user.call_list || [];
       }
   },
   async mounted() {
+    const shiftId = this.$route.params.id;
+
+    try {
+      const callsRes = await axios.get('/api/phone/call_list/', {
+        params: { shift_id: shiftId }
+      });
+      this.$store.commit('setCallList', callsRes.data);
+      console.log('SearchShiftDetail: call list loaded', callsRes.data);
+    } catch (err) {
+      console.error('CALL LIST ERROR:', err);
+    }
+
     this.$nextTick(async () => {
       try {
         const id = this.$route.params.id;
@@ -431,6 +486,14 @@ export default {
       else kmh = value;
 
       return `${kmh.toFixed(2)} կմ/ժ`;
+    },
+    playAudio(url) {
+      const audio = document.getElementById("recordedAudio");
+      if (!audio) return;
+
+      audio.src = url;
+      audio.load();
+      audio.play();
     }
   },
 };
