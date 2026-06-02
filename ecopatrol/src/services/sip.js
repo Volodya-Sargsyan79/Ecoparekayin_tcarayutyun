@@ -17,6 +17,7 @@ let callStartISOString = null;
 let callEndISOString = null;
 let callDurationSeconds = 0;
 let alreadySaved = false;
+let callAnswered = false;
 let ringbackAudio = null;
 let dialToneAudio = null;
 
@@ -181,6 +182,7 @@ export async function callNumber(number, shiftIdParam) {
   callStartISOString = new Date().toISOString();
   callEndISOString = null;
   callDurationSeconds = 0;
+  callAnswered = false;
 
   const target = UserAgent.makeURI(`sip:${number}@192.168.1.5`);
   const inviter = new Inviter(ua, target);
@@ -209,6 +211,7 @@ inviter.stateChange.addListener((state) => {
 
   // ☎️ answered
   if (state === "Established") {
+    callAnswered = true;
     dialToneAudio?.pause();
     ringbackAudio?.pause();
 
@@ -262,6 +265,7 @@ inviter.stateChange.addListener((state) => {
 
     onConnected: () => {
       console.log("📞 Call connected");
+      callAnswered = true;
       if (ringbackAudio) {
         ringbackAudio.pause();
         ringbackAudio.currentTime = 0;
@@ -357,6 +361,11 @@ async function saveRecording() {
   if (alreadySaved) return; // 🔥 ԱՅՍՏԵՂ է կարևորը
   alreadySaved = true;
 
+  if (!callAnswered) {
+    console.log("🛑 Call was not answered; skipping recording upload.");
+    return;
+  }
+
   if (recordedChunks.length === 0) return;
 
   const blob = new Blob(recordedChunks, { type: "audio/webm" });
@@ -394,13 +403,17 @@ async function saveRecording() {
 function stopAndCleanup() {
   console.log("🧹 Cleaning up call...");
 
-  if (mediaRecorder && mediaRecorder.state === "recording") {
-    try {
-      mediaRecorder.requestData();
-    } catch (_) {}
-    setTimeout(() => {
-      try { mediaRecorder.stop(); } catch (_) {}
-    }, 200);
+  if (mediaRecorder) {
+    if (mediaRecorder.state === "recording") {
+      try {
+        mediaRecorder.requestData();
+      } catch (_) {}
+      setTimeout(() => {
+        try { mediaRecorder.stop(); } catch (_) {}
+      }, 200);
+    } else if (mediaRecorder.state === "inactive" && recordedChunks.length > 0 && !alreadySaved) {
+      saveRecording();
+    }
   }
 
   if (localStreamRef) {
@@ -423,19 +436,39 @@ function stopAndCleanup() {
     ringbackAudio.currentTime = 0;
   }
 
+  window.dispatchEvent(new CustomEvent("sip-call-ended", {
+    detail: {
+      call_id: callId,
+      caller_number: callerNumber,
+      called_number: calledNumber,
+    },
+  }));
+
   // reset call metadata (optional)
   currentSession = null;
   // note: do not clear callId/callerNumber immediately if you need them for upload; they are used in saveRecording
 }
 
 // Manual hangup
-export function endCall() {
+export async function endCall() {
   if (currentSession) {
     try {
-      currentSession.bye();
-      // cleanup will run from onBye/onTerminated handlers
+      const sessionState = currentSession.state || "";
+      const canCancel = typeof currentSession.cancel === "function";
+      const canBye = typeof currentSession.bye === "function";
+
+      if (canCancel && sessionState !== "Established" && sessionState !== "established") {
+        await currentSession.cancel();
+        console.log("❌ Outgoing call canceled");
+      } else if (canBye) {
+        await currentSession.bye();
+        console.log("❌ Call ended with BYE");
+      } else {
+        console.warn("No hangup/cancel method available on current session");
+      }
     } catch (err) {
       console.error("endCall error:", err);
+    } finally {
       stopAndCleanup();
     }
   } else {

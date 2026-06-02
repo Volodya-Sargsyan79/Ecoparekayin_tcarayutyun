@@ -26,7 +26,15 @@
           >
             <template v-if="isPerson && cellIndex === 3 && cell">
               {{ cell }}
-              <button @click="startCall(350)">📞</button>
+              <button class="button is-small is-info" @click="startCall(350, rowIndex)" style="margin-left: 0.5rem;">📞</button>
+              <button
+                v-if="callStarted && activeRowIndex === rowIndex"
+                class="button is-small is-danger"
+                @click="handleHangup"
+                style="margin-left: 0.5rem;"
+              >
+                Ընդատել
+              </button>
             </template>
 
             <template v-else>
@@ -44,22 +52,44 @@
 
 <script>
 import axios from "axios";
-import { initSip, callNumber } from "@/services/sip";
+import { initSip, callNumber, endCall } from "@/services/sip";
 
 export default {
+  data() {
+    return {
+      callStarted: false,
+      activeRowIndex: null,
+    };
+  },
+
   props: {
     header: Array,
     invoice: Array,
     isPerson: Boolean,
   },
 
+  mounted() {
+    window.addEventListener("sip-call-ended", this.onSipCallEnded);
+  },
+
+  beforeUnmount() {
+    window.removeEventListener("sip-call-ended", this.onSipCallEnded);
+  },
+
   methods: {
-    async startCall(number) {
+    onSipCallEnded() {
+      this.callStarted = false;
+      this.activeRowIndex = null;
+    },
+    async startCall(number, rowIndex) {
+      this.callStarted = true;
+      this.activeRowIndex = rowIndex;
+
       try {
         await initSip();
 
         const shiftIdParam = this.$route.params.id;
-        
+
         const response = await axios.post(
           "http://192.168.88.111:8000/api/phone/call/",
           {
@@ -69,12 +99,28 @@ export default {
 
         if (response.data.status === "call_sent") {
           await callNumber(number, shiftIdParam);
+        } else {
+          console.warn("Unexpected call response:", response.data);
+          this.callStarted = false;
+          this.activeRowIndex = null;
         }
       } catch (error) {
         console.error("CALL ERROR:", error);
+        this.callStarted = false;
+        this.activeRowIndex = null;
       }
     },
-    
+
+    async handleHangup() {
+      try {
+        await endCall();
+      } catch (error) {
+        console.error("Hangup failed:", error);
+      } finally {
+        this.callStarted = false;
+        this.activeRowIndex = null;
+      }
+    },
   },
 };
 </script>
