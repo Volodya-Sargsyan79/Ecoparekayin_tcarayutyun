@@ -50,7 +50,7 @@
             },
             title: {
                 type: String,
-                required: true
+                default: ""
             },
             depth: {
                 type: Number,
