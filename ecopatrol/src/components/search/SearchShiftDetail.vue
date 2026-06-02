@@ -182,7 +182,7 @@
           <!-- PDF -->
           <a 
             v-if="value.pdf_file"
-            :href="`http://127.0.0.1:8000/media/${value.pdf_file}`" 
+            :href="`http://192.168.88.111:8000/media/${value.pdf_file}`" 
             target="_blank" 
             class="button is-link is-small"
           >
