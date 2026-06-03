@@ -182,7 +182,7 @@
           <!-- PDF -->
           <a 
             v-if="value.pdf_file"
-            :href="`http://192.168.88.111:8000/media/${value.pdf_file}`" 
+            :href="`http://${$hostname}:8000/media/${value.pdf_file}`" 
             target="_blank" 
             class="button is-link is-small"
           >
@@ -358,7 +358,6 @@ export default {
         const route_id = this.shift_info.route_id
 
         const kmlUrl = `http://${window.location.hostname}:8000/media/kml/${route_id}/doc.kml`;
-        // const kmlUrl = `http://127.0.0.1:8000/media/kml/${route_id}/doc.kml`;
 
 
         this.map = L.map("map").setView([40.1792, 44.4991], 10);
@@ -407,9 +406,6 @@ export default {
         const to = new Date(
           this.shift_info.end_shift.replace(" ", "T")
         ).toISOString();
-
-        // console.log("FROM:", from);
-        // console.log("TO:", to);
 
         // 🔥 2 API call միաժամանակ (ավելի արագ)
         const [positionsRes, summaryRes] = await Promise.all([
@@ -489,11 +485,6 @@ export default {
           .openPopup();
 
         this.map.fitBounds(this.polyline.getBounds());
-
-        // =========================
-        // 📊 SUMMARY (տվյալներ)
-        // =========================
-        // console.log("SUMMARY RAW:", summaryRes.data);
 
         // եթե array է
         this.summary = Array.isArray(summaryRes.data)

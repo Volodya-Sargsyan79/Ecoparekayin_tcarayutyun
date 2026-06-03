@@ -45,7 +45,6 @@
         computed: {
             
             menuTree() {
-                console.log("USER", this.$store.state.user)
 
                 const user = this.$store.state.user;
                 const isAdmin = user?.is_admin || user?.id === 1;

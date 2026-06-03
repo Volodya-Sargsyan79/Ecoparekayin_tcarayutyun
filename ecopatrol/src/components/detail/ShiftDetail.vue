@@ -420,8 +420,6 @@ export default {
         const route_id = this.shift_info.route_id
 
         const kmlUrl = `http://${window.location.hostname}:8000/media/kml/${route_id}/doc.kml`;
-        // const kmlUrl = `http://127.0.0.1:8000/media/kml/${route_id}/doc.kml`;
-
 
         this.map = L.map("map").setView([40.1792, 44.4991], 10);
 
@@ -480,16 +478,12 @@ export default {
           }
         );
 
-        // console.log("GPS DATA:", res.data);
-
         if (res.data.length > 0) {
           const last = res.data[0];
 
           const lat = last.latitude;
           const lng = last.longitude;
           const speed = this.formatSpeed(last.speed)
-
-          // console.log("COORD:", lat, lng);
 
           if (!lat || !lng) {
             alert("Մեքենայի տեղորոշման կոորդինատները հասանելի չեն:");

@@ -91,7 +91,7 @@ export default {
         const shiftIdParam = this.$route.params.id;
 
         const response = await axios.post(
-          "http://192.168.88.111:8000/api/phone/call/",
+          "/api/phone/call/",
           {
             phone_number: number,
           }
