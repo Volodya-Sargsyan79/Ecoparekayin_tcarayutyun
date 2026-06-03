@@ -1,7 +1,7 @@
 # Ignore Python virtual environment
 .venv/
 venv/
-urls.py
+.urls.py
 
 # Byte-compiled / cache files
 __pycache__/
