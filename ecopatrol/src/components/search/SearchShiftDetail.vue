@@ -121,7 +121,7 @@
       </div>
     </div>
 
-    <div class="columns" v-if="callList.length > 0">
+    <div class="columns" v-if="callList?.length > 0">
       <div class="column">
         <h3 class="title is-5 has-text-centered mb-4">
           Զանգերի պատմություն
@@ -347,6 +347,22 @@ export default {
       console.error('LUNCHES ERROR:', err);
     }
 
+    try {
+      const id = this.$route.params.id;
+
+      console.log("id:", id)
+
+      const res = await axios
+              .get("/api/ekopatrol/getinformationforshift/", {
+                  params: { id: id },
+              })
+              
+      this.shift_pdf = res.data;
+
+    } catch (err) {
+      console.error("ERROR:", err);
+    }
+
     this.$nextTick(async () => {
       try {
         const id = this.$route.params.id;
@@ -495,22 +511,6 @@ export default {
 
       } catch (err) {
         console.error("GPS API ERROR:", err);
-      }
-
-      try {
-        const id = this.$route.params.id;
-
-        console.log("id:", id)
-
-        const res = await axios
-                .get("/api/ekopatrol/getinformationforshift/", {
-                    params: { id: id },
-                })
-                
-        this.shift_pdf = res.data;
-
-      } catch (err) {
-        console.error("ERROR:", err);
       }
 
     });

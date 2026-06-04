@@ -93,7 +93,6 @@ export default {
 
                         try {
                             const userRes = await axios.get('/api/ekopatrol/getme/')
-                            console.log('USER:', userRes.data)
                             this.$store.commit('setUser', userRes.data)
                         } catch (err) {
                             console.error('GETME ERROR:', err)
