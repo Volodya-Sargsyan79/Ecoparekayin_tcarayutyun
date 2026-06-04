@@ -1,49 +1,60 @@
 <template>
-    <div>
-      <Nav/>
-      
-      <div class="is-loading-bar has-text-centered" v-bind:class="{'is-loading': $store.state.isLoading }">
-        <div class="lds-dual-ring">sADASDAS</div>
-      </div>
-
-      <router-view/>
-
-      <Footer />
+  <div id="app-wrapper">
+    <Nav/>
+    <div class="is-loading-bar has-text-centered" :class="{ 'is-loading': $store.state.isLoading }">
+      <div class="lds-dual-ring"></div>
     </div>
+    <main class="page-content">
+      <router-view/>
+    </main>
+    <Footer />
+  </div>
 </template>
 
 <script>
-import axios from 'axios'
-import Nav from '@/components/nav/Nav'
-import Footer from '@/components/nav/Footer'
-
-export default {
-  name: 'App',
-  components: {
-    Nav,
-    Footer
-  },
-  beforeCreate() {
-    this.$store.commit('initializeStore')
-
-    const token = this.$store.state.user.token
-
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = "Token " + token
-    } else {
-      axios.defaults.headers.common['Authorization'] = ""
+  import axios from 'axios'
+  import Nav from '@/components/nav/Nav'
+  import Footer from '@/components/nav/Footer'
+  export default {
+    name: 'App',
+    components: {
+      Nav,
+      Footer
+    },
+    beforeCreate() {
+      this.$store.commit('initializeStore')
+      const token = this.$store.state.user.token
+      if (token) {
+        axios.defaults.headers.common['Authorization'] = "Token " + token
+      } else {
+        axios.defaults.headers.common['Authorization'] = ""
+      }
     }
   }
-}
 </script>
 
 <style lang="scss">
+  html, body, #app {
+    height: 100%;
+    margin: 0;
+  }
+
+  #app-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page-content {
+    flex: 1;
+  }
   @import '../node_modules/bulma';
   .lds-dual-ring {
     display: inline-block;
     width: 80px;
     height: 80px;
   }
+
   .lds-dual-ring:after {
     content: " ";
     display: block;
@@ -70,7 +81,6 @@ export default {
     overflow: hidden;
     -webkit-transition: all 0.3s;
     transition: all 0.3s;
-
     &.is-loading {
       height: 80px;
     }

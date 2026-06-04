@@ -9,27 +9,23 @@
 </template>
 
 <script>
-import axios from 'axios'
-export default {
-    methods: {
-        logout() {
-            axios
-                .post('/api/ekopatrol/token/logout/')
-                .then(response => {
-                    console.log('Logged out')
-                })
-                .catch(error => {
-                    console.log(JSON.stringify(error))
-                })
-                
-            axios.defaults.headers.common['Authorization'] = ""
-                        
-            localStorage.removeItem('token')
-
-            this.$store.commit('removeToken')
-
-            this.$router.push('/')
+    import axios from 'axios'
+    export default {
+        methods: {
+            logout() {
+                axios
+                    .post('/api/ecopatrol/token/logout/')
+                    .then(response => {
+                        console.log('Logged out')
+                    })
+                    .catch(error => {
+                        console.log(JSON.stringify(error))
+                    })
+                axios.defaults.headers.common['Authorization'] = ""
+                localStorage.removeItem('token')
+                this.$store.commit('removeToken')
+                this.$router.push('/')
+            }
         }
     }
-}
 </script>

@@ -1,9 +1,6 @@
 <template>
     <div class="box">
-        <h3 class="title is-5 has-text-centered mb-4">
-           Հերթափոխերի վերաբերյալ տեղեկատվություն
-        </h3>
-                <!-- Date Filter -->
+        <h3 class="title is-5 has-text-centered mb-4">Հերթափոխերի վերաբերյալ տեղեկատվություն</h3>
         <div class="columns is-vcentered mb-4">
             <div class="column is-narrow">
                 <div class="field">
@@ -28,13 +25,7 @@
                         <div class="select is-fullwidth">
                         <select v-model="precinct_id" @change="loadRoute">
                             <option value="">Ընտրել</option>
-                            <option
-                                v-for="precinct in $store.state.user.precincts"
-                                :key="precinct.id"
-                                :value="precinct.id"
-                            >
-                                {{ precinct.precinct }}
-                            </option>
+                            <option v-for="precinct in $store.state.user.precincts" :key="precinct.id" :value="precinct.id">{{ precinct.precinct }}</option>
                         </select>
                     </div>
                     </div>
@@ -50,15 +41,10 @@
                 </div>
             </div>
         </div>
-
         <div class="columns">
             <div class="column">
                 <div class="field">
-                    <InvoiceTable 
-                        :header="header"
-                        :invoice="invoice"
-                        routeName="search-shift-detail"
-                    />
+                    <InvoiceTable :header="header" :invoice="invoice" routeName="search-shift-detail"/>
                 </div>
             </div>
         </div>
@@ -96,7 +82,6 @@
             },
             invoice() {
                 const routes = this.$store.state.user.stationshif || []
-
                 return routes.map((item, index) => ({
                     id: item.id,
                     start_shift: item.start_shift,
@@ -111,10 +96,9 @@
             }
         },
         methods: {
-
             async search() {
                 try {
-                    const res = await axios.get('/api/ekopatrol/filterstationshift/', {
+                    const res = await axios.get('/api/ecopatrol/filterstationshift/', {
                         params: {
                             id: this.precinct_id || undefined,  // կամ քո param-ը
                             date_from: this.dateFrom || undefined,

@@ -10,12 +10,9 @@
       </div>
     </div>
   </div>
-
   <section class="section">
     <div class="container">
       <div class="columns is-multiline">
-
-        <!-- BUTTON 1 -->
         <router-link to="/dashboard/precinct_shift" class="column is-4">
           <div class="box has-text-centered">
             <span class="icon is-size-2">
@@ -25,8 +22,6 @@
             <p class="title is-5">հերթափոխերի վերաբերյալ</p>
           </div>
         </router-link>
-
-        <!-- BUTTON 2 -->
         <div class=" column is-4">
           <div class="box has-text-centered clickable" @click="shitԼist">
             <span class="icon is-size-2">
@@ -36,7 +31,6 @@
             <p class="title is-5">իրավախախտումների վերաբերյալ</p>
           </div>
         </div>
-        <!-- BUTTON 3 -->
         <router-link to="/CrimeAlert" class="column is-4">
           <div class="box has-text-centered">
             <span class="icon is-size-2">
@@ -46,7 +40,6 @@
             <p class="title is-5">ահազանգման համակարգ</p>
           </div>
         </router-link>
-
       </div>
     </div>
   </section>
@@ -59,9 +52,7 @@
 </script>
 
 <style lang="scss">
-
   .clickable {
     cursor: pointer;
   }
-
 </style>

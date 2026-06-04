@@ -41,7 +41,6 @@
                                         title: "Հ",
                                         func: () => this.placeKeeper(1)
                                     },
-                                    
                                 ]
                             },
                             {
@@ -62,7 +61,6 @@
                                         title: "Հ",
                                         func: () => this.placeKeeper(2)
                                     },
-                                    
                                 ]
                             },
                             {
@@ -83,7 +81,6 @@
                                         title: "Հ",
                                         func: () => this.placeKeeper(3)
                                     },
-                                    
                                 ]
                             },
                             {
@@ -103,8 +100,7 @@
                                         label: "Հերթափոխ",
                                         title: "Հ",
                                         func: () => this.placeKeeper(4)
-                                    },
-                                    
+                                    },  
                                 ]
                             }
                         ]
@@ -246,7 +242,7 @@
         methods: {
             employeeKeeper(e){
                 axios
-                    .get("/api/ekopatrol/getlastemployee/", {
+                    .get("/api/ecopatrol/getlastemployee/", {
                         params: { id: e},
                     })
                     .then(res => {
@@ -257,7 +253,7 @@
             },
             routeKeeper(e){
                 axios
-                    .get('/api/ekopatrol/getlastroute/', {
+                    .get('/api/ecopatrol/getlastroute/', {
                         params: { id: e},
                     })
                     .then((res) => {
@@ -268,7 +264,7 @@
             },
             placeKeeper(e){
                 axios
-                .get('/api/ekopatrol/getstationshiftlist/', {
+                .get('/api/ecopatrol/getstationshiftlist/', {
                     params: { id: e},
                 }) 
                 .then((res) => {
@@ -276,7 +272,6 @@
                     this.$router.push('/dashboard/precinct_shift/information/shitlist') 
                 })
                 .catch(err => { console.error(err) }) 
-
             }
         }
     }

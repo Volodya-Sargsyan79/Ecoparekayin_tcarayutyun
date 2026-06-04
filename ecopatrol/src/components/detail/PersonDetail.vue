@@ -3,9 +3,7 @@
     <div class="columns">
       <div class="column is-3">
         <div class="field">
-            <img 
-              :src="`http://${$hostname}:8000/media/${person.image}`" 
-            />
+            <img :src="`http://${$hostname}:8000/media/${person.image}`"/>
         </div>
       </div>
       <div class="column is-9">
@@ -33,35 +31,26 @@
 </template>
 
 <script>
-import axios from "axios";
-
-export default {
-  name: "PersonDetail",
-  data() {
-    return {
-      person: {}
-    }
-  },
-
-  async mounted() {
-    this.$nextTick(async () => {
-      try {
-        const id = this.$route.params.id;
-
-        const res = await axios.get(
-          `/api/ekopatrol/getemployee/${id}/`
-        );
-
-        this.person = res.data[0];
-
-      } catch (err) {
-        console.error("ERROR:", err);
+  import axios from "axios";
+  export default {
+    name: "PersonDetail",
+    data() {
+      return {
+        person: {}
       }
-    });
-  },
-};
+    },
+    async mounted() {
+      this.$nextTick(async () => {
+        try {
+          const id = this.$route.params.id;
+          const res = await axios.get(
+            `/api/ecopatrol/getemployee/${id}/`
+          );
+          this.person = res.data[0];
+        } catch (err) {
+          console.error("ERROR:", err);
+        }
+      });
+    },
+  };
 </script>
-
-<style>
-
-</style>

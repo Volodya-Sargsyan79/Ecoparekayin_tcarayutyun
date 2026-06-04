@@ -16,7 +16,6 @@
                                             <span class="is-size-4">
                                                 <strong>էլեկտրոնային գրանցում</strong>
                                             </span>
-                                             
                                         </h2>
                                     </div>
                                     <div class="has-text-centered">

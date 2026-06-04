@@ -16,7 +16,6 @@
                                             <span class="is-size-4">
                                                 <strong>տեղամասերի հերթափոխերի գրաֆիկ</strong>
                                             </span>
-                                             
                                         </h2>
                                     </div>
                                     <div class="has-text-centered">
@@ -24,9 +23,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="column is-10" 
-                                v-if="$route.path != '/dashboard/precinct_shift/information'"
-                            >
+                            <div class="column is-10" v-if="$route.path != '/dashboard/precinct_shift/information'">
                                 <router-view />
                             </div>
                             <div class="column is-10" v-else>

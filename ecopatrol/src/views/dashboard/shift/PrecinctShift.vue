@@ -9,12 +9,9 @@
       </div>
     </div>
   </div>
-
   <section class="section">
     <div class="container">
       <div class="columns is-multiline">
-
-        <!-- BUTTON 1 -->
         <router-link to="/dashboard/precinct_shift/registration" class="column is-4">
           <div class="box has-text-centered clickable">
             <span class="icon is-size-2">
@@ -24,8 +21,6 @@
             <p class="title is-6">ծառայողների, հերթափոխերի և երթուղիների գրանցման համակարգ</p>
           </div>
         </router-link>
-
-        <!-- BUTTON 2 -->
          <router-link to="/dashboard/precinct_shift/information" class="column is-4">
           <div class="box has-text-centered clickable">
             <span class="icon is-size-2">
@@ -35,8 +30,6 @@
             <p class="title is-6">հերթապահների, հերթափոխերի և երթուղիների վերաբերյալ</p>
           </div>
         </router-link>
-
-        <!-- BUTTON 3 -->
         <router-link to="/dashboard/precinct_shift/search_information" class="column is-4">
           <div class="box has-text-centered clickable">
             <span class="icon is-size-2">
@@ -46,7 +39,6 @@
             <p class="title is-6">հերթապահների, հերթափոխերի և երթուղիների վերաբերյալլ</p>
           </div>
         </router-link>
-
       </div>
     </div>
   </section>
@@ -59,9 +51,7 @@
 </script>
 
 <style lang="scss">
-
   .clickable {
     cursor: pointer;
   }
-
 </style>

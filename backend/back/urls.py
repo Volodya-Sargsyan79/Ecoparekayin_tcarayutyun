@@ -21,11 +21,11 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/ekopatrol/', include('djoser.urls')),
-    path('api/ekopatrol/', include('djoser.urls.authtoken')),
-    path('api/ekopatrol/', include('apps.person.urls')),
+    path('api/ecopatrol/', include('djoser.urls')),
+    path('api/ecopatrol/', include('djoser.urls.authtoken')),
+    path('api/ecopatrol/', include('apps.person.urls')),
     path('api/phone/', include('apps.phone.urls')),
-    path('api/ekopatrol_duty/', include('apps.monthly_duty.urls')),
+    path('api/ecopatrol_duty/', include('apps.monthly_duty.urls')),
 ]
 
 urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -6,7 +6,6 @@
                 <h1 class="title">տեղամասերի հերթապահության համակարգ</h1>
             </div>
         </div>
-    
         <section class="section">
             <div class="container">
                 <div class="columns">
@@ -18,20 +17,17 @@
                                     <input type="text" class="input" v-model="username"/>
                                 </div>
                             </div>
-
                             <div class="field">
                                 <label for="">Գախտնաբառ</label>
                                 <div class="control">
                                     <input type="password" class="input" v-model="password"/>
                                 </div>
                             </div>
-
                             <div class="notification is-danger" v-if="errors.length">
                                 <p v-for="error in errors" v-bind:key="erre">
                                     {{ error }}
                                 </p>
                             </div>
-
                             <div class="field">
                                 <div class="control">
                                     <button class="button" style="background: #163820; color: #ffffff;">Log in</button>
@@ -46,73 +42,63 @@
 </template>
 
 <script>
-import axios from 'axios'
+    import axios from 'axios'
 
-export default {
-    name: 'SignUp',
-    data() {
-        return {
-            username: '',
-            password: '',
-            errors: []
-        }
-    },
-    methods: {
-        async submitForm() {
-            this.$store.commit('setIsLoading', true)
-
-            axios.defaults.headers.common['Authorization'] = ""
-
-            localStorage.removeItem('token')
-            
-            this.errors = []
-            
-            if (this.username === ''){
-                this.errors.push('The username is missing!')
+    export default {
+        name: 'SignUp',
+        data() {
+            return {
+                username: '',
+                password: '',
+                errors: []
             }
-            if (this.password === ''){
-                this.errors.push('The password is missing!')
-            }
-
-            if (!this.errors.length) {
-                const formData = {
-                    username: this.username,
-                    password: this.password
+        },
+        methods: {
+            async submitForm() {
+                this.$store.commit('setIsLoading', true)
+                axios.defaults.headers.common['Authorization'] = ""
+                localStorage.removeItem('token')
+                this.errors = []
+                if (this.username === ''){
+                    this.errors.push('The username is missing!')
                 }
-
-                await axios
-                    .post('/api/ekopatrol/token/login/', formData)
-                    .then(async response => {
-                        const token = response.data.auth_token
-                        
-                        this.$store.commit('setToken', token)
-                        
-                        axios.defaults.headers.common['Authorization'] = "Token " + token
-                        
-                        localStorage.setItem('token', token)
-
-                        try {
-                            const userRes = await axios.get('/api/ekopatrol/getme/')
-                            this.$store.commit('setUser', userRes.data)
-                        } catch (err) {
-                            console.error('GETME ERROR:', err)
-                        }
-                        this.$router.push('/dashboard')
-                    })
-                    .catch(error => {
-                        if (error.response) {
-                            for (const property in error.response.data) {
-                                this.errors.push(`${property}: ${error.response.data[property]}`)
+                if (this.password === ''){
+                    this.errors.push('The password is missing!')
+                }
+                if (!this.errors.length) {
+                    const formData = {
+                        username: this.username,
+                        password: this.password
+                    }
+                    await axios
+                        .post('/api/ecopatrol/token/login/', formData)
+                        .then(async response => {
+                            const token = response.data.auth_token
+                            this.$store.commit('setToken', token)
+                            axios.defaults.headers.common['Authorization'] = "Token " + token
+                            localStorage.setItem('token', token)
+                            try {
+                                const userRes = await axios.get('/api/ecopatrol/getme/')
+                                this.$store.commit('setUser', userRes.data)
+                            } catch (err) {
+                                console.error('GETME ERROR:', err)
                             }
-                            console.log(JSON.stringify(error.response.data))
-                        } else if (error.message) {
-                            this.errors.push('Something went wrong. Please try again')
-                            console.log(JSON.stringify(error))
-                        }
-                    })
-                this.$store.commit('setIsLoading', false) 
+                            this.$router.push('/dashboard')
+                        })
+                        .catch(error => {
+                            if (error.response) {
+                                for (const property in error.response.data) {
+                                    this.errors.push(`${property}: ${error.response.data[property]}`)
+                                }
+                                console.log(JSON.stringify(error.response.data))
+                            } else if (error.message) {
+                                this.errors.push('Something went wrong. Please try again')
+                                console.log(JSON.stringify(error))
+                            }
+                        })
+                    this.$store.commit('setIsLoading', false) 
+                }
             }
         }
     }
-}
 </script>

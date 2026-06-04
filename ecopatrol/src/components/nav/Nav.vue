@@ -23,19 +23,19 @@
 </template>
 
 <script>
-import LogOut from '../../views/LogOut.vue';
+  import LogOut from '../../views/LogOut.vue';
 
-export default {
-    name: 'Nav',
-    components: {
-            LogOut
-    },
-    data() {
-        return {
-            username: '',
-            password: '',
-            errors: []
-        }
-    }
-}
+  export default {
+      name: 'Nav',
+      components: {
+              LogOut
+      },
+      data() {
+          return {
+              username: '',
+              password: '',
+              errors: []
+          }
+      }
+  }
 </script>

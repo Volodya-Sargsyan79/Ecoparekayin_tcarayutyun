@@ -73,34 +73,28 @@
             },
             toggleMenu() {
                 this.expanded = !this.expanded
-                // If the menu item is closed
                 if(!this.showChildren) {
                     this.showChildren = true;
                     this.$nextTick(() => {
-                        // We get the height of what's inside thw container to start the animation
                         this.containerHeight = this.$refs["container"].scrollHeight + "px";
                         setTimeout(() => {
                             this.containerHeight = "fit-content"
-                            // We set the overflow of the container to visible at the end of the animation
                             this.$refs["container"].style.overflow = "visible";
-                        }, 300) // Duration of the animation
+                        }, 300)
                     })
                 } else {
                     this.containerHeight = this.$refs["container"].scrollHeight + "px";
-                    // we set the overflow of the container to hidden to avoid text overlapping during tre animation
                     this.$refs["container"].style.overflow = "hidden";
-                    // This trick allow us to play the animation when the CSS is all well set
                     setTimeout(() => {
                         this.containerHeight = 0 + "px";
                     }, 10)
                     setTimeout(() => {
                         this.showChildren = false;
-                    }, 300) // Duration of the animation
+                    }, 300)
                 }
             }
         }
     }
-    
 </script>
 
 <style lang="scss" scoped>

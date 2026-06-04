@@ -37,18 +37,14 @@
                     },
                 ]
             }
-            
         },
         components: {
             MenuItem
         },
         computed: {
-            
             menuTree() {
-
                 const user = this.$store.state.user;
                 const isAdmin = user?.is_admin || user?.id === 1;
-
                 const common = [
                     {
                         label: 'Հերթափոխի գրանցում',
@@ -56,9 +52,7 @@
                         func: () => this.registrationShift()
                     }
                 ];
-
                 if (!isAdmin) return common;
-
                 return [
                     {
                         label: 'ԷՊԾ աշխատակցի գրանցում',
@@ -77,7 +71,7 @@
         methods: {
             registrationEmployee() {
                 axios
-                    .get('/api/ekopatrol/regions/')
+                    .get('/api/ecopatrol/regions/')
                     .then(response => {
                         this.$store.state.user.regions = response.data
                     })
@@ -93,7 +87,7 @@
                         }
                     })
                 axios
-                    .get('/api/ekopatrol/position/')
+                    .get('/api/ecopatrol/position/')
                     .then(response => {
                         this.$store.state.user.position = response.data
                     })
@@ -112,7 +106,7 @@
             },
             registrationShift() {
                 axios
-                    .get('/api/ekopatrol/regions/')
+                    .get('/api/ecopatrol/regions/')
                     .then(response => {
                         this.$store.state.user.regions = response.data
                     })
@@ -131,7 +125,7 @@
             },
             registrationRoute() {
                 axios
-                    .get('/api/ekopatrol/regions/')
+                    .get('/api/ecopatrol/regions/')
                     .then(response => {
                         this.$store.state.user.regions = response.data
                     })

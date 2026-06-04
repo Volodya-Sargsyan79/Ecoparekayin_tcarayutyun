@@ -59,16 +59,14 @@
                 limit: 10,
                 offset: 0
             }
-            
         },
         components: {
             MenuItem
         },
         methods: {
             searchShifth(e){
-
                 axios
-                    .get("/api/ekopatrol/precinct/", {
+                    .get("/api/ecopatrol/precinct/", {
                         params: { id: e },
                     })
                     .then((res) => {
@@ -81,7 +79,7 @@
             },
             placeKeeper(e){
                 axios
-                .get('/api/ekopatrol/getstationshiftlist/', {
+                .get('/api/ecopatrol/getstationshiftlist/', {
                     params: { id: e},
                 }) 
                 .then((res) => {
@@ -89,7 +87,6 @@
                     this.$router.push('/dashboard/precinct_shift/information/shitlist') 
                 })
                 .catch(err => { console.error(err) }) 
-
             }
         }
     }
