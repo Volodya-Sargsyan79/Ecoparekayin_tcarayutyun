@@ -33,6 +33,7 @@
 <script>
   import axios from "axios";
   import { initSip, callNumber, endCall } from "@/services/sip";
+  // import { initSip, endCall } from "@/services/sip";
 
   export default {
     data() {
@@ -61,7 +62,7 @@
         this.callStarted = true;
         this.activeRowIndex = rowIndex;
         try {
-          await initSip();
+          await initSip(number);
           const shiftIdParam = this.$route.params.id;
           const response = await axios.post(
             "/api/phone/call/",

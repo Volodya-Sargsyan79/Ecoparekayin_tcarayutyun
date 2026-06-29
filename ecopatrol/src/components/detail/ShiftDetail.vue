@@ -345,7 +345,7 @@
           console.error("ERROR:", err);
         }
         try {
-          const TOKEN = "SDBGAiEAv5Rc5L7LmxRjHReMqaM5LKptTGGGjT1WezwAlyVXDAQCIQCh0lLO_xlVrefOGUUCNTFsBFGU_cdtaqsv4sN0-yRxAnsidSI6MiwiZSI6IjIwMjYtMDYtMDRUMjA6MDA6MDAuMDAwKzAwOjAwIn0";
+          const TOKEN = "RjBEAiAfPN-wEZdJ_edGYBlOuUfo0umS28VXbHyR4vah11lUgQIgRL-1CyUKYQQ4_vgKvC5fcTlkIUbCPGgtPl7MlMVHQhJ7InUiOjIsImUiOiIyMDI2LTA2LTExVDIwOjAwOjAwLjAwMCswMDowMCJ9";
           const res = await axios.get(
             "https://gps.eps.am/api/positions",
             {
