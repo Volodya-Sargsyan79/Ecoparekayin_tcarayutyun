@@ -110,18 +110,63 @@
                         children: [
                             {
                                 label: 'Սևանի տեղամաս',
-                                title: "Կ",
-                                func: () => this.personEmployee()
+                                children: [
+                                    {
+                                        label: "Անձնակազմ",
+                                        title: "Ա",
+                                        func: () => this.employeeKeeper(5)
+                                    },
+                                    {
+                                        label: "Երթուղի",
+                                        title: "Ե",
+                                        func: () => this.routeKeeper(5)
+                                    },
+                                    {
+                                        label: "Հերթափոխ",
+                                        title: "Հ",
+                                        func: () => this.placeKeeper(5)
+                                    },
+                                ]
                             },
                             {
                                 label: 'Հրազդանի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
+                                children: [
+                                    {
+                                        label: "Անձնակազմ",
+                                        title: "Ա",
+                                        func: () => this.employeeKeeper(6)
+                                    },
+                                    {
+                                        label: "Երթուղի",
+                                        title: "Ե",
+                                        func: () => this.routeKeeper(6)
+                                    },
+                                    {
+                                        label: "Հերթափոխ",
+                                        title: "Հ",
+                                        func: () => this.placeKeeper(6)
+                                    },
+                                ]
                             },
                             {
                                 label: 'Ճամբարակի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
+                                children: [
+                                    {
+                                        label: "Անձնակազմ",
+                                        title: "Ա",
+                                        func: () => this.employeeKeeper(7)
+                                    },
+                                    {
+                                        label: "Երթուղի",
+                                        title: "Ե",
+                                        func: () => this.routeKeeper(7)
+                                    },
+                                    {
+                                        label: "Հերթափոխ",
+                                        title: "Հ",
+                                        func: () => this.placeKeeper(7)
+                                    },
+                                ]
                             }
                         ]
                     },
