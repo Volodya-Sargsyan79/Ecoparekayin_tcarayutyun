@@ -16,10 +16,8 @@ from django.http import JsonResponse
 from .models import InformationForShift
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import LunchTime, StationShift
-import json
+from .models import LunchTime
 from datetime import datetime
-
 
 
 class GetMe(APIView):

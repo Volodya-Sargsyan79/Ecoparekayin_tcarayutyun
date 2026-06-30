@@ -13,6 +13,7 @@
   <section class="section">
     <div class="container">
       <div class="columns is-multiline">
+
         <router-link to="/dashboard/precinct_shift" class="column is-4">
           <div class="box has-text-centered">
             <span class="icon is-size-2">
@@ -22,15 +23,17 @@
             <p class="title is-5">հերթափոխերի վերաբերյալ</p>
           </div>
         </router-link>
-        <div class=" column is-4">
-          <div class="box has-text-centered clickable" @click="shitԼist">
+
+        <router-link to="/dashboard/legalization" class="column is-4">
+          <div class="box has-text-centered">
             <span class="icon is-size-2">
               <i class="far fa-comments"></i>
             </span>
             <h2 class="title is-4 mt-4 mb-4">Տեղեկատվություն</h2>
             <p class="title is-5">իրավախախտումների վերաբերյալ</p>
           </div>
-        </div>
+        </router-link>
+
         <router-link to="/CrimeAlert" class="column is-4">
           <div class="box has-text-centered">
             <span class="icon is-size-2">

@@ -6,6 +6,7 @@ import Registration from '@/views/dashboard/shift/Registration.vue'
 import PrecinctShift from '@/views/dashboard/shift/PrecinctShift.vue'
 import Information from '@/views/dashboard/shift/Information.vue'
 import SearchInformation from '@/views/dashboard/shift/SearchInformation.vue'
+import Legalization from '@/views/dashboard/offenses/Լegalization.vue'
 
 const routes = [
   {
@@ -25,6 +26,14 @@ const routes = [
     path: '/dashboard/precinct_shift',
     name: 'PrecinctShift',
     component: PrecinctShift,
+    meta: {
+      requireLogin: true
+    }
+  },
+    {
+    path: '/dashboard/legalization',
+    name: 'Legalization',
+    component: Legalization,
     meta: {
       requireLogin: true
     }
