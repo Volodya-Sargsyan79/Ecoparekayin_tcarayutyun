@@ -219,17 +219,8 @@
                         this.$store.state.user.employee = res.data
                     })
                     .catch(err => { console.error(err) })
-                axios
-                    .get("/api/ecopatrol/creater/",{
-                        params: { id: this.form.precinct_id },
-                    })
-                    .then(res => {
-                        this.$store.state.user.creater = res.data[1]
-                    })
-                    .catch(err => { console.error(err) })
             },
             saveCall() {
-                this.form.user_id = this.$store.state.user.creater.user_id
                 axios.post("/api/ecopatrol/addstationshift/", this.form)
                     .then(() => 
                         axios
@@ -241,7 +232,8 @@
                                 alert("Գրանցումը հաջողությամբ կատարվել է:")
                                 this.$router.push('/dashboard/precinct_shift/registration')
                             })
-                            .catch(err => { 
+                            .catch(err => {
+                                alert("Անհրաժեշտ է լրացնել բոլոր դաշտերը:")
                                 console.error(err) 
                             }) 
                     )

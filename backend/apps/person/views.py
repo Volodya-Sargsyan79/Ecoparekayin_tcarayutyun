@@ -35,21 +35,16 @@ class GetRegionList(APIView):
         try:
             cursor = connection.cursor()
 
-            if request.user.id == 1:
-                sql = '''
-                    SELECT * FROM person_region;
-                '''
-                cursor.execute(sql)
-
-            else:
-                sql = '''
-                    SELECT person_region.id, person_region.region 
-                    FROM ekopatrol.person_useraccess 
-                    JOIN person_region 
-                    ON person_useraccess.region_id = person_region.id 
-                    LIMIT 1;
-                '''
-                cursor.execute(sql)
+            sql = '''
+                SELECT DISTINCT
+                    person_region.id,
+                    person_region.region
+                FROM person_useraccess
+                JOIN person_region
+                    ON person_useraccess.region_id = person_region.id
+                WHERE person_useraccess.user_id = %s;
+            '''
+            cursor.execute(sql, [request.user.id])
 
             columns = [col[0] for col in cursor.description]
 
@@ -121,33 +116,6 @@ class GetPositionList(APIView):
             # Log the error using log_error function
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-class GetCreater(APIView):
-    permission_classes = [IsAuthenticated]
-    def get(self, request):
-    
-        precinct_id = request.GET.get('id') or ''
-
-        try:
-            cursor = connection.cursor()
-
-            sql = '''
-                SELECT user_id FROM ekopatrol.person_useraccess 
-                WHERE precinct_id=%s;
-            '''
-            cursor.execute(sql, [precinct_id])
-
-            columns = [col[0] for col in cursor.description]
-
-            results = [
-                dict(zip(columns, row)) for row in cursor.fetchall()
-            ]
-
-            return Response(results, status=status.HTTP_200_OK)
-
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 class AddEmployee(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
@@ -163,7 +131,7 @@ class AddEmployee(APIView):
 
         sql = '''
             INSERT INTO person_employee 
-            (name, surname, phone, camera, position_id, precinct_id, region_id, created_by_id)
+                (name, surname, phone, camera, position_id, precinct_id, region_id, created_by_id)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         '''
 
@@ -374,48 +342,11 @@ class GetStationShiftList(APIView):
 class FilterStationShift(APIView):
     permission_classes = [IsAuthenticated]
 
-    # def get(self, request):
-    #     id = request.GET.get('id') or ''
-    #     date_from = request.GET.get('date_from') or ''
-    #     date_to = request.GET.get('date_to') or ''
-
-    #     try:
-    #         cursor = connection.cursor()
-    #         sql = '''
-    #             SELECT person_stationshift.id, start_shift, end_shift, precinct, car_number, board_number, route_number, route_length, thumbnail 
-    #             FROM ekopatrol.person_stationshift 
-    #             JOIN person_precinct ON person_stationshift.precinct_id = person_precinct.id 
-    #             JOIN person_car ON person_stationshift.car_id = person_car.id
-    #             JOIN person_route ON person_stationshift.route_id = person_route.id
-    #             LEFT JOIN person_useraccess 
-    #                 ON person_stationshift.precinct_id = person_useraccess.precinct_id
-    #             WHERE person_precinct.id = %s
-    #             AND person_useraccess.user_id = %s
-    #             AND DATE(person_stationshift.start_shift) BETWEEN %s AND %s
-    #         '''
-
-    #         params = [id, request.user.id, date_from, date_to]
-
-
-    #         cursor.execute(sql, params)
-
-    #         columns = [col[0] for col in cursor.description]
-
-    #         results = [
-    #             dict(zip(columns, row)) for row in cursor.fetchall()
-    #         ]
-    #         print(results, 11111)
-    #         return Response(results, status=status.HTTP_200_OK)
-
-    #     except Exception as e:
-    #         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
     def get(self, request):
         id = request.GET.get('id') or ''
         date_from = request.GET.get('date_from') or ''
         date_to = request.GET.get('date_to') or ''
 
-        print(request.GET.get, 00000)
         try:
             cursor = connection.cursor()
             sql = '''
@@ -518,7 +449,7 @@ class AddStationShift(APIView):
         start_shift = request.data.get('start_shift')
         end_shift = request.data.get('end_shift')
         car_id = request.data.get('car_id')
-        created_by_id = request.data.get('user_id')
+        created_by_id = request.user.id
         employee_01_id = request.data.get('employee_01_id')
         employee_02_id = request.data.get('employee_02_id')
         employee_03_id = request.data.get('employee_03_id') or None
