@@ -7,6 +7,7 @@ import PrecinctShift from '@/views/dashboard/shift/PrecinctShift.vue'
 import Information from '@/views/dashboard/shift/Information.vue'
 import SearchInformation from '@/views/dashboard/shift/SearchInformation.vue'
 import Legalization from '@/views/dashboard/offenses/Լegalization.vue'
+import RegistrationLegalization from '@/views/dashboard/offenses/RegistrationLegalization.vue'
 
 const routes = [
   {
@@ -26,14 +27,6 @@ const routes = [
     path: '/dashboard/precinct_shift',
     name: 'PrecinctShift',
     component: PrecinctShift,
-    meta: {
-      requireLogin: true
-    }
-  },
-    {
-    path: '/dashboard/legalization',
-    name: 'Legalization',
-    component: Legalization,
     meta: {
       requireLogin: true
     }
@@ -116,6 +109,33 @@ const routes = [
           name: "search-shift-detail",
           component: () => import('@/components/search/SearchShiftDetail.vue')
         },
+      ]
+    },
+    {
+      path: '/dashboard/legalization',
+      name: 'Legalization',
+      component: Legalization,
+      meta: {
+        requireLogin: true
+      }
+    },
+    {
+      path: '/dashboard/legalization/registration_legalization',
+      component: RegistrationLegalization,
+      meta: { requireLogin: true },
+      children: [
+        {
+          path: 'illegal_logging',
+          component: () => import('@/components/registration/RegistrationIllegalLogging.vue')
+        },
+        {
+          path: 'poaching',
+          component: () => import('@/components/registration/RegistrationPoaching.vue')
+        },
+        {
+          path: 'illegal_fishing',
+          component: () => import('@/components/registration/RegistrationIllegalFishing.vue')
+        }
       ]
     },
   ]

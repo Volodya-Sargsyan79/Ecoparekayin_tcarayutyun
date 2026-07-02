@@ -12,7 +12,7 @@
   <section class="section">
     <div class="container">
       <div class="columns is-multiline">
-        <router-link to="/dashboard/precinct_shift/registration" class="column is-6">
+        <router-link to="/dashboard/legalization/registration_legalization" class="column is-6">
           <div class="box has-text-centered clickable">
             <span class="icon is-size-2">
               <i class="far fa-clock"></i>

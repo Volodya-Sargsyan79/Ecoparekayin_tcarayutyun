@@ -30,7 +30,7 @@
               <i class="far fa-comments"></i>
             </span>
             <h2 class="title is-4 mt-4 mb-4">Տեղեկատվություն</h2>
-            <p class="title is-5">իրավախախտումների վերաբերյալ</p>
+            <p class="title is-5">իրավախաղտումների վերաբերյալ</p>
           </div>
         </router-link>
 

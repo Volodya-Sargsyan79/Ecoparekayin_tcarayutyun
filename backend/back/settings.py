@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     'apps.monthly_duty',
     'apps.person',
     'apps.phone',
+    'apps.legalization',
 
 ]
 
