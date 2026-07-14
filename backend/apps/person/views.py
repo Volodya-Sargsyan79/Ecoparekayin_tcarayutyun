@@ -1,4 +1,6 @@
 
+from urllib import request
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -13,11 +15,13 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.http import JsonResponse
+from urllib3 import request
 from .models import InformationForShift
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import LunchTime
 from datetime import datetime
+from django.utils.dateparse import parse_datetime
 
 
 class GetMe(APIView):
@@ -191,8 +195,6 @@ class GetEmployee(APIView):
 
     def get(self, request, pk):
         
-        # id = request.GET.get('id') or ''
-        
         try:
             cursor = connection.cursor()
 
@@ -323,7 +325,8 @@ class GetStationShiftList(APIView):
                     ON person_stationshift.precinct_id = person_useraccess.precinct_id
                 WHERE person_precinct.id = %s
                 AND person_useraccess.user_id = %s
-                AND DATE(person_stationshift.start_shift) = CURRENT_DATE;
+                AND NOW() BETWEEN person_stationshift.start_shift
+                AND person_stationshift.end_shift
             '''
             cursor.execute(sql, [id, request.user.id])
 
@@ -444,10 +447,11 @@ class GetStationShift(APIView):
 
 class AddStationShift(APIView):
     permission_classes = [IsAuthenticated]
+
     def post(self, request):
 
-        start_shift = request.data.get('start_shift')
-        end_shift = request.data.get('end_shift')
+        start_shift = parse_datetime(request.data.get('start_shift'))
+        end_shift = parse_datetime(request.data.get('end_shift'))
         car_id = request.data.get('car_id')
         created_by_id = request.user.id
         employee_01_id = request.data.get('employee_01_id')
@@ -460,7 +464,7 @@ class AddStationShift(APIView):
 
         try:
             with connection.cursor() as cursor:
-                # Ստուգում ենք կա՞ արդեն նույն start_shift և car_id-ով
+
                 cursor.execute('''
                     SELECT COUNT(*) FROM person_stationshift
                     WHERE start_shift = %s AND car_id = %s
@@ -474,21 +478,15 @@ class AddStationShift(APIView):
                         status=status.HTTP_400_BAD_REQUEST
                     )
 
-                # Եթե չկա — գրանցում ենք
                 cursor.execute('''
                     INSERT INTO person_stationshift 
                     (
-                        start_shift, 
-                        end_shift, 
-                        employee_01_id, 
-                        employee_02_id, 
-                        employee_03_id, 
-                        employee_04_id, 
-                        region_id, 
-                        precinct_id, 
-                        car_id,
-                        route_id, 
-                        created_by_id)
+                        start_shift, end_shift,
+                        employee_01_id, employee_02_id,
+                        employee_03_id, employee_04_id,
+                        region_id, precinct_id,
+                        car_id, route_id, created_by_id
+                    )
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ''', [
                     start_shift,
@@ -504,10 +502,10 @@ class AddStationShift(APIView):
                     created_by_id
                 ])
 
-            return Response({"message": "Employee caller added successfully"}, status=status.HTTP_201_CREATED)
+            return Response({"message": "success"}, status=201)
 
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({'error': str(e)}, status=500)
         
 
 

@@ -127,7 +127,7 @@
                     </div>
 
                     <label class="label has-text-centered" style="font-size:10px;">
-                        Փոխադրամիջոցի նկարներ
+                        Տեղայնքի նկարներ
                     </label>
                 </div>
             </div>

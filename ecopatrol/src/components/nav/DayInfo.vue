@@ -63,28 +63,23 @@
                         children: [
                             {
                                 label: 'Սևքարի տեղամաս',
-                                title: "Կ",
-                                func: () => this.personEmployee()
+                                children: this.createActions(15)
                             },
                             {
                                 label: 'Նոյեմբերյանի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
+                                children: this.createActions(16)
                             },
                             {
                                 label: 'Դիլիջանի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
+                                children: this.createActions(17)
                             },
                             {
                                 label: 'Իջևանի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
+                                children: this.createActions(18)
                             },
                             {
                                 label: 'Բերդի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
+                                children: this.createActions(19)
                             }
                         ]
                     },
@@ -93,28 +88,23 @@
                         children: [
                             {
                                 label: 'Ստեփանավանի և Տաշիր տեղամաս',
-                                title: "Կ",
-                                func: () => this.personEmployee()
+                                children: this.createActions(8)
                             },
                             {
                                 label: 'Վայոցձորի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
+                                children: this.createActions(9)
                             },
                             {
                                 label: 'Թումանյանի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
+                                children: this.createActions(10)
                             },
                             {
                                 label: 'Ախթալայի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
+                                tchildren: this.createActions(11)
                             },
                             {
                                 label: 'Ալավերդու տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
+                                children: this.createActions(12)
                             }
                         ]
                     },
@@ -123,13 +113,11 @@
                         children: [
                             {
                                 label: 'Վեդու տեղամաս',
-                                title: "Կ",
-                                func: () => this.personEmployee()
+                                children: this.createActions(13)
                             },
                             {
                                 label: 'Ջերմուկի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
+                                children: this.createActions(14)
                             }
                         ]
                     },
@@ -138,19 +126,16 @@
                         children: [
                             {
                                 label: 'Գյումրու տեղամաս',
-                                title: "Կ",
-                                func: () => this.personEmployee()
+                                children: this.createActions(20)
                             },
                             {
                                 label: 'Ապարանի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
+                                children: this.createActions(21)
                             },
                             {
                                 label: 'Աշոցքի տեղամաս',
-                                title: "Ք",
-                                func: () => this.personRelatives()
-                            }
+                                children: this.createActions(22)
+                            }           
                         ]
                     },
                     {
@@ -158,8 +143,7 @@
                         children: [
                             {
                                 label: 'Երևանի տեղամաս',
-                                title: "Կ",
-                                func: () => this.personEmployee()
+                                children: this.createActions(23)
                             }
                         ]
                     }
