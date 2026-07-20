@@ -321,7 +321,7 @@
             console.error("SHIFT TIME NOT FOUND");
             return;
           }
-          const TOKEN = "RjBEAiAfPN-wEZdJ_edGYBlOuUfo0umS28VXbHyR4vah11lUgQIgRL-1CyUKYQQ4_vgKvC5fcTlkIUbCPGgtPl7MlMVHQhJ7InUiOjIsImUiOiIyMDI2LTA2LTExVDIwOjAwOjAwLjAwMCswMDowMCJ9";
+          const TOKEN = "RjBEAiBFF35SXZhyhx7mtzcqX9sWzRey0sr4iDoowuHSga96VQIgYnoI31tReZk21QByMb8EAOzM0VZ01WVCHnR8R9DCesF7InUiOjIsImUiOiIyMDI2LTA3LTIzVDIwOjAwOjAwLjAwMCswMDowMCJ9";
           const from = new Date(
             this.shift_info.start_shift.replace(" ", "T")
           ).toISOString();

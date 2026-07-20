@@ -95,7 +95,15 @@ class Route(models.Model):
     
     def __str__(self):
         return f'{self.registration_day} {self.precinct} {self.route_number} երթուղի'
-   
+
+
+class Camera(models.Model):
+    number = models.CharField(unique=True, max_length=5, verbose_name="Տեսախցիկի համար")
+    region = models.ForeignKey(Region, related_name='camera', on_delete=models.CASCADE, verbose_name="Վարչություն")
+    precinct = models.ForeignKey(Precinct, related_name='camera', on_delete=models.CASCADE, null=True, blank=True, verbose_name="Տեղամաս")
+
+    def __str__(self):
+        return f'Տեսախցիկի համար {self.number} {self.region} {self.precinct}'
 
 class Employee(models.Model):
     name = models.CharField(max_length=50, verbose_name="Անուն")
@@ -103,8 +111,8 @@ class Employee(models.Model):
     region = models.ForeignKey(Region, related_name='employee', on_delete=models.CASCADE, verbose_name="Վարչություն")
     precinct = models.ForeignKey(Precinct, related_name='employee', on_delete=models.CASCADE, null=True, blank=True, verbose_name="Տեղամաս")
     position = models.ForeignKey(Position, related_name='employee', on_delete=models.CASCADE, verbose_name="Պաշտոն")
+    camera = models.OneToOneField(Camera, related_name='employee', on_delete=models.CASCADE, null=True, blank=True, verbose_name="Տեսախցիկ")
     phone = models.CharField(max_length=9, null=True, blank=True, verbose_name="Հեռ.")
-    camera = models.IntegerField(unique=True, verbose_name="Տեսախցիկ")
     image = models.ImageField(upload_to='person/', null=True, blank=True, verbose_name="Նկար")
     birth_day = models.DateField(null=True, blank=True, verbose_name="Ծննդյան ամսաթիվ")
     order_day = models.DateField(null=True, blank=True, verbose_name="Հրամանի ամսաթիվ")

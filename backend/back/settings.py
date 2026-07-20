@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     'apps.person',
     'apps.phone',
     'apps.legalization',
+    'apps.gps',
 
 ]
 

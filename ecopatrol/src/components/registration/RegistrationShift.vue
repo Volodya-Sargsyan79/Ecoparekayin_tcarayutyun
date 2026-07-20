@@ -59,7 +59,7 @@
                             <select v-model="form.employee_01_id">
                                 <option value="">Ընտրել</option>
                                 <option v-for="employee in $store.state.user.employee" :key="employee.id" :value="employee.id">
-                                    {{ employee.camera }} {{ employee.name }} {{ employee.surname }} 
+                                    {{ employee.number }} {{ employee.name }} {{ employee.surname }} 
                                 </option>
                             </select>
                         </div>
@@ -75,7 +75,7 @@
                             <select v-model="form.employee_02_id">
                                 <option value="">Ընտրել</option>
                                 <option v-for="employee in $store.state.user.employee" :key="employee.id" :value="employee.id">
-                                    {{ employee.camera }} {{ employee.name }} {{ employee.surname }}
+                                    {{ employee.number }} {{ employee.name }} {{ employee.surname }}
                                 </option>
                             </select>
                         </div>
@@ -91,7 +91,7 @@
                             <select v-model="form.employee_03_id">
                                 <option value="">Ընտրել</option>
                                 <option v-for="employee in $store.state.user.employee" :key="employee.id" :value="employee.id">
-                                    {{ employee.camera }} {{ employee.name }} {{ employee.surname }}
+                                    {{ employee.number }} {{ employee.name }} {{ employee.surname }}
                                 </option>
                             </select>
                         </div>
@@ -106,7 +106,7 @@
                            <select v-model="form.employee_04_id">
                                 <option value="">Ընտրել</option>
                                 <option v-for="employee in $store.state.user.employee" :key="employee.id" :value="employee.id">
-                                    {{ employee.camera }} {{ employee.name }} {{ employee.surname }}
+                                    {{ employee.number }} {{ employee.name }} {{ employee.surname }}
                                 </option>
                             </select>
                         </div>
@@ -123,7 +123,7 @@
                            <select v-model="form.car_id">
                                 <option value="">Ընտրել</option>
                                 <option v-for="car in $store.state.user.car" :key="car.id" :value="car.id">
-                                    {{ car.car_number }} {{ car.board_number }}
+                                    {{ car.board_number }} {{ car.car_number }} 
                                 </option>
                             </select>
                         </div>

@@ -169,10 +169,17 @@ class GetLastEmployee(APIView):
             cursor = connection.cursor()
 
             sql = '''
-                SELECT person_employee.id, name, surname, camera, phone 
-                FROM person_employee 
-                LEFT JOIN person_useraccess 
-                ON person_employee.precinct_id = person_useraccess.precinct_id
+                SELECT
+                    person_employee.id,
+                    person_employee.name,
+                    person_employee.surname,
+                    person_camera.number,
+                    person_employee.phone
+                FROM person_employee
+                LEFT JOIN person_camera
+                    ON person_employee.camera_id = person_camera.id
+                LEFT JOIN person_useraccess
+                    ON person_employee.precinct_id = person_useraccess.precinct_id
                 WHERE person_employee.precinct_id = %s
                 AND person_useraccess.user_id = %s;
             '''
@@ -256,12 +263,26 @@ class GetLastRoute(APIView):
             cursor = connection.cursor()
 
             sql = '''
-                SELECT person_route.id, route_number, route_length, registration_day, thumbnail
-                FROM person_route 
-                LEFT JOIN person_useraccess 
-                ON person_route.precinct_id = person_useraccess.precinct_id
-                WHERE person_route.precinct_id = %s
-                AND person_useraccess.user_id = %s;
+                SELECT id, route_number, route_length, registration_day, thumbnail
+                FROM (
+                    SELECT
+                        person_route.id,
+                        person_route.route_number,
+                        person_route.route_length,
+                        person_route.registration_day,
+                        person_route.thumbnail,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY person_route.route_number
+                            ORDER BY person_route.registration_day DESC, person_route.id DESC
+                        ) AS rn
+                    FROM person_route
+                    LEFT JOIN person_useraccess
+                        ON person_route.precinct_id = person_useraccess.precinct_id
+                    WHERE person_route.precinct_id = %s
+                    AND person_useraccess.user_id = %s
+                ) t
+                WHERE rn = 1
+                ORDER BY route_number;
             '''
             cursor.execute(sql, [id, request.user.id])
 
@@ -393,22 +414,22 @@ class GetStationShift(APIView):
 
                     -- Employee 1
                     e1.name AS employee_01_name, e1.surname AS employee_01_surname, 
-                    e1.phone AS employee_01_phone, e1.camera AS employee_01_camera, 
+                    e1.phone AS employee_01_phone, c1.number AS employee_01_camera,
                     p1.position_held AS employee_01_position_held,
 
                     -- Employee 2
                     e2.name AS employee_02_name, e2.surname AS employee_02_surname, 
-                    e2.phone AS employee_02_phone, e2.camera AS employee_02_camera, 
+                    e2.phone AS employee_02_phone, c2.number AS employee_02_camera,
                     p2.position_held AS employee_02_position_held,
 
                     -- Employee 3
                     e3.name AS employee_03_name, e3.surname AS employee_03_surname, 
-                    e3.phone AS employee_03_phone, e3.camera AS employee_03_camera, 
+                    e3.phone AS employee_03_phone, c3.number AS employee_03_camera,
                     p3.position_held AS employee_03_position_held,
 
                     -- Employee 4
                     e4.name AS employee_04_name, e4.surname AS employee_04_surname, 
-                    e4.phone AS employee_04_phone, e4.camera AS employee_04_camera, 
+                    e4.phone AS employee_04_phone, c4.number AS employee_04_camera,
                     p4.position_held AS employee_04_position_held
 
                 FROM ekopatrol.person_stationshift
@@ -423,11 +444,15 @@ class GetStationShift(APIView):
                 LEFT JOIN person_employee e3 ON person_stationshift.employee_03_id = e3.id
                 LEFT JOIN person_employee e4 ON person_stationshift.employee_04_id = e4.id
 
-                -- Join position table 4 times using aliases p1, p2, p3, p4
                 LEFT JOIN person_position p1 ON e1.position_id = p1.id
                 LEFT JOIN person_position p2 ON e2.position_id = p2.id
                 LEFT JOIN person_position p3 ON e3.position_id = p3.id
                 LEFT JOIN person_position p4 ON e4.position_id = p4.id
+                
+                LEFT JOIN person_camera c1 ON e1.camera_id = c1.id
+                LEFT JOIN person_camera c2 ON e2.camera_id = c2.id
+                LEFT JOIN person_camera c3 ON e3.camera_id = c3.id
+                LEFT JOIN person_camera c4 ON e4.camera_id = c4.id
                 WHERE person_stationshift.id = %s;
             '''
             cursor.execute(sql, [pk])
