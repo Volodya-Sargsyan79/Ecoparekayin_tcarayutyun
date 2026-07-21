@@ -5,21 +5,77 @@
         <div class="columns">
             <div class="column">
                 <div class="field">
-                    <label class="label">Հերտափոխի սկիզբ</label>
-                    <div class="control">
-                        <input class="input" type="datetime-local" v-model="form.start_shift">
+                    <label class="label">Հերթափոխի սկիզբ</label>
+                    <div class="field is-grouped is-align-items-center">
+                        <div class="control is-expanded">
+                            <input class="input" type="date" v-model="form.start_shift_date">
+                        </div>
+                        <div class="control" style="max-width: 110px;">
+                            <input
+                                class="input"
+                                type="number"
+                                min="0"
+                                max="23"
+                                step="1"
+                                inputmode="numeric"
+                                v-model="form.start_shift_hour"
+                                placeholder="Ժամ"
+                                @blur="normalizeTimeField('start')"
+                            >
+                        </div>
+                        <div class="control" style="max-width: 110px;">
+                            <input
+                                class="input"
+                                type="number"
+                                min="0"
+                                max="59"
+                                step="1"
+                                inputmode="numeric"
+                                v-model="form.start_shift_minute"
+                                placeholder="րոպ"
+                                @blur="normalizeTimeField('start')"
+                            >
+                        </div>
                     </div>
                 </div>
-                <p v-if="!form.start_shift" class="help is-danger">Պարտադիր է ընտրել տեղամասը</p>
+                <p v-if="!form.start_shift_date || !form.start_shift_hour || !form.start_shift_minute" class="help is-danger">Պարտադիր է ընտրել սկիզբի ամսաթիվը և ժամանակը</p>
             </div>
             <div class="column">
                 <div class="field">
-                    <label class="label">Հերտափոխի ավարտ</label>
-                    <div class="control">
-                        <input class="input" type="datetime-local" v-model="form.end_shift">
+                    <label class="label">Հերթափոխի ավարտ</label>
+                    <div class="field is-grouped is-align-items-center">
+                        <div class="control is-expanded">
+                            <input class="input" type="date" v-model="form.end_shift_date">
+                        </div>
+                        <div class="control" style="max-width: 110px;">
+                            <input
+                                class="input"
+                                type="number"
+                                min="0"
+                                max="23"
+                                step="1"
+                                inputmode="numeric"
+                                v-model="form.end_shift_hour"
+                                placeholder="Ժամ"
+                                @blur="normalizeTimeField('end')"
+                            >
+                        </div>
+                        <div class="control" style="max-width: 110px;">
+                            <input
+                                class="input"
+                                type="number"
+                                min="0"
+                                max="59"
+                                step="1"
+                                inputmode="numeric"
+                                v-model="form.end_shift_minute"
+                                placeholder="րոպ"
+                                @blur="normalizeTimeField('end')"
+                            >
+                        </div>
                     </div>
                 </div>
-                <p v-if="!form.end_shift" class="help is-danger">Պարտադիր է ընտրել տեղամասը</p>
+                <p v-if="!form.end_shift_date || !form.end_shift_hour || !form.end_shift_minute" class="help is-danger">Պարտադիր է ընտրել ավարտի ամսաթիվը և ժամանակը</p>
             </div>
             <div class="column">
                 <div class="field">
@@ -162,8 +218,12 @@
         data() {
             return {
                 form: {
-                    start_shift: null,
-                    end_shift: null,
+                    start_shift_date: null,
+                    start_shift_hour: null,
+                    start_shift_minute: null,
+                    end_shift_date: null,
+                    end_shift_hour: null,
+                    end_shift_minute: null,
                     region_id: null,
                     precinct_id: null,
                     employee_01_id: null,
@@ -220,8 +280,34 @@
                     })
                     .catch(err => { console.error(err) })
             },
+            normalizeTimeField(part) {
+                const hourKey = `${part}_shift_hour`
+                const minuteKey = `${part}_shift_minute`
+
+                const normalize = (value, max) => {
+                    if (value === null || value === undefined || value === '') return null
+                    const digits = String(value).replace(/\D/g, '')
+                    if (!digits) return null
+                    const num = Number(digits)
+                    const clamped = Math.min(Math.max(num, 0), max)
+                    return String(clamped).padStart(2, '0')
+                }
+
+                this.form[hourKey] = normalize(this.form[hourKey], 23)
+                this.form[minuteKey] = normalize(this.form[minuteKey], 59)
+            },
             saveCall() {
-                axios.post("/api/ecopatrol/addstationshift/", this.form)
+                const payload = { ...this.form }
+                payload.start_shift = `${this.form.start_shift_date}T${String(this.form.start_shift_hour).padStart(2, '0')}:${String(this.form.start_shift_minute).padStart(2, '0')}`
+                payload.end_shift = `${this.form.end_shift_date}T${String(this.form.end_shift_hour).padStart(2, '0')}:${String(this.form.end_shift_minute).padStart(2, '0')}`
+                delete payload.start_shift_date
+                delete payload.start_shift_hour
+                delete payload.start_shift_minute
+                delete payload.end_shift_date
+                delete payload.end_shift_hour
+                delete payload.end_shift_minute
+
+                axios.post("/api/ecopatrol/addstationshift/", payload)
                     .then(() => 
                         axios
                             .get('/api/ecopatrol/getstationshiftlist/', {

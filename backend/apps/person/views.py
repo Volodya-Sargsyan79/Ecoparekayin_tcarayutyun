@@ -16,10 +16,9 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.http import JsonResponse
 from urllib3 import request
-from .models import InformationForShift
+from .models import InformationForShift, LunchTime, Camera
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import LunchTime
 from datetime import datetime
 from django.utils.dateparse import parse_datetime
 
@@ -127,15 +126,28 @@ class AddEmployee(APIView):
         name = request.data.get('name')
         surname = request.data.get('surname')
         phone = request.data.get('phone')
-        camera = request.data.get('camera')
+        camera_number = request.data.get('camera')
         position_id = request.data.get('position_id')
         precinct_id = request.data.get('precinct_id')
         region_id = request.data.get('region_id')
         created_by_id = request.user.id
+        camera_id = None
+
+        if camera_number:
+            camera_number = str(camera_number).strip()
+            if camera_number:
+                camera_obj, _ = Camera.objects.get_or_create(
+                    number=camera_number,
+                    defaults={
+                        'region_id': region_id,
+                        'precinct_id': precinct_id,
+                    }
+                )
+                camera_id = camera_obj.id
 
         sql = '''
             INSERT INTO person_employee 
-                (name, surname, phone, camera, position_id, precinct_id, region_id, created_by_id)
+                (name, surname, phone, camera_id, position_id, precinct_id, region_id, created_by_id)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         '''
 
@@ -145,7 +157,7 @@ class AddEmployee(APIView):
                     name,
                     surname,
                     phone,
-                    camera,
+                    camera_id,
                     position_id,
                     precinct_id,
                     region_id,

@@ -17,6 +17,8 @@
 
 <script>
     import InvoiceTable from "../tables/InvoiceTable.vue";
+    import { formatDate } from "@/utils/dateFormatter";
+
     export default {
         name: "ShitListForm",
         components: {
@@ -40,8 +42,8 @@
                     const routes = this.$store.state.user.stationshif || []
                     return routes.map((item, index) => ({
                         id: item.id,
-                        start_shift: item.start_shift,
-                        end_shift: item.end_shift,
+                        start_shift: formatDate(item.start_shift),
+                        end_shift: formatDate(item.end_shift),
                         precinct: item.precinct,
                         car_number: item.car_number,
                         board_number: item.board_number,

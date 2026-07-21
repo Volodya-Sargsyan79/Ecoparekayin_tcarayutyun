@@ -143,6 +143,7 @@
   import markerIcon from "leaflet/dist/images/marker-icon.png";
   import markerShadow from "leaflet/dist/images/marker-shadow.png";
   import SearchTable from "../tables/SearchTable.vue";
+  import { formatDate } from "@/utils/dateFormatter";
 
   delete L.Icon.Default.prototype._getIconUrl;
   L.Icon.Default.mergeOptions({
@@ -203,8 +204,8 @@
           return {
             carInfo: [
               [
-                this.shift_info?.start_shift,
-                this.shift_info?.end_shift,
+                formatDate(this.shift_info?.start_shift),
+                formatDate(this.shift_info?.end_shift),
                 this.shift_info?.car_number,
                 this.shift_info?.board_number,
               ]
