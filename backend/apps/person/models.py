@@ -162,8 +162,6 @@ class StationShift(models.Model):
     car = models.ForeignKey('Car', related_name='stationshift', on_delete=models.CASCADE, verbose_name="Ծառայողական մեքենան")
     route = models.ForeignKey('Route', related_name='stationshift', on_delete=models.CASCADE, verbose_name="Երթուղի")
 
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='stationshift', on_delete=models.CASCADE, verbose_name="Գրանցող օգտատեր")
-
     def __str__(self):
         return f'{self.start_shift} {self.end_shift} {self.car} {self.route}'
 
@@ -175,9 +173,9 @@ class InformationForShift(models.Model):
 
 
 class UserAccess(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    region = models.ForeignKey(Region, on_delete=models.CASCADE)
-    precinct = models.ForeignKey(Precinct, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    region = models.ForeignKey(Region, on_delete=models.CASCADE, null=True, blank=True)
+    precinct = models.ForeignKey(Precinct, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f'{self.user}'

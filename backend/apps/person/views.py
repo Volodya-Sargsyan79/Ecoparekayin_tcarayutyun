@@ -16,20 +16,31 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.http import JsonResponse
 from urllib3 import request
-from .models import InformationForShift, LunchTime, Camera
+from .models import InformationForShift, LunchTime, Camera, UserAccess
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 from django.utils.dateparse import parse_datetime
+from .permissions import IsAdmin, IsAllUsers, IsForEmployee, IsForShiftAdd, IsForShiftInformationsAdd
 
 
 class GetMe(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        user = request.user
+
+        access = UserAccess.objects.filter(user=user).first()
+
         return Response({
-            'id': request.user.id,
-            'username': request.user.username,
+            'id': user.id,
+            'username': user.username,
+            'groups': list(
+                user.groups.values_list('name', flat=True)
+            ),
+
+            'region_id': access.region_id if access else None,
+            'precinct_id': access.precinct_id if access else None,
         })
 
 class GetRegionList(APIView):
@@ -39,15 +50,12 @@ class GetRegionList(APIView):
             cursor = connection.cursor()
 
             sql = '''
-                SELECT DISTINCT
+                SELECT
                     person_region.id,
                     person_region.region
-                FROM person_useraccess
-                JOIN person_region
-                    ON person_useraccess.region_id = person_region.id
-                WHERE person_useraccess.user_id = %s;
+                FROM person_region;
             '''
-            cursor.execute(sql, [request.user.id])
+            cursor.execute(sql)
 
             columns = [col[0] for col in cursor.description]
 
@@ -69,22 +77,11 @@ class GetPrecinctList(APIView):
         try:
             cursor = connection.cursor()
 
-            if request.user.id == 1:
-                sql = '''
-                    SELECT * FROM person_precinct
-                    WHERE person_precinct.region_id = %s;
-                '''
-                cursor.execute(sql, [id])
-
-            else:
-                sql = '''
-                    SELECT person_precinct.id, person_precinct.precinct 
-                    FROM ekopatrol.person_useraccess 
-                    JOIN person_precinct 
-                    ON person_useraccess.precinct_id = person_precinct.id 
-                    WHERE person_useraccess.user_id = %s;
-                '''
-                cursor.execute(sql, [request.user.id])
+            sql = '''
+                SELECT * FROM person_precinct
+                WHERE person_precinct.region_id = %s;
+            '''
+            cursor.execute(sql, [id])
 
             columns = [col[0] for col in cursor.description]
 
@@ -120,7 +117,7 @@ class GetPositionList(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class AddEmployee(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdmin]
     def post(self, request):
 
         name = request.data.get('name')
@@ -171,7 +168,7 @@ class AddEmployee(APIView):
         
 
 class GetLastEmployee(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAllUsers]
 
     def get(self, request):
         
@@ -190,12 +187,9 @@ class GetLastEmployee(APIView):
                 FROM person_employee
                 LEFT JOIN person_camera
                     ON person_employee.camera_id = person_camera.id
-                LEFT JOIN person_useraccess
-                    ON person_employee.precinct_id = person_useraccess.precinct_id
                 WHERE person_employee.precinct_id = %s
-                AND person_useraccess.user_id = %s;
             '''
-            cursor.execute(sql, [id, request.user.id])
+            cursor.execute(sql, [id])
 
             columns = [col[0] for col in cursor.description]
 
@@ -210,7 +204,7 @@ class GetLastEmployee(APIView):
         
 
 class GetEmployee(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsForEmployee]
 
     def get(self, request, pk):
         
@@ -240,6 +234,7 @@ class GetEmployee(APIView):
 
 
 class GetLastCar(APIView):
+    permission_classes = [IsAuthenticated]
     def get(self, request):
         
         id = request.GET.get('id') or ''
@@ -288,15 +283,12 @@ class GetLastRoute(APIView):
                             ORDER BY person_route.registration_day DESC, person_route.id DESC
                         ) AS rn
                     FROM person_route
-                    LEFT JOIN person_useraccess
-                        ON person_route.precinct_id = person_useraccess.precinct_id
                     WHERE person_route.precinct_id = %s
-                    AND person_useraccess.user_id = %s
                 ) t
                 WHERE rn = 1
                 ORDER BY route_number;
             '''
-            cursor.execute(sql, [id, request.user.id])
+            cursor.execute(sql, [id])
 
             columns = [col[0] for col in cursor.description]
 
@@ -341,7 +333,7 @@ class GetRouteMap(APIView):
 
 
 class GetStationShiftList(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAllUsers]
 
     def get(self, request):
         id = request.GET.get('id') or ''
@@ -354,14 +346,11 @@ class GetStationShiftList(APIView):
                 JOIN person_precinct ON person_stationshift.precinct_id = person_precinct.id 
                 JOIN person_car ON person_stationshift.car_id = person_car.id
                 JOIN person_route ON person_stationshift.route_id = person_route.id
-                LEFT JOIN person_useraccess 
-                    ON person_stationshift.precinct_id = person_useraccess.precinct_id
                 WHERE person_precinct.id = %s
-                AND person_useraccess.user_id = %s
                 AND NOW() BETWEEN person_stationshift.start_shift
                 AND person_stationshift.end_shift
             '''
-            cursor.execute(sql, [id, request.user.id])
+            cursor.execute(sql, [id])
 
             columns = [col[0] for col in cursor.description]
 
@@ -376,7 +365,7 @@ class GetStationShiftList(APIView):
         
 
 class FilterStationShift(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAllUsers]
 
     def get(self, request):
         id = request.GET.get('id') or ''
@@ -391,13 +380,10 @@ class FilterStationShift(APIView):
                 JOIN person_precinct ON person_stationshift.precinct_id = person_precinct.id 
                 JOIN person_car ON person_stationshift.car_id = person_car.id
                 JOIN person_route ON person_stationshift.route_id = person_route.id
-                LEFT JOIN person_useraccess 
-                    ON person_stationshift.precinct_id = person_useraccess.precinct_id
                 WHERE person_precinct.id = %s
-                AND person_useraccess.user_id = %s
                 AND DATE(person_stationshift.start_shift) BETWEEN %s AND %s
             '''
-            cursor.execute(sql, [id, request.user.id, date_from, date_to])
+            cursor.execute(sql, [id, date_from, date_to])
 
             columns = [col[0] for col in cursor.description]
 
@@ -411,7 +397,7 @@ class FilterStationShift(APIView):
 
 
 class GetStationShift(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAllUsers]
 
     def get(self, request, pk):
         try:
@@ -483,14 +469,13 @@ class GetStationShift(APIView):
 
 
 class AddStationShift(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsForShiftAdd]
 
     def post(self, request):
 
         start_shift = parse_datetime(request.data.get('start_shift'))
         end_shift = parse_datetime(request.data.get('end_shift'))
         car_id = request.data.get('car_id')
-        created_by_id = request.user.id
         employee_01_id = request.data.get('employee_01_id')
         employee_02_id = request.data.get('employee_02_id')
         employee_03_id = request.data.get('employee_03_id') or None
@@ -522,9 +507,9 @@ class AddStationShift(APIView):
                         employee_01_id, employee_02_id,
                         employee_03_id, employee_04_id,
                         region_id, precinct_id,
-                        car_id, route_id, created_by_id
+                        car_id, route_id
                     )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ''', [
                     start_shift,
                     end_shift,
@@ -535,8 +520,7 @@ class AddStationShift(APIView):
                     region_id,
                     precinct_id,
                     car_id,
-                    route_id,
-                    created_by_id
+                    route_id
                 ])
 
             return Response({"message": "success"}, status=201)
@@ -562,7 +546,7 @@ def create_thumbnail(image, thumb_name):
     return thumb_path
 
 class AddRoute(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdmin]
 
     def post(self, request):
         try:
@@ -615,7 +599,7 @@ class AddRoute(APIView):
 
         
 class AddInformationForShift(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsForShiftInformationsAdd]
     
     def post(self, request):
         text_info = request.data.get('text')
@@ -642,6 +626,7 @@ class AddInformationForShift(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 class GetInformationForShift(APIView):
+    permission_classes = [IsAuthenticated, IsAllUsers]
     
     def get(self, request):
 

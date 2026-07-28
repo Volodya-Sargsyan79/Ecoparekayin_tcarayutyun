@@ -1,7 +1,7 @@
 <template>
     <div class="menu">
-        <MenuItem 
-            v-for="(item, index) in menuTree"
+        <MenuItem
+            v-for="(item, index) in visibleMenuTree"
             :key="index"
             :label="item.label"
             :title="item.title"
@@ -42,30 +42,19 @@
             MenuItem
         },
         computed: {
-            menuTree() {
-                const user = this.$store.state.user;
-                const isAdmin = user?.is_admin || user?.id === 1;
-                const common = [
-                    {
-                        label: 'Հերթափոխի գրանցում',
-                        title: "Հ",
-                        func: () => this.registrationShift()
-                    }
-                ];
-                if (!isAdmin) return common;
-                return [
-                    {
-                        label: 'ԷՊԾ աշխատակցի գրանցում',
-                        title: "Է",
-                        func: () => this.registrationEmployee()
-                    },
-                    ...common,
-                    {
-                        label: 'Երթուղու գրանցում',
-                        title: "Ե",
-                        func: () => this.registrationRoute()
-                    }
-                ];
+            userGroups() {
+                return this.$store.state.user.groups || []
+            },
+            isAdmin() {
+                return this.userGroups.includes('Ադմիններ')
+            },
+            visibleMenuTree() {
+                if (this.isAdmin) {
+                    return this.menuTree
+                }
+                return this.menuTree.filter(
+                    item => item.label === 'Հերթափոխի գրանցում'
+                )
             }
         },
         methods: {
@@ -108,20 +97,21 @@
                 axios
                     .get('/api/ecopatrol/regions/')
                     .then(response => {
-                        this.$store.state.user.regions = response.data
-                    })
-                    .catch(error => {
-                        if (error.response) {
-                            for (const property in error.response.data) {
-                                this.errors.push(`${property}: ${error.response.data[property]}`)
-                            }
-                            console.log(JSON.stringify(error.response.data))
-                        } else if (error.message) {
-                            this.errors.push('Something went wrong. Please try again')
-                            console.log(JSON.stringify(error))
+                        const groups = this.$store.state.user.groups || []
+                        const user = this.$store.state.user
+                        if (
+                            groups.includes('Ադմիններ') ||
+                            groups.includes('Օպերատորներ')
+                        ) {
+                            this.$store.state.user.regions = response.data
                         }
+                        else {
+                            this.$store.state.user.regions = response.data.filter(
+                                region => Number(region.id) === Number(user.region_id)
+                            )
+                        }
+                        this.$router.push('/dashboard/precinct_shift/registration/shift')
                     })
-                this.$router.push('/dashboard/precinct_shift/registration/shift')
             },
             registrationRoute() {
                 axios

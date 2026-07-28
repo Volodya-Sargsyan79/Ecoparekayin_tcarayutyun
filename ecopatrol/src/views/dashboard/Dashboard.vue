@@ -14,7 +14,10 @@
     <div class="container">
       <div class="columns is-multiline">
 
-        <router-link to="/dashboard/precinct_shift" class="column is-4">
+        <router-link
+          to="/dashboard/precinct_shift"
+          class="column is-4" 
+        >
           <div class="box has-text-centered">
             <span class="icon is-size-2">
               <i class="far fa-clock"></i>
@@ -24,7 +27,11 @@
           </div>
         </router-link>
 
-        <router-link to="/dashboard/legalization" class="column is-4">
+        <router-link 
+          v-if="isOperator"
+          to="/dashboard/legalization"
+          class="column is-4"
+        >
           <div class="box has-text-centered">
             <span class="icon is-size-2">
               <i class="far fa-comments"></i>
@@ -34,7 +41,11 @@
           </div>
         </router-link>
 
-        <router-link to="/CrimeAlert" class="column is-4">
+        <router-link 
+          v-if="isOperator"
+          to="/dashboard/legalization"
+          class="column is-4"
+        >
           <div class="box has-text-centered">
             <span class="icon is-size-2">
               <i class="far fa-home"></i>
@@ -50,7 +61,17 @@
 
 <script>
   export default {
-    name: 'Dashboard'
+    name: 'Dashboard',
+
+    computed: {
+      userGroups() {
+        return this.$store.state.user.groups || []
+      },
+
+      isOperator() {
+        return this.userGroups.includes('Օպերատորներ')
+      }
+    }
   }
 </script>
 

@@ -242,12 +242,22 @@
                     .get("/api/ecopatrol/precinct/", {
                         params: { id: this.form.region_id },
                     })
-                    .then((res) => {
-                        this.$store.state.user.precincts = res.data;
+                    .then(response => {
+                        const groups = this.$store.state.user.groups || []
+                        const user = this.$store.state.user
+                        if (
+                            groups.includes('Ադմիններ') ||
+                            groups.includes('Օպերատորներ')
+                        ) {
+                            this.$store.state.user.precincts = response.data
+                        } else {
+                            // Հերթապահ և տեղամասի պետ՝ միայն իրենց տեղամասը
+                            this.$store.state.user.precincts = response.data.filter(
+                                precinct =>
+                                    Number(precinct.id) === Number(user.precinct_id)
+                            )
+                        }
                     })
-                    .catch((err) => {
-                        console.error(err);
-                    });
                 axios
                     .get("/api/ecopatrol/getlastcar/", {
                         params: { id: this.form.region_id },

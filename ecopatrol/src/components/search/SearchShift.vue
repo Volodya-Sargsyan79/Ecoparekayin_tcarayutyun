@@ -19,15 +19,26 @@
                 </div>
             </div>
             <div class="column is-narrow">
-                <div class="flield">
+                <div class="field">
                     <label class="label is-small">Տեղամաս</label>
+
                     <div class="control">
                         <div class="select is-fullwidth">
-                        <select v-model="precinct_id" @change="loadRoute">
-                            <option value="">Ընտրել</option>
-                            <option v-for="precinct in $store.state.user.precincts" :key="precinct.id" :value="precinct.id">{{ precinct.precinct }}</option>
-                        </select>
-                    </div>
+                            <select
+                            v-model="precinct_id"
+                            @change="loadRoute"
+                            >
+                                <option value="">Ընտրել</option>
+
+                                <option
+                                    v-for="precinct in $store.state.user.precincts"
+                                    :key="precinct.id"
+                                    :value="precinct.id"
+                                >
+                                    {{ precinct.precinct }}
+                                </option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -56,7 +67,7 @@
     import InvoiceTable from "../tables/InvoiceTable.vue";
     import { formatDate } from "@/utils/dateFormatter";
     export default {
-        name: "ShitListForm",
+        name: "SearchShift",
         data() {
             return {
                 dateFrom: '',

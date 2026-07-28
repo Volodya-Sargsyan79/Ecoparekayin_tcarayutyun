@@ -44,35 +44,38 @@
             </div>
         </div>
     </div>
-    <h3 class="title is-5 has-text-centered mb-5">☕ Հանգստի գրանցումներ</h3>
-    <div class="columns mb-4">
-      <div class="column">
-        <button class="button is-warning is-fullwidth" @click="startLunch" :disabled="isOnBreak">☕ Կարգախումբը գնում է հանգստի</button>
-      </div>
-      <div class="column">
-        <button class="button is-success is-fullwidth" @click="endLunch" :disabled="!isOnBreak">🟢 Վերադարձ հանգստից</button>
-      </div>
-    </div>
-    <div class="columns mb-4">
-      <div class="column">
-        <div class="box has-text-centered">
-          <p class="heading">Օգտագործված</p>
-          <p class="title is-4 has-text-info">{{ formatMinutes(stats.used) }}</p>
+    <div v-if="!cannotPrecinctUser">
+      <h3 class="title is-5 has-text-centered mb-5">☕ Հանգստի գրանցումներ</h3>
+      <div class="columns mb-4">
+        <div class="column">
+          <button class="button is-warning is-fullwidth" @click="startLunch" :disabled="isOnBreak">☕ Կարգախումբը գնում է հանգստի</button>
+        </div>
+        <div class="column">
+          <button class="button is-success is-fullwidth" @click="endLunch" :disabled="!isOnBreak">🟢 Վերադարձ հանգստից</button>
         </div>
       </div>
-      <div class="column">
-        <div class="box has-text-centered">
-          <p class="heading">Մնացած</p>
-          <p class="title is-4" :class="stats.remaining >= 0 ? 'has-text-success' : 'has-text-danger'">
-            {{ formatMinutes(Math.abs(stats.remaining)) }}
-          </p>
+      <div class="columns mb-4">
+        <div class="column">
+          <div class="box has-text-centered">
+            <p class="heading">Օգտագործված</p>
+            <p class="title is-4 has-text-info">{{ formatMinutes(stats.used) }}</p>
+          </div>
         </div>
-      </div>
+        <div class="column">
+          <div class="box has-text-centered">
+            <p class="heading">Մնացած</p>
+            <p class="title is-4" :class="stats.remaining >= 0 ? 'has-text-success' : 'has-text-danger'">
+              {{ formatMinutes(Math.abs(stats.remaining)) }}
+            </p>
+          </div>
+        </div>
+      </div> 
     </div>
     <div v-if="!lunches.length" class="notification is-info is-light has-text-centered">
       ⏱ Կարգախումբը ունի <strong>2 ժամ (02:00)</strong> հանգստի ժամանակ
     </div>
     <div v-else class="box">
+      <h3 class="title is-5 has-text-centered mb-5">☕ Հանգստի գնացած ժամանակը</h3>
       <table class="table is-fullwidth is-striped">
         <thead>
           <tr>
@@ -99,42 +102,44 @@
         </tbody>
       </table>
     </div>
-    <h3 class="title is-5 has-text-centered mb-4">Զանգեր հերթափոխի հետ</h3>
-    <div class="columns">
-      <div class="column">
-        <div class="field">
-          <table class="table is-fullwidth">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Ժամ</th>
-                <th>Ումից</th>
-                <th>Ում</th>
-                <th>Լսել</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(call, index) in callList" :key="index">
-                <td>{{ index + 1 }}</td>
-                <td>{{ call.call_start }}</td>
-                <td>{{ call.caller_number }}</td>
-                <td>{{ call.called_number }}</td>
-                <td>
-                  <button @click="playAudio(call.recording_url)">▶️ Play</button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <audio id="recordedAudio" controls style="width:100%; margin-top:20px;"></audio>
+    <div v-if="!cannotPrecinctUser">
+      <h3 class="title is-5 has-text-centered mb-4">Զանգեր հերթափոխի հետ</h3>
+      <div class="columns">
+        <div class="column">
+          <div class="field">
+            <table class="table is-fullwidth">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Ժամ</th>
+                  <th>Ումից</th>
+                  <th>Ում</th>
+                  <th>Լսել</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(call, index) in callList" :key="index">
+                  <td>{{ index + 1 }}</td>
+                  <td>{{ call.call_start }}</td>
+                  <td>{{ call.caller_number }}</td>
+                  <td>{{ call.called_number }}</td>
+                  <td>
+                    <button @click="playAudio(call.recording_url)">▶️ Play</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <audio id="recordedAudio" controls style="width:100%; margin-top:20px;"></audio>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="columns" >
-      <div class="column">
-        <h3 class="title is-5 has-text-centered mb-4">Զեկուցագիր / Տեղեկություն</h3>
-        <div class="box mb-3" v-for="(value, index) in shift_pdf" :key="index">
-          <p class="mb-3" v-if="value.text_info">{{ value.text_info }}</p>
-          <a v-if="value.pdf_file" :href="`http://192.168.88.111:8000/media/${value.pdf_file}`"  target="_blank" class="button is-link is-small">📄 Բացել PDF</a>
+      <div class="columns" >
+        <div class="column">
+          <h3 class="title is-5 has-text-centered mb-4">Զեկուցագիր / Տեղեկություն</h3>
+          <div class="box mb-3" v-for="(value, index) in shift_pdf" :key="index">
+            <p class="mb-3" v-if="value.text_info">{{ value.text_info }}</p>
+            <a v-if="value.pdf_file" :href="`http://192.168.88.111:8000/media/${value.pdf_file}`"  target="_blank" class="button is-link is-small">📄 Բացել PDF</a>
+          </div>
         </div>
       </div>
     </div>
@@ -191,91 +196,110 @@
       SearchTable
     },
     computed: {
-        header() {
-          return {
-            carHeader: [
-              "Հերթափոխի սկիզբ",
-              "Հերթափոխի ավարտ",
-              "Մեքենայի պետհամարանիշ",
-              "Մեքենայի կողային համարանիշ"
-            ],
-            personHeader: [
-              "#",
-              "Անուն",
-              "Ազգանուն",
-              "Պաշտոն",
-              "Հեռախոս",
-              "Տեսախցիկ"
-            ],
-            summaryHeader: [
-              "Միջին արագություն",
-              "Առավելագույն արագություն", 
-              "Վազք",
-              "Արագացուցիչի վազքը <br> հետթափոխի սկզբին",
-              "Արագացուցիչի վազքը <br> հետթափոխի ավարտին",
-              "Շարժիչի աշխատանք",
-            ]
-          } 
-        },
-        invoice() {
-          const routes = this.$store.state.user.stationshif || []
-          return {
-            carInfo: [
-              [
-                formatDate(this.shift_info?.start_shift),
-                formatDate(this.shift_info?.end_shift),
-                this.shift_info?.car_number,
-                this.shift_info?.board_number,
-              ]
-            ],
-            personInfo: [ 
-              [
-                this.shift_info?.employee_01_name,
-                this.shift_info?.employee_01_surname,
-                this.shift_info?.employee_01_position_held,
-                this.shift_info?.employee_01_phone,
-                this.shift_info?.employee_01_camera,
-              ],
-              [
-                this.shift_info?.employee_02_name,
-                this.shift_info?.employee_02_surname,
-                this.shift_info?.employee_02_position_held,
-                this.shift_info?.employee_02_phone,
-                this.shift_info?.employee_02_camera,
-              ],
-              [
-                this.shift_info?.employee_03_name,
-                this.shift_info?.employee_03_surname,
-                this.shift_info?.employee_03_position_held,
-                this.shift_info?.employee_03_phone,
-                this.shift_info?.employee_03_camera,
-              ],
-              [
-                this.shift_info?.employee_04_name,
-                this.shift_info?.employee_04_surname,
-                this.shift_info?.employee_04_position_held,
-                this.shift_info?.employee_04_phone,
-                this.shift_info?.employee_04_camera,
-              ]
-            ].filter(row => row.some(cell => cell))
-          }
-        },
-        summaryInfo() {
-          if (!this.summary) return [];
-          return [
+      userGroups() {
+        return this.$store.state.user.groups || []
+      },
+
+      isDutyOfficer() {
+        return this.userGroups.includes('Հերթապահներ')
+      },
+
+      isPrecinctHead() {
+        return this.userGroups.includes('Տեղամասի պետեր')
+      },
+
+      isRegionHead() {
+        return this.userGroups.includes('Վարչության պետեր')
+      },
+
+      cannotPrecinctUser() {
+          return this.isDutyOfficer || this.isPrecinctHead || this.isRegionHead
+      },
+      header() {
+        return {
+          carHeader: [
+            "Հերթափոխի սկիզբ",
+            "Հերթափոխի ավարտ",
+            "Մեքենայի պետհամարանիշ",
+            "Մեքենայի կողային համարանիշ"
+          ],
+          personHeader: [
+            "#",
+            "Անուն",
+            "Ազգանուն",
+            "Պաշտոն",
+            "Հեռախոս",
+            "Տեսախցիկ"
+          ],
+          summaryHeader: [
+            "Միջին արագություն",
+            "Առավելագույն արագություն", 
+            "Վազք",
+            "Արագացուցիչի վազքը <br> հետթափոխի սկզբին",
+            "Արագացուցիչի վազքը <br> հետթափոխի ավարտին",
+            "Շարժիչի աշխատանք",
+          ]
+        } 
+      },
+      invoice() {
+        const routes = this.$store.state.user.stationshif || []
+        return {
+          carInfo: [
             [
-              this.formatSpeed(this.summary.averageSpeed),
-              this.formatSpeed(this.summary.maxSpeed),
-              `${this.summary.distance?.toFixed(2)/1000} կմ`,
-              `${this.summary.startOdometer?.toFixed(2)/1000} կմ`,
-              `${this.summary.endOdometer?.toFixed(2)/1000} կմ`,
-              this.formatHours(this.summary.engineHours),
+              formatDate(this.shift_info?.start_shift),
+              formatDate(this.shift_info?.end_shift),
+              this.shift_info?.car_number,
+              this.shift_info?.board_number,
             ]
-          ];
-        },
-        callList() {
-          return this.$store.state.user.call_list || [];
+          ],
+          personInfo: [ 
+            [
+              this.shift_info?.employee_01_name,
+              this.shift_info?.employee_01_surname,
+              this.shift_info?.employee_01_position_held,
+              this.shift_info?.employee_01_phone,
+              this.shift_info?.employee_01_camera,
+            ],
+            [
+              this.shift_info?.employee_02_name,
+              this.shift_info?.employee_02_surname,
+              this.shift_info?.employee_02_position_held,
+              this.shift_info?.employee_02_phone,
+              this.shift_info?.employee_02_camera,
+            ],
+            [
+              this.shift_info?.employee_03_name,
+              this.shift_info?.employee_03_surname,
+              this.shift_info?.employee_03_position_held,
+              this.shift_info?.employee_03_phone,
+              this.shift_info?.employee_03_camera,
+            ],
+            [
+              this.shift_info?.employee_04_name,
+              this.shift_info?.employee_04_surname,
+              this.shift_info?.employee_04_position_held,
+              this.shift_info?.employee_04_phone,
+              this.shift_info?.employee_04_camera,
+            ]
+          ].filter(row => row.some(cell => cell))
         }
+      },
+      summaryInfo() {
+        if (!this.summary) return [];
+        return [
+          [
+            this.formatSpeed(this.summary.averageSpeed),
+            this.formatSpeed(this.summary.maxSpeed),
+            `${this.summary.distance?.toFixed(2)/1000} կմ`,
+            `${this.summary.startOdometer?.toFixed(2)/1000} կմ`,
+            `${this.summary.endOdometer?.toFixed(2)/1000} կմ`,
+            this.formatHours(this.summary.engineHours),
+          ]
+        ];
+      },
+      callList() {
+        return this.$store.state.user.call_list || [];
+      }
     },
     async mounted() {
       const shiftId = this.$route.params.id;
@@ -443,7 +467,7 @@
         this.currentLunch = null;
         this.isOnBreak = false;
         this.recalculateStats();
-        axios.post("/api/ekopatrol/lunch_end/", fd)
+        axios.post("/api/ecopatrol/lunch_end/", fd)
         .then(() => {})
         .catch(err => {
           console.error(err.response?.data || err);

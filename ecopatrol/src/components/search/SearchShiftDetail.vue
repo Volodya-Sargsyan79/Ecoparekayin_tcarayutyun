@@ -90,34 +90,36 @@
         </div>
       </div>
     </div>
-    <div class="columns" v-if="callList?.length > 0">
-      <div class="column">
-        <h3 class="title is-5 has-text-centered mb-4">Զանգերի պատմություն</h3>
-        <div class="box mb-3">
-          <div class="field">
-            <table class="table is-fullwidth">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Ժամ</th>
-                  <th>Ումից</th>
-                  <th>Ում</th>
-                  <th>Լսել</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(call, index) in callList" :key="index">
-                  <td>{{ index + 1 }}</td>
-                  <td>{{ call.call_start }}</td>
-                  <td>{{ call.caller_number }}</td>
-                  <td>{{ call.called_number }}</td>
-                  <td>
-                    <button @click="playAudio(call.recording_url)"> ▶️ Play</button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <audio id="recordedAudio" controls style="width:100%; margin-top:20px;"></audio>
+    <div v-if="!cannotListen">
+      <div class="columns" v-if="callList?.length > 0">
+        <div class="column">
+          <h3 class="title is-5 has-text-centered mb-4">Զանգերի պատմություն</h3>
+          <div class="box mb-3">
+            <div class="field">
+              <table class="table is-fullwidth">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Ժամ</th>
+                    <th>Ումից</th>
+                    <th>Ում</th>
+                    <th>Լսել</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(call, index) in callList" :key="index">
+                    <td>{{ index + 1 }}</td>
+                    <td>{{ call.call_start }}</td>
+                    <td>{{ call.caller_number }}</td>
+                    <td>{{ call.called_number }}</td>
+                    <td>
+                      <button @click="playAudio(call.recording_url)"> ▶️ Play</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <audio id="recordedAudio" controls style="width:100%; margin-top:20px;"></audio>
+            </div>
           </div>
         </div>
       </div>
@@ -171,93 +173,108 @@
       SearchTable
     },
     computed: {
-        header() {
-          return {
-            carHeader: [
-              "Հերթափոխի սկիզբ",
-              "Հերթափոխի ավարտ",
-              "Մեքենայի պետհամարանիշ",
-              "Մեքենայի կողային համարանիշ"
-            ],
-            personHeader: [
-              "#",
-              "Անուն",
-              "Ազգանուն",
-              "Պաշտոն",
-              "Հեռախոս",
-              "Տեսախցիկ"
-            ],
-            summaryHeader: [
-              "Միջին արագություն",
-              "Առավելագույն արագություն", 
-              "Վազք",
-              "Արագացուցիչի վազքը <br> հերթափոխի սկզբին",
-              "Արագացուցիչի վազքը <br> հերթափոխի ավարտին",
-              "Շարժիչի աշխատանք",
-              
+      userGroups() {
+        return this.$store.state.user.groups || []
+      },
+
+      isPrecinctHead() {
+        return this.userGroups.includes('Տեղամասի պետեր')
+      },
+
+      isRegionHead() {
+          return this.userGroups.includes('Վարչության պետեր')
+      },
+
+      cannotListen() {
+          return this.isPrecinctHead || this.isRegionHead
+      },
+      header() {
+        return {
+          carHeader: [
+            "Հերթափոխի սկիզբ",
+            "Հերթափոխի ավարտ",
+            "Մեքենայի պետհամարանիշ",
+            "Մեքենայի կողային համարանիշ"
+          ],
+          personHeader: [
+            "#",
+            "Անուն",
+            "Ազգանուն",
+            "Պաշտոն",
+            "Հեռախոս",
+            "Տեսախցիկ"
+          ],
+          summaryHeader: [
+            "Միջին արագություն",
+            "Առավելագույն արագություն", 
+            "Վազք",
+            "Արագացուցիչի վազքը <br> հերթափոխի սկզբին",
+            "Արագացուցիչի վազքը <br> հերթափոխի ավարտին",
+            "Շարժիչի աշխատանք",
             
-            ]
-          } 
-        },
-        invoice() {
-          const routes = this.$store.state.user.stationshif || []
-          return {
-            carInfo: [
-              [
-                formatDate(this.shift_info?.start_shift),
-                formatDate(this.shift_info?.end_shift),
-                this.shift_info?.car_number,
-                this.shift_info?.board_number,
-              ]
-            ],
-            personInfo: [ 
-              [
-                this.shift_info?.employee_01_name,
-                this.shift_info?.employee_01_surname,
-                this.shift_info?.employee_01_position_held,
-                this.shift_info?.employee_01_phone,
-                this.shift_info?.employee_01_camera,
-              ],
-              [
-                this.shift_info?.employee_02_name,
-                this.shift_info?.employee_02_surname,
-                this.shift_info?.employee_02_position_held,
-                this.shift_info?.employee_02_phone,
-                this.shift_info?.employee_02_camera,
-              ],
-              [
-                this.shift_info?.employee_03_name,
-                this.shift_info?.employee_03_surname,
-                this.shift_info?.employee_03_position_held,
-                this.shift_info?.employee_03_phone,
-                this.shift_info?.employee_03_camera,
-              ],
-              [
-                this.shift_info?.employee_04_name,
-                this.shift_info?.employee_04_surname,
-                this.shift_info?.employee_04_position_held,
-                this.shift_info?.employee_04_phone,
-                this.shift_info?.employee_04_camera,
-              ]
-            ].filter(row => row.some(cell => cell))
-          }
-        },
-        summaryInfo() {
-          if (!this.summary) return [];
-          return [
+          
+          ]
+        } 
+      },
+      invoice() {
+        const routes = this.$store.state.user.stationshif || []
+        return {
+          carInfo: [
             [
-              this.formatSpeed(this.summary.averageSpeed),
-              this.formatSpeed(this.summary.maxSpeed),
-              `${this.summary.distance?.toFixed(2)/1000} կմ`,
-              `${this.summary.startOdometer?.toFixed(2)/1000} կմ`,
-              `${this.summary.endOdometer?.toFixed(2)/1000} կմ`,
-              this.formatHours(this.summary.engineHours),
+              formatDate(this.shift_info?.start_shift),
+              formatDate(this.shift_info?.end_shift),
+              this.shift_info?.car_number,
+              this.shift_info?.board_number,
             ]
-          ];
-        },
-        callList() {
-          return this.$store.state.user.call_list || [];
+          ],
+          personInfo: [ 
+            [
+              this.shift_info?.employee_01_name,
+              this.shift_info?.employee_01_surname,
+              this.shift_info?.employee_01_position_held,
+              this.shift_info?.employee_01_phone,
+              this.shift_info?.employee_01_camera,
+            ],
+            [
+              this.shift_info?.employee_02_name,
+              this.shift_info?.employee_02_surname,
+              this.shift_info?.employee_02_position_held,
+              this.shift_info?.employee_02_phone,
+              this.shift_info?.employee_02_camera,
+            ],
+            [
+              this.shift_info?.employee_03_name,
+              this.shift_info?.employee_03_surname,
+              this.shift_info?.employee_03_position_held,
+              this.shift_info?.employee_03_phone,
+              this.shift_info?.employee_03_camera,
+            ],
+            [
+              this.shift_info?.employee_04_name,
+              this.shift_info?.employee_04_surname,
+              this.shift_info?.employee_04_position_held,
+              this.shift_info?.employee_04_phone,
+              this.shift_info?.employee_04_camera,
+            ]
+          ].filter(row => row.some(cell => cell))
         }
+      },
+      summaryInfo() {
+        if (!this.summary) return [];
+        return [
+          [
+            this.formatSpeed(this.summary.averageSpeed),
+            this.formatSpeed(this.summary.maxSpeed),
+            `${this.summary.distance?.toFixed(2)/1000} կմ`,
+            `${this.summary.startOdometer?.toFixed(2)/1000} կմ`,
+            `${this.summary.endOdometer?.toFixed(2)/1000} կմ`,
+            this.formatHours(this.summary.engineHours),
+          ]
+        ];
+      },
+      callList() {
+        return this.$store.state.user.call_list || [];
+      }
     },
     async mounted() {
       const shiftId = this.$route.params.id;

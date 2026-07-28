@@ -12,7 +12,7 @@
   <section class="section">
     <div class="container">
       <div class="columns is-multiline">
-        <router-link to="/dashboard/precinct_shift/registration" class="column is-4">
+        <router-link v-if="!cannotRegister" to="/dashboard/precinct_shift/registration" class="column is-4">
           <div class="box has-text-centered clickable">
             <span class="icon is-size-2">
               <i class="far fa-clock"></i>
@@ -46,7 +46,24 @@
 
 <script>
   export default {
-    name: 'Dashboard'
+    name: 'PrecinctShift',
+    computed: {
+      userGroups() {
+        return this.$store.state.user.groups || []
+      },
+
+      isPrecinctHead() {
+        return this.userGroups.includes('Տեղամասի պետեր')
+      },
+
+      isRegionHead() {
+          return this.userGroups.includes('Վարչության պետեր')
+      },
+
+      cannotRegister() {
+          return this.isPrecinctHead || this.isRegionHead
+      },
+    }
   }
 </script>
 
