@@ -13,7 +13,6 @@ export default createStore({
       relatives: "",
       regions: "",
       precincts: "",
-      region_id: null,
       position: "",
       stationshif: null,
       employee: null,
@@ -22,6 +21,7 @@ export default createStore({
       persons: null,
       creater: null,
       call_list: null,
+      filelist: null,
       isLoading: false,
       isAuthenticated: false
     }

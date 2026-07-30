@@ -290,16 +290,29 @@
                     })
                     .catch(err => console.error(err))
             },
-            placeKeeper(e){
-                axios
-                .get('/api/ecopatrol/getstationshiftlist/', {
-                    params: { id: e},
-                }) 
-                .then((res) => {
-                    this.$store.state.user.stationshif = res.data;
-                    this.$router.push('/dashboard/precinct_shift/information/shitlist') 
-                })
-                .catch(err => { console.error(err) }) 
+            async placeKeeper(e) {
+                this.$store.state.user.filelist = null
+                this.$store.state.user.stationshif = []
+
+                try {
+                    const [shiftResponse, fileResponse] = await Promise.all([
+                        axios.get('/api/ecopatrol/getstationshiftlist/', {
+                            params: { id: e }
+                        }),
+
+                        axios.get('/api/ecopatrol/getshiftdayinfo/', {
+                            params: { id: e }
+                        })
+                    ])
+                    this.$store.state.user.stationshif = shiftResponse.data
+                    this.$store.state.user.filelist = fileResponse.data
+                    this.$router.push(
+                        '/dashboard/precinct_shift/information/shitlist'
+                    )
+                } catch (err) {
+                    console.error(err)
+                    this.$store.state.user.filelist = []
+                }
             }
         }
     }

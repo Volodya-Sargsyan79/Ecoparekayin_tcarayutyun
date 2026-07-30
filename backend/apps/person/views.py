@@ -16,7 +16,7 @@ from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.http import JsonResponse
 from urllib3 import request
-from .models import InformationForShift, LunchTime, Camera, UserAccess
+from .models import InformationForShift, ShiftDayInfo, LunchTime, Camera, UserAccess
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
@@ -341,7 +341,7 @@ class GetStationShiftList(APIView):
         try:
             cursor = connection.cursor()
             sql = '''
-                SELECT person_stationshift.id, start_shift, end_shift, precinct, car_number, board_number, route_number, route_length, thumbnail 
+                SELECT person_stationshift.id, person_stationshift.precinct_id, start_shift, end_shift, precinct,   car_number, board_number, route_number, route_length, thumbnail 
                 FROM ekopatrol.person_stationshift 
                 JOIN person_precinct ON person_stationshift.precinct_id = person_precinct.id 
                 JOIN person_car ON person_stationshift.car_id = person_car.id
@@ -652,6 +652,46 @@ class GetInformationForShift(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+
+class AddShiftDayInfo(APIView):
+    permission_classes = [IsAuthenticated, IsForShiftInformationsAdd]
+    def post(self, request):
+        precinct_id = request.data.get('precinct')
+        pdf_file = request.FILES.get('PDF')
+        print(f"Received precinct_id: {precinct_id}, pdf_file: {pdf_file}")
+        try:
+            instance = ShiftDayInfo(
+                precinct_id=precinct_id
+            )
+            if pdf_file:
+                instance.pdf_file = pdf_file
+            instance.save()
+            return Response({
+                "message": "Info for shift added successfully",
+                "pdf_file": instance.pdf_file.url if instance.pdf_file else None,
+            }, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+class GetShiftDayInfo(APIView):
+    permission_classes = [IsAuthenticated, IsAllUsers]
+    def get(self, request):
+        id = request.GET.get('id')
+        try:
+            cursor = connection.cursor()
+            sql = '''
+                SELECT * FROM person_shiftdayinfo
+                WHERE person_shiftdayinfo.precinct_id = %s 
+                AND person_shiftdayinfo.registration_day = CURRENT_DATE;;
+            '''
+            cursor.execute(sql, [id])
+            columns = [col[0] for col in cursor.description]
+            results = [
+                dict(zip(columns, row)) for row in cursor.fetchall()
+            ]
+            return Response(results, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @csrf_exempt

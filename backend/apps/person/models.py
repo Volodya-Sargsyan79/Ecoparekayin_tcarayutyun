@@ -168,8 +168,13 @@ class StationShift(models.Model):
 
 class InformationForShift(models.Model):
     text_info = models.TextField(null=True, blank=True, verbose_name="Հերթափոխի վերաբերյալ տեղեկություն")
-    pdf_file = models.FileField(upload_to='pdf/', validators=[FileExtensionValidator(allowed_extensions=['pdf'])], null=True, blank=True, verbose_name="Հերթափոխի վերաբերյալ զեկուցագիր")
+    pdf_file = models.FileField(upload_to='pdf/reports/', validators=[FileExtensionValidator(allowed_extensions=['pdf'])], null=True, blank=True, verbose_name="Հերթափոխի վերաբերյալ զեկուցագիր")
     shift = models.ForeignKey('StationShift', related_name='informationforshift', on_delete=models.CASCADE, verbose_name="Հերթափոխ")
+
+class ShiftDayInfo(models.Model):
+    registration_day = models.DateField(auto_now_add=True)
+    pdf_file = models.FileField(upload_to='pdf/shifts/', validators=[FileExtensionValidator(allowed_extensions=['pdf'])], verbose_name="Հերթափոխի վերաբերյալ զեկուցագիր")
+    precinct = models.ForeignKey(Precinct, related_name='shiftdayinfo', on_delete=models.CASCADE, verbose_name="Տեղամաս")
 
 
 class UserAccess(models.Model):

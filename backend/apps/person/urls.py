@@ -17,6 +17,8 @@ from .views import (
     GetRouteMap,
     AddInformationForShift,
     GetInformationForShift,
+    AddShiftDayInfo,
+    GetShiftDayInfo,
     start_lunch,
     end_lunch,
     get_lunches
@@ -43,4 +45,6 @@ urlpatterns = [
     path('lunch_start/', start_lunch, name='start_lunch'),
     path("lunch_end/", end_lunch, name="end_lunch"),
     path("lunches/", get_lunches, name="get_lunches"),
+    path("addshiftdayinfo/", AddShiftDayInfo.as_view(), name="add_shift_day_info"),
+    path("getshiftdayinfo/", GetShiftDayInfo.as_view(), name="get_shift_day_info"),
 ]

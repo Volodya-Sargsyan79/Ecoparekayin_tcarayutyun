@@ -10,6 +10,7 @@ admin.site.register(models.UserAccess)
 admin.site.register(models.InformationForShift)
 admin.site.register(models.LunchTime)
 admin.site.register(models.Camera)
+admin.site.register(models.ShiftDayInfo)
 
 @admin.register(models.Employee)
 class EmployeeAdmin(admin.ModelAdmin):

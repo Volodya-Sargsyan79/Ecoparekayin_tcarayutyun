@@ -28,7 +28,7 @@ class IsForShiftAdd(GroupPermission):
     allowed_groups = ["Ադմիններ", "Օպերատորներ", "Հերթապահներ"]
 
 class IsForShiftInformationsAdd(GroupPermission):
-    allowed_groups = ["Հերթապահներ", "Տեղամասի պետեր", "Վարչության պետեր"]
+    allowed_groups = ["Հերթապահներ", "Տեղամասի պետեր", "Վարչության պետեր", "Օպերատորներ"]
 
 class IsForEmployee(GroupPermission):
     allowed_groups = ["Ադմիններ", "Օպերատորներ", "Տեղամասի պետեր", "Վարչության պետեր"]

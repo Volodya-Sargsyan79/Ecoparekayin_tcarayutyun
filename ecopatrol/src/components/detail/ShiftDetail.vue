@@ -133,16 +133,17 @@
           </div>
         </div>
       </div>
-      <div class="columns" >
-        <div class="column">
-          <h3 class="title is-5 has-text-centered mb-4">Զեկուցագիր / Տեղեկություն</h3>
-          <div class="box mb-3" v-for="(value, index) in shift_pdf" :key="index">
-            <p class="mb-3" v-if="value.text_info">{{ value.text_info }}</p>
-            <a v-if="value.pdf_file" :href="`http://192.168.88.111:8000/media/${value.pdf_file}`"  target="_blank" class="button is-link is-small">📄 Բացել PDF</a>
-          </div>
+    </div>
+    <div class="columns" >
+      <div class="column">
+        <h3 class="title is-5 has-text-centered mb-4">Զեկուցագիր / Տեղեկություն</h3>
+        <div class="box mb-3" v-for="(value, index) in shift_pdf" :key="index">
+          <p class="mb-3" v-if="value.text_info">{{ value.text_info }}</p>
+          <a v-if="value.pdf_file" :href="`http://192.168.88.111:8000/media/${value.pdf_file}`"  target="_blank" class="button is-link is-small">📄 Բացել PDF</a>
         </div>
       </div>
     </div>
+    
     <div class="columns">
       <div class="column" style="display: flex; align-items: flex-end;">
         <button class="button is-primary" @click="handleClick">Ավելացնել զեկուցագիր կամ տեղեկատվություն</button>
