@@ -1,6 +1,7 @@
 <template>
   <div class="box">
-    <div class="columns">
+    
+    <div v-if="!isDutyOfficer" class="columns">
       <div class="column">
         <div class="map-container">
           <div id="map"></div>
@@ -71,36 +72,38 @@
         </div>
       </div> 
     </div>
-    <div v-if="!lunches.length" class="notification is-info is-light has-text-centered">
-      ⏱ Կարգախումբը ունի <strong>2 ժամ (02:00)</strong> հանգստի ժամանակ
-    </div>
-    <div v-else class="box">
-      <h3 class="title is-5 has-text-centered mb-5">☕ Հանգստի գնացած ժամանակը</h3>
-      <table class="table is-fullwidth is-striped">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Սկիզբ</th>
-            <th>Ավարտ</th>
-            <th>Տևողություն</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(l, index) in lunches" :key="index">
-            <td>{{ index + 1 }}</td>
-            <td>{{ l.start }}</td>
-            <td>
-              <span v-if="l.end && l.end !== 'None'">{{ l.end }}</span>
-              <span v-else class="has-text-warning">ընթացքի մեջ..</span>
-            </td>
+    <div v-if="!isDutyOfficer">
+      <div v-if="!lunches.length" class="notification is-info is-light has-text-centered">
+        ⏱ Կարգախումբը ունի <strong>2 ժամ (02:00)</strong> հանգստի ժամանակ
+      </div>
+      <div v-else class="box">
+        <h3 class="title is-5 has-text-centered mb-5">☕ Հանգստի գնացած ժամանակը</h3>
+        <table class="table is-fullwidth is-striped">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Սկիզբ</th>
+              <th>Ավարտ</th>
+              <th>Տևողություն</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(l, index) in lunches" :key="index">
+              <td>{{ index + 1 }}</td>
+              <td>{{ l.start }}</td>
+              <td>
+                <span v-if="l.end && l.end !== 'None'">{{ l.end }}</span>
+                <span v-else class="has-text-warning">ընթացքի մեջ..</span>
+              </td>
 
-            <td>
-              <span v-if="l.duration">{{ formatMinutes(l.duration) }}</span>
-              <span v-else>—</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              <td>
+                <span v-if="l.duration">{{ formatMinutes(l.duration) }}</span>
+                <span v-else>—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     <div v-if="!cannotPrecinctUser">
       <h3 class="title is-5 has-text-centered mb-4">Զանգեր հերթափոխի հետ</h3>
