@@ -11,7 +11,7 @@
   </div>
   <section class="section">
     <div class="container">
-      <div class="columns is-multiline">
+      <div class="columns is-multiline is-centered">
         <router-link v-if="!cannotRegister" to="/dashboard/precinct_shift/registration" class="column is-4">
           <div class="box has-text-centered clickable">
             <span class="icon is-size-2">
