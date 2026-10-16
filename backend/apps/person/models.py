@@ -4,6 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
 from django.conf import settings
+from datetime import datetime, timedelta
 from PIL import Image
 import zipfile
 import uuid
@@ -106,45 +107,66 @@ class Camera(models.Model):
         return f'Տեսախցիկի համար {self.number} {self.region} {self.precinct}'
 
 class Employee(models.Model):
+    class Status(models.TextChoices):
+        ACTIVE = "active", "Գործող աշխատակից"
+        SUSPENDED = "suspended", "Լիազորությունները կասեցված են"
+        RESIGNED = "resigned", "Ազատվել է սեփական դիմումի համաձայն"
+        DISMISSED = "dismissed", "Ազատվել է աշխատանքից"
+        TRANSFERRED = "transferred", "Տեղափոխվել է"
+        OTHER = "other", "Այլ պատճառ"
+
     name = models.CharField(max_length=50, verbose_name="Անուն")
     surname = models.CharField(max_length=50, verbose_name="Ազգանուն")
-    region = models.ForeignKey(Region, related_name='employee', on_delete=models.CASCADE, verbose_name="Վարչություն")
-    precinct = models.ForeignKey(Precinct, related_name='employee', on_delete=models.CASCADE, null=True, blank=True, verbose_name="Տեղամաս")
-    position = models.ForeignKey(Position, related_name='employee', on_delete=models.CASCADE, verbose_name="Պաշտոն")
-    camera = models.OneToOneField(Camera, related_name='employee', on_delete=models.CASCADE, null=True, blank=True, verbose_name="Տեսախցիկ")
+    region = models.ForeignKey(Region, related_name="employee", on_delete=models.PROTECT, verbose_name="Վարչություն")
+    precinct = models.ForeignKey(Precinct, related_name="employee", on_delete=models.PROTECT, null=True, blank=True, verbose_name="Տեղամաս")
+    position = models.ForeignKey(Position,related_name="employee", on_delete=models.PROTECT, verbose_name="Պաշտոն")
+    camera = models.OneToOneField(Camera, related_name="employee", on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Տեսախցիկ")
+    previous_camera_number = models.CharField(max_length=5, null=True, blank=True, verbose_name="Նախկին տեսախցիկի համար")
     phone = models.CharField(max_length=9, null=True, blank=True, verbose_name="Հեռ.")
-    image = models.ImageField(upload_to='person/', null=True, blank=True, verbose_name="Նկար")
-    birth_day = models.DateField(null=True, blank=True, verbose_name="Ծննդյան ամսաթիվ")
+    image = models.ImageField(upload_to="person/", null=True, blank=True, verbose_name="Ծննդյան ամսաթիվ")
+    birth_date = models.DateField(null=True, blank=True, verbose_name="Ծննդյան ամսաթիվ")
     order_day = models.DateField(null=True, blank=True, verbose_name="Հրամանի ամսաթիվ")
     residential_address = models.CharField(max_length=250, null=True, blank=True, verbose_name="Բնակության հասցե")
     service_number = models.CharField(max_length=5, null=True, blank=True, verbose_name="Ծառայողական համար")
     passport = models.CharField(max_length=10, null=True, blank=True, verbose_name="Անձնագիր")
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='employee', on_delete=models.CASCADE)
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACTIVE, verbose_name="Աշխատանքային կարգավիճակ")
+    status_date = models.DateField(null=True, blank=True, verbose_name="Կարգավիճակի փոփոխման ամսաթիվ")
+    status_reason = models.TextField(null=True, blank=True, verbose_name="Կարգավիճակի փոփոխման հիմք")
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="employee", on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Գրանցող")
+
+    @property
+    def is_active_employee(self):
+        return self.status == self.Status.ACTIVE
 
     def save(self, *args, **kwargs):
+        if self.status != self.Status.ACTIVE and self.camera:
+            self.previous_camera_number = self.camera.number
+            self.camera = None
+
         if self.image:
             self.image = self.make_thumbnail(self.image)
+
         super().save(*args, **kwargs)
 
     def make_thumbnail(self, image, size=(300, 400)):
         img = Image.open(image)
-        img = img.convert('RGB')
-        img = img.resize(size) 
-
+        img = img.convert("RGB")
+        img = img.resize(size)
         thumb_io = BytesIO()
-        img.save(thumb_io, 'JPEG', quality=85)
-
-        image = File(thumb_io, name=image.name)
-
-        return image
+        img.save(thumb_io, "JPEG", quality=85)
+        return File(thumb_io, name=image.name)
 
     def __str__(self):
-        return f'{self.camera} {self.position} {self.name} {self.surname} {self.phone}'
+        return (
+            f'{self.camera.number if self.camera else "-"} '
+            f"{self.position} {self.name} {self.surname} "
+            f"{self.phone or ''}"
+        )
     
 
 def upload_to(instance, filename):
     ext = filename.split('.')[-1]
-    return f'pdf/{uuid.uuid4()}.{ext}'   # 🔥 unique անուն
+    return f'pdf/{uuid.uuid4()}.{ext}'
 
 
 class StationShift(models.Model):
@@ -154,10 +176,10 @@ class StationShift(models.Model):
     region = models.ForeignKey('Region', related_name='stationshift', on_delete=models.CASCADE, verbose_name="Մարզ")
     precinct = models.ForeignKey('Precinct', related_name='stationshift', on_delete=models.CASCADE, verbose_name="Տեղամաս")
 
-    employee_01 = models.ForeignKey('Employee', related_name='stationshift', on_delete=models.CASCADE, verbose_name="Հերթափոխ 1")
-    employee_02 = models.ForeignKey('Employee', related_name='stationshift_02', on_delete=models.CASCADE, verbose_name="Հերթափոխ 2")
-    employee_03 = models.ForeignKey('Employee', related_name='stationshift_03', on_delete=models.CASCADE, null=True, blank=True, verbose_name="Հերթափոխ 3")
-    employee_04 = models.ForeignKey('Employee', related_name='stationshift_04', on_delete=models.CASCADE, null=True, blank=True, verbose_name="Հերթափոխ 4")
+    employee_01 = models.ForeignKey('Employee', related_name='stationshift', on_delete=models.PROTECT, verbose_name="Հերթափոխ 1")
+    employee_02 = models.ForeignKey('Employee', related_name='stationshift_02', on_delete=models.PROTECT, verbose_name="Հերթափոխ 2")
+    employee_03 = models.ForeignKey('Employee', related_name='stationshift_03', on_delete=models.PROTECT, null=True, blank=True, verbose_name="Հերթափոխ 3")
+    employee_04 = models.ForeignKey('Employee', related_name='stationshift_04', on_delete=models.PROTECT, null=True, blank=True, verbose_name="Հերթափոխ 4")
 
     car = models.ForeignKey('Car', related_name='stationshift', on_delete=models.CASCADE, verbose_name="Ծառայողական մեքենան")
     route = models.ForeignKey('Route', related_name='stationshift', on_delete=models.CASCADE, verbose_name="Երթուղի")
@@ -186,11 +208,37 @@ class UserAccess(models.Model):
         return f'{self.user}'
     
 class LunchTime(models.Model):
-    start_lanch = models.TimeField(null=True, blank=True)
-    end_lanch = models.TimeField(null=True, blank=True)
-    duration = models.IntegerField(null=True, blank=True)
-    shift = models.ForeignKey('StationShift', related_name='lunchtime', on_delete=models.CASCADE, verbose_name="Հերթափոխ")
+    start_lanch = models.TimeField(null=True, blank=True, verbose_name="Ընդմիջման սկիզբ")
+    end_lanch = models.TimeField(null=True, blank=True, verbose_name="Ընդմիջման ավարտ")
+    duration = models.IntegerField(null=True, blank=True, verbose_name="Տևողություն՝ րոպեներով")
+    shift = models.ForeignKey("StationShift", related_name="lunchtime", on_delete=models.CASCADE, verbose_name="Հերթափոխ")
+
+    def save(self, *args, **kwargs):
+        if self.start_lanch and self.end_lanch:
+            today = datetime.today().date()
+
+            start = datetime.combine(today, self.start_lanch)
+            end = datetime.combine(today, self.end_lanch)
+
+            if end < start:
+                end += timedelta(days=1)
+
+            self.duration = int((end - start).total_seconds() // 60)
+
+        super().save(*args, **kwargs)
+
+    @property
+    def duration_display(self):
+        if self.duration is None:
+            return "00:00"
+
+        hours, minutes = divmod(self.duration, 60)
+        return f"{hours:02d}:{minutes:02d}"
+
+    def __str__(self):
+        return (
+            f"{self.start_lanch or '-'} - "
+            f"{self.end_lanch or '-'} "
+            f"({self.duration_display})"
+        )
     
-
-
-
