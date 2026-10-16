@@ -14,7 +14,7 @@
         </div>
     </div>
     <div class="box" v-if="this.$store.state.user.stationshif && this.$store.state.user.stationshif.length > 0">
-        <h3 class="title is-5 has-text-centered mb-4">Հերթապոխերի վերաբերյալ զեկուցագիր</h3>
+        <h3 class="title is-5 has-text-centered mb-4">{{this.$store.state.user.stationshif[0].precinct}}ի Հերթապոխերի վերաբերյալ զեկուցագիր</h3>
         <div class="columns" >
             <div class="column">
                 <div class="box mb-3" v-for="(value, index) in this.$store.state.user.filelist" :key="index">
