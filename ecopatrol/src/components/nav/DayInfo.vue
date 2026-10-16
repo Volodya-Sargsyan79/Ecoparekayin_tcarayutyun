@@ -190,22 +190,14 @@
             visibleMenuTree() {
                 const user = this.$store.state.user
                 const groups = user.groups || []
-
                 if (user.isLoading || !groups.length) {
                     return []
                 }
-
                 const isDutyOfficer = groups.includes('Հերթապահներ')
-
                 const isPrecinctHead = groups.includes('Տեղամասի պետեր')
-
                 const isRegionHead = groups.includes('Վարչության պետեր')
-
                 const regionId = Number(user.region_id)
                 const precinctId = Number(user.precinct_id)
-
-                // Ադմինը, օպերատորը և մյուս խմբերը
-                // տեսնում են ամբողջ ցանկը
                 if (
                     !isDutyOfficer &&
                     !isPrecinctHead &&
@@ -213,26 +205,17 @@
                 ) {
                     return this.menuTree
                 }
-
-                // Սահմանափակված խմբերի համար region_id պարտադիր է
                 if (!regionId) {
                     return []
                 }
-
-                // Վարչության պետը տեսնում է իր վարչության
-                // բոլոր տեղամասերը
                 if (isRegionHead) {
                     return this.menuTree.filter(
                         region => Number(region.regionId) === regionId
                     )
                 }
-
-                // Հերթապահը և տեղամասի պետը
-                // տեսնում են միայն իրենց տեղամասը
                 if (!precinctId) {
                     return []
                 }
-
                 return this.menuTree
                 .filter(
                     region => Number(region.regionId) === regionId
@@ -250,23 +233,28 @@
         },
         methods: {
             createActions(id) {
-                return [
+                const groups = this.$store.state.user.groups || []
+                const isDutyOfficer = groups.includes('Հերթապահներ')
+                const actions = [
                     {
                         label: "Անձնակազմ",
                         title: "Ա",
                         func: () => this.employeeKeeper(id)
                     },
                     {
-                        label: "Երթուղի",
-                        title: "Ե",
-                        func: () => this.routeKeeper(id)
-                    },
-                    {
                         label: "Հերթափոխ",
                         title: "Հ",
                         func: () => this.placeKeeper(id)
                     }
-                ];
+                ]
+                if (!isDutyOfficer) {
+                    actions.splice(1, 0, {
+                        label: "Երթուղի",
+                        title: "Ե",
+                        func: () => this.routeKeeper(id)
+                    })
+                }
+                return actions
             },
             employeeKeeper(e){
                 axios
