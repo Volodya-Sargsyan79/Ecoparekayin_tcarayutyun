@@ -183,7 +183,8 @@ class GetLastEmployee(APIView):
                     person_employee.name,
                     person_employee.surname,
                     person_camera.number,
-                    person_employee.phone
+                    person_employee.phone,
+                    person_employee.status
                 FROM person_employee
                 LEFT JOIN person_camera
                     ON person_employee.camera_id = person_camera.id
