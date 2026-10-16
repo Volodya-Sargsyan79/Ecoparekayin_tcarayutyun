@@ -49,10 +49,10 @@
       <h3 class="title is-5 has-text-centered mb-5">☕ Հանգստի գրանցումներ</h3>
       <div class="columns mb-4">
         <div class="column">
-          <button class="button is-warning is-fullwidth" @click="startLunch" :disabled="isOnBreak">☕ Կարգախումբը գնում է հանգստի</button>
+          <button class="button is-warning is-fullwidth" @click="startLunch" :disabled="isOnBreak || stats.remaining <= 0">☕ Կարգախումբը գնում է հանգստի</button>
         </div>
         <div class="column">
-          <button class="button is-success is-fullwidth" @click="endLunch" :disabled="!isOnBreak">🟢 Վերադարձ հանգստից</button>
+          <button class="button is-success is-fullwidth" @click="endLunch()" :disabled="!isOnBreak">🟢 Վերադարձ հանգստից</button>
         </div>
       </div>
       <div class="columns mb-4">
@@ -74,7 +74,7 @@
     </div>
     <div v-if="!isDutyOfficer">
       <div v-if="!lunches.length" class="notification is-info is-light has-text-centered">
-        ⏱ Կարգախումբը ունի <strong>2 ժամ (02:00)</strong> հանգստի ժամանակ
+        ⏱ Կարգախումբը ունի <strong>1 ժամ 20 րոպե (01:20)</strong> հանգստի ժամանակ
       </div>
       <div v-else class="box">
         <h3 class="title is-5 has-text-centered mb-5">☕ Հանգստի գնացած ժամանակը</h3>
@@ -166,6 +166,8 @@
   import markerShadow from "leaflet/dist/images/marker-shadow.png";
   import { formatDate } from "@/utils/dateFormatter";
 
+  const LUNCH_LIMIT_MINUTES = 10;
+
   delete L.Icon.Default.prototype._getIconUrl;
   L.Icon.Default.mergeOptions({
     iconRetinaUrl: markerIcon2x,
@@ -189,11 +191,12 @@
         lunches: [],
         stats: {
           used: 0,
-          remaining: 120,
+          remaining: LUNCH_LIMIT_MINUTES,
           overused: 0
         },
         currentLunch: null,
-        isOnBreak: false
+        isOnBreak: false,
+        lunchTimer: null
       };
     },
       components: {
@@ -307,14 +310,14 @@
     },
     async mounted() {
       const shiftId = this.$route.params.id;
-      axios
-        .get('/api/phone/call_list/', {
-            params: { shift_id: shiftId},
-        }) 
-        .then((res) => {
-            this.$store.commit('setCallList', res.data);
-        })
-        .catch(err => { console.error(err) })
+      // axios
+      //   .get('/api/phone/call_list/', {
+      //       params: { shift_id: shiftId},
+      //   }) 
+      //   .then((res) => {
+      //       this.$store.commit('setCallList', res.data);
+      //   })
+      //   .catch(err => { console.error(err) })
       window.addEventListener("new-call", this.onNewCall);
       axios.get("/api/ecopatrol/lunches/", {
         params: { shift_id: shiftId }
@@ -333,7 +336,8 @@
           this.isOnBreak = false;
           this.currentLunch = null;
         }
-        this.recalculateStats?.();
+        this.recalculateStats();
+        if (active) this.scheduleLunchAutoEnd();
       });
       this.recalculateStats();
       this.$nextTick(async () => {
@@ -374,9 +378,9 @@
           console.error("ERROR:", err);
         }
         try {
-          const TOKEN = "RjBEAiAfPN-wEZdJ_edGYBlOuUfo0umS28VXbHyR4vah11lUgQIgRL-1CyUKYQQ4_vgKvC5fcTlkIUbCPGgtPl7MlMVHQhJ7InUiOjIsImUiOiIyMDI2LTA2LTExVDIwOjAwOjAwLjAwMCswMDowMCJ9";
+          const TOKEN = "SDBGAiEA-uvavfehfrcVmB67qFm0Vv1lCssnN0OP__VdsyHxHOICIQCPLu7FwOCRWmeYmy3NiDw29LQPtpv25hLTQ6MdWqfi4XsidSI6MiwiZSI6IjIwMjYtMDgtMjVUMjA6MDA6MDAuMDAwKzAwOjAwIn0";
           const res = await axios.get(
-            "https://gps.eps.am/api/positions",
+            "https://192.168.88.66/api/positions",
             {
               params: {
                 deviceId: this.shift_info.deviceId,
@@ -418,6 +422,7 @@
     },
     beforeUnmount() {
       window.removeEventListener("new-call", this.onNewCall);
+      clearTimeout(this.lunchTimer);
     },
     methods: {
       formatSpeed(value, type = "knots") {
@@ -443,18 +448,20 @@
         this.lunches.push(lunch);
         this.isOnBreak = true;
       axios.post("/api/ecopatrol/lunch_start/", fd)
-        .then(() => {})
+        .then(() => this.scheduleLunchAutoEnd())
         .catch(err => {
           console.error(err.response?.data || err);
         });
       },
-      endLunch() {
-        const now = this.getTime();
+      endLunch(endTime = this.getTime()) {
+        if (!this.currentLunch) return;
+        clearTimeout(this.lunchTimer);
+        this.lunchTimer = null;
+        const now = endTime;
         const shiftId = this.$route.params.id;
         const fd = new FormData();
         fd.append("shift_id", shiftId);
         fd.append("end_lanch", now);
-        if (!this.currentLunch) return;
         const index = this.lunches.findIndex(
           l => !l.end || l.end === "None"
         );
@@ -477,6 +484,18 @@
           console.error(err.response?.data || err);
         });
       },
+      scheduleLunchAutoEnd() {
+        clearTimeout(this.lunchTimer);
+        if (!this.currentLunch) return;
+        const [hours, minutes, seconds] = this.currentLunch.start.split(":").map(Number);
+        const start = new Date();
+        start.setHours(hours, minutes, seconds, 0);
+        if (start > new Date()) start.setDate(start.getDate() - 1);
+        const deadline = start.getTime() + (LUNCH_LIMIT_MINUTES - this.stats.used) * 60000;
+        const delay = Math.max(deadline - Date.now(), 0);
+        const endTime = new Date(deadline).toTimeString().slice(0, 8);
+        this.lunchTimer = setTimeout(() => this.endLunch(endTime), delay);
+      },
       recalculateStats() {
         let used = 0;
         this.lunches.forEach(l => {
@@ -487,7 +506,7 @@
           }
         });
         this.stats.used = used;
-        this.stats.remaining = 120 - used;
+        this.stats.remaining = LUNCH_LIMIT_MINUTES - used;
       },
       getTime() {
         return new Date().toTimeString().slice(0, 8); // HH:MM:SS
@@ -499,7 +518,7 @@
       },
       updateStats(mins) {
         this.stats.used += mins;
-        this.stats.remaining = 120 - this.stats.used;
+        this.stats.remaining = LUNCH_LIMIT_MINUTES - this.stats.used;
       },
       formatMinutes(mins) {
         if (!mins && mins !== 0) return "00:00";
