@@ -16,16 +16,12 @@
         <tr v-for="(row, rowIndex) in invoice" :key="rowIndex">
           <td v-if="invoice.length > 1">{{ rowIndex + 1 }}</td>
           <td v-for="(cell, cellIndex) in row" :key="cellIndex" style="text-align: center;">
-            
             <template v-if="isPerson && cellIndex === 3 && cell">
               {{ cell }}
-              <span v-if="!cannotCallUser">
-                <button class="button is-small is-info" @click="startCall(350, rowIndex)" style="margin-left: 0.5rem;">📞</button>
-                <button v-if="callStarted && activeRowIndex === rowIndex" class="button is-small is-danger" @click="handleHangup" style="margin-left: 0.5rem;">Ընդատել</button>
-              </span>
+              <button class="button is-small is-info" @click="startCall(350, rowIndex)" style="margin-left: 0.5rem;">📞</button>
+              <button v-if="callStarted && activeRowIndex === rowIndex" class="button is-small is-danger" @click="handleHangup" style="margin-left: 0.5rem;">Ընդատել</button>
             </template>
             <template v-else>{{ cell }}</template>
-          
           </td>
         </tr>
       </tbody>
@@ -56,27 +52,6 @@
     },
     beforeUnmount() {
       window.removeEventListener("sip-call-ended", this.onSipCallEnded);
-    },
-    computed: {
-      userGroups() {
-        return this.$store.state.user.groups || []
-      },
-
-      isDutyOfficer() {
-          return this.userGroups.includes('Հերթապահներ')
-      },
-
-      isPrecinctHead() {
-          return this.userGroups.includes('Տեղամասի պետեր')
-      },
-
-      isRegionHead() {
-          return this.userGroups.includes('Վարչության պետեր')
-      },
-
-      cannotCallUser() {
-          return this.isDutyOfficer || this.isPrecinctHead || this.isRegionHead
-      }
     },
     methods: {
       onSipCallEnded() {
