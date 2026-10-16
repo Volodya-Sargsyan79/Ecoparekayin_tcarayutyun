@@ -29,14 +29,16 @@
                 ]
             },
             invoice() {
-                const routes = this.$store.state.user.employee || []
-                return routes.map((item, index) => ({
-                    id: item.id,
-                    camera: item.number,
-                    name: item.name,
-                    surname: item.surname,
-                    phone: item.phone,
-                }))
+                const employees = this.$store.state.user.employee || []
+                return employees
+                    .filter(item => item.status === "active")
+                    .map((item, index) => ({
+                        id: item.id,
+                        camera: item.number,
+                        name: item.name,
+                        surname: item.surname,
+                        phone: item.phone,
+                    }))
             }
         }
     };
