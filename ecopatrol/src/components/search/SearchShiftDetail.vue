@@ -124,13 +124,19 @@
         </div>
       </div>
     </div>           
-    <div class="columns" v-if="shift_pdf?.length > 0">
+    <div class="columns" >
       <div class="column">
-        <h3 class="title is-5 has-text-centered mb-4">Զանգվածային և տեքստային տեղեկություններ հերթափոխի մասին</h3>
+        <h3 class="title is-5 has-text-centered mb-4">Զեկուցագիր / Տեղեկություն</h3>
         <div class="box mb-3" v-for="(value, index) in shift_pdf" :key="index">
           <p class="mb-3" v-if="value.text_info">{{ value.text_info }}</p>
-          <a v-if="value.pdf_file" :href="`http://${$hostname}:8000/media/${value.pdf_file}`" target="_blank" class="button is-link is-small">📄 Բացել PDF</a>
+          <a v-if="value.pdf_file" :href="`http://192.168.88.111:8000/media/${value.pdf_file}`"  target="_blank" class="button is-link is-small">📄 Բացել PDF</a>
         </div>
+      </div>
+    </div>
+
+    <div class="columns">
+      <div class="column" style="display: flex; align-items: flex-end;">
+        <button class="button is-primary" @click="handleClick">Ավելացնել զեկուցագիր կամ տեղեկատվություն</button>
       </div>
     </div>
   </div>
@@ -339,7 +345,7 @@
             console.error("SHIFT TIME NOT FOUND");
             return;
           }
-          const TOKEN = "RjBEAiBFF35SXZhyhx7mtzcqX9sWzRey0sr4iDoowuHSga96VQIgYnoI31tReZk21QByMb8EAOzM0VZ01WVCHnR8R9DCesF7InUiOjIsImUiOiIyMDI2LTA3LTIzVDIwOjAwOjAwLjAwMCswMDowMCJ9";
+          const TOKEN = "RjBEAiBd8bPKE14vkfABmlwcZlHh0tXG9-O2CvQm8rH0Fvep0QIgX7Q5dOsJJ9ol65KoGTY-tMFtFy0vSDJ7PKhzAtRxvtF7InUiOjIsImUiOiIyMDI2LTA4LTI1VDIwOjAwOjAwLjAwMCswMDowMCJ9";
           const from = new Date(
             this.shift_info.start_shift.replace(" ", "T")
           ).toISOString();
@@ -347,7 +353,7 @@
             this.shift_info.end_shift.replace(" ", "T")
           ).toISOString();
           const [positionsRes, summaryRes] = await Promise.all([
-            axios.get("https://gps.eps.am/api/positions", {
+            axios.get("https://192.168.88.66/api/positions", {
               params: {
                 deviceId: this.shift_info.deviceId,
                 from,
@@ -357,7 +363,7 @@
                 Authorization: `Bearer ${TOKEN}`,
               },
             }),
-            axios.get("https://gps.eps.am/api/reports/summary", {
+            axios.get("https://192.168.88.66/api/reports/summary", {
               params: {
                 deviceId: this.shift_info.deviceId,
                 from,
@@ -442,7 +448,13 @@
         const h = Math.floor(mins / 60);
         const m = mins % 60;
         return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-      }
+      },
+      handleClick() {
+        this.$router.push({
+          name: "shift-edit",
+          params: { id: this.shift_info.id }
+        })
+      },
     },
   };
 </script>
