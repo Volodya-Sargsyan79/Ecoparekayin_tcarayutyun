@@ -12,7 +12,7 @@
   </div>
   <section class="section">
     <div class="container">
-      <div class="columns is-multiline">
+      <div class="columns is-multiline is-centered">
 
         <router-link
           to="/dashboard/precinct_shift"
