@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 from django.core.validators import FileExtensionValidator
 from django.conf import settings
 from datetime import datetime, timedelta
+from django.core.exceptions import ValidationError
+from django.utils.dateparse import parse_time
 from PIL import Image
 import zipfile
 import uuid
@@ -211,34 +213,63 @@ class LunchTime(models.Model):
     start_lanch = models.TimeField(null=True, blank=True, verbose_name="Ընդմիջման սկիզբ")
     end_lanch = models.TimeField(null=True, blank=True, verbose_name="Ընդմիջման ավարտ")
     duration = models.IntegerField(null=True, blank=True, verbose_name="Տևողություն՝ րոպեներով")
+    auto_end_at = models.DateTimeField(null=True, blank=True, verbose_name="Ավտոմատ ավարտի ժամանակ")
+    ended_automatically = models.BooleanField(default=False, verbose_name="Ավարտվել է ավտոմատ")
     shift = models.ForeignKey("StationShift", related_name="lunchtime", on_delete=models.CASCADE, verbose_name="Հերթափոխ")
 
     def save(self, *args, **kwargs):
+        if isinstance(self.start_lanch, str):
+            self.start_lanch = parse_time(self.start_lanch)
+
+            if self.start_lanch is None:
+                raise ValidationError(
+                    {"start_lanch": "Ընդմիջման սկզբի ժամը սխալ է։"}
+                )
+
+        if isinstance(self.end_lanch, str):
+            self.end_lanch = parse_time(self.end_lanch)
+
+            if self.end_lanch is None:
+                raise ValidationError(
+                    {"end_lanch": "Ընդմիջման ավարտի ժամը սխալ է։"}
+                )
+
         if self.start_lanch and self.end_lanch:
             today = datetime.today().date()
 
-            start = datetime.combine(today, self.start_lanch)
-            end = datetime.combine(today, self.end_lanch)
+            start = datetime.combine(
+                today,
+                self.start_lanch,
+            )
+            end = datetime.combine(
+                today,
+                self.end_lanch,
+            )
 
             if end < start:
                 end += timedelta(days=1)
 
-            self.duration = int((end - start).total_seconds() // 60)
+            self.duration = int(
+                (end - start).total_seconds() // 60
+            )
 
         super().save(*args, **kwargs)
 
     @property
     def duration_display(self):
-        if self.duration is None:
-            return "00:00"
+        # Չավարտված ընդմիջման դեպքում
+        if self.end_lanch is None or self.duration is None:
+            return None
 
         hours, minutes = divmod(self.duration, 60)
+
         return f"{hours:02d}:{minutes:02d}"
 
     def __str__(self):
+        duration = self.duration_display or "—"
+
         return (
             f"{self.start_lanch or '-'} - "
             f"{self.end_lanch or '-'} "
-            f"({self.duration_display})"
+            f"({duration})"
         )
-    

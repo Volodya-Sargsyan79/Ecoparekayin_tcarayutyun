@@ -97,7 +97,11 @@
               </td>
 
               <td>
-                <span v-if="l.duration">{{ formatMinutes(l.duration) }}</span>
+                <span
+                  v-if="l.duration !== null"
+                >
+                  {{ l.duration }}
+                </span>
                 <span v-else>—</span>
               </td>
             </tr>
@@ -166,7 +170,7 @@
   import markerShadow from "leaflet/dist/images/marker-shadow.png";
   import { formatDate } from "@/utils/dateFormatter";
 
-  const LUNCH_LIMIT_MINUTES = 10;
+  const LUNCH_LIMIT_MINUTES = 5;
 
   delete L.Icon.Default.prototype._getIconUrl;
   L.Icon.Default.mergeOptions({

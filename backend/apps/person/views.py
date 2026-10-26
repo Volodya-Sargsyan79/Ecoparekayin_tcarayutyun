@@ -1,6 +1,3 @@
-
-from urllib import request
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -15,13 +12,13 @@ from io import BytesIO
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from django.http import JsonResponse
-from urllib3 import request
 from .models import InformationForShift, ShiftDayInfo, LunchTime, Camera, UserAccess
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from datetime import datetime
 from django.utils.dateparse import parse_datetime
 from .permissions import IsAdmin, IsAllUsers, IsForEmployee, IsForShiftAdd, IsForShiftInformationsAdd
+from datetime import timedelta
+from django.utils import timezone
 
 
 class GetMe(APIView):
@@ -698,81 +695,147 @@ class GetShiftDayInfo(APIView):
 @csrf_exempt
 def start_lunch(request):
     if request.method != "POST":
-        return JsonResponse({"error": "POST required"}, status=405)
+        return JsonResponse(
+            {"error": "POST required"},
+            status=405,
+        )
 
     shift_id = request.POST.get("shift_id")
-    start = request.POST.get("start_lanch")
 
-    if not shift_id or not start:
-        return JsonResponse({"error": "missing data"}, status=400)
+    if not shift_id:
+        return JsonResponse(
+            {"error": "shift_id չկա"},
+            status=400,
+        )
+
+    active_lunch = LunchTime.objects.filter(
+        shift_id=shift_id,
+        end_lanch__isnull=True,
+    ).first()
+
+    if active_lunch:
+        return JsonResponse(
+            {
+                "error": "Ընդմիջումն արդեն սկսված է",
+                "id": active_lunch.id,
+            },
+            status=400,
+        )
+
+    current_datetime = timezone.localtime()
+    auto_end_datetime = current_datetime + timedelta(minutes=5)
 
     lunch = LunchTime.objects.create(
         shift_id=shift_id,
-        start_lanch=start
+        start_lanch=current_datetime.time().replace(microsecond=0),
+        auto_end_at=auto_end_datetime,
     )
 
-    return JsonResponse({
-        "ok": True,
-        "id": lunch.id,
-        "start_lanch": str(lunch.start_lanch)
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "id": lunch.id,
+            "start": lunch.start_lanch.strftime("%H:%M:%S"),
+            "auto_end_at": timezone.localtime(
+                lunch.auto_end_at
+            ).strftime("%Y-%m-%d %H:%M:%S"),
+            "duration": None,
+        }
+    )
 
 @csrf_exempt
 def end_lunch(request):
     if request.method != "POST":
-        return JsonResponse({"error": "POST required"}, status=405)
+        return JsonResponse(
+            {"error": "POST required"},
+            status=405,
+        )
 
     shift_id = request.POST.get("shift_id")
-    end = request.POST.get("end_lanch")
 
-    if not shift_id or not end:
-        return JsonResponse({"error": "missing data"}, status=400)
+    if not shift_id:
+        return JsonResponse(
+            {"error": "shift_id չկա"},
+            status=400,
+        )
 
-    lunch = LunchTime.objects.filter(
-        shift_id=shift_id,
-        end_lanch__isnull=True
-    ).order_by("-id").first()
+    lunch = (
+        LunchTime.objects.filter(
+            shift_id=shift_id,
+            end_lanch__isnull=True,
+        )
+        .order_by("-id")
+        .first()
+    )
 
     if not lunch:
-        return JsonResponse({"error": "no active lunch found"}, status=404)
+        return JsonResponse(
+            {"error": "Չավարտված ընդմիջում չի գտնվել"},
+            status=404,
+        )
 
-    # convert safely
-    start_dt = datetime.combine(datetime.today(), lunch.start_lanch)
-    end_dt = datetime.strptime(end, "%H:%M:%S")
+    current_datetime = timezone.now()
 
-    # fix midnight case
-    if end_dt < start_dt:
-        end_dt = end_dt.replace(day=start_dt.day + 1)
+    # Եթե 80 րոպեն արդեն լրացել է
+    if (
+        lunch.auto_end_at
+        and current_datetime >= lunch.auto_end_at
+    ):
+        end_datetime = timezone.localtime(lunch.auto_end_at)
+        lunch.ended_automatically = True
+    else:
+        # Կոճակով վաղաժամ ավարտ
+        end_datetime = timezone.localtime(current_datetime)
+        lunch.ended_automatically = False
 
-    duration_minutes = int((end_dt - start_dt).seconds / 60)
-
-    lunch.end_lanch = end
-    lunch.duration = duration_minutes
+    lunch.end_lanch = end_datetime.time().replace(microsecond=0)
     lunch.save()
 
-    return JsonResponse({
-        "ok": True,
-        "id": lunch.id,
-        "start": str(lunch.start_lanch),
-        "end": str(lunch.end_lanch),
-        "duration": duration_minutes
-    })
+    return JsonResponse(
+        {
+            "ok": True,
+            "id": lunch.id,
+            "start": lunch.start_lanch.strftime("%H:%M:%S"),
+            "end": lunch.end_lanch.strftime("%H:%M:%S"),
+            "duration": lunch.duration_display,
+            "ended_automatically": lunch.ended_automatically,
+        }
+    )
+
 
 def get_lunches(request):
     shift_id = request.GET.get("shift_id")
 
     lunches = LunchTime.objects.filter(
-        shift_id=shift_id
+        shift_id=shift_id,
     ).order_by("id")
 
     data = []
 
-    for l in lunches:
-        data.append({
-            "id": l.id,
-            "start": str(l.start_lanch),
-            "end": str(l.end_lanch),
-            "duration": l.duration if hasattr(l, "duration") and l.duration else 0
-        })
+    for lunch in lunches:
+        # Եթե ընդմիջումն ավարտված չէ՝ duration-ը null
+        if lunch.end_lanch is None:
+            formatted_duration = None
+        else:
+            total_minutes = lunch.duration or 0
+            hours, minutes = divmod(total_minutes, 60)
+            formatted_duration = f"{hours:02d}:{minutes:02d}"
+
+        data.append(
+            {
+                "id": lunch.id,
+                "start": (
+                    lunch.start_lanch.strftime("%H:%M:%S")
+                    if lunch.start_lanch
+                    else None
+                ),
+                "end": (
+                    lunch.end_lanch.strftime("%H:%M:%S")
+                    if lunch.end_lanch
+                    else None
+                ),
+                "duration": formatted_duration,
+            }
+        )
 
     return JsonResponse(data, safe=False)

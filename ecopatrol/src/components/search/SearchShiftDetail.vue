@@ -71,7 +71,7 @@
                   <span v-else class="has-text-warning">ընթացքի մեջ...</span>
                 </td>
                 <td>
-                  <span v-if="l.duration">{{ formatMinutes(l.duration) }}</span>
+                  <span v-if="l.duration !== null">{{ l.duration }}</span>
                   <span v-else>—</span>
                 </td>
               </tr>
@@ -345,7 +345,7 @@
             console.error("SHIFT TIME NOT FOUND");
             return;
           }
-          const TOKEN = "RjBEAiBd8bPKE14vkfABmlwcZlHh0tXG9-O2CvQm8rH0Fvep0QIgX7Q5dOsJJ9ol65KoGTY-tMFtFy0vSDJ7PKhzAtRxvtF7InUiOjIsImUiOiIyMDI2LTA4LTI1VDIwOjAwOjAwLjAwMCswMDowMCJ9";
+          const TOKEN = "RjBEAiA4ogzdIq7_F4_rOHcLHfeHrz65lsihYwtwLT9PcqNT0gIgKMRRLLuCbjpK-BiDBn1DUmnw5Fyfz7GMOxnEb1ghfDh7InUiOjEsImUiOiIyMDI2LTEwLTMwVDIwOjAwOjAwLjAwMCswMDowMCJ9";
           const from = new Date(
             this.shift_info.start_shift.replace(" ", "T")
           ).toISOString();
