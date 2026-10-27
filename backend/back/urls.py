@@ -26,7 +26,6 @@ urlpatterns = [
     path('api/ecopatrol/', include('apps.person.urls')),
     path('api/phone/', include('apps.phone.urls')),
     path('api/legalization/', include('apps.legalization.urls')),
-    path('api/ecopatrol_duty/', include('apps.monthly_duty.urls')),
 ]
 
 urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -74,7 +74,6 @@ INSTALLED_APPS = [
     'rangefilter',
     'djoser',
     
-    'apps.monthly_duty',
     'apps.person',
     'apps.phone',
     'apps.legalization',

@@ -12,8 +12,6 @@ import zipfile
 import uuid
 import os
 
-# Create your models here.
-
 class Region(models.Model):
     region = models.CharField(max_length=200)
     
@@ -88,10 +86,8 @@ class Route(models.Model):
         img = Image.open(image)
         img = img.convert('RGB')
         img.thumbnail(size)
-
         thumb_io = BytesIO()
         img.save(thumb_io, 'JPEG', quality=85)
-
         thumbnail = File(thumb_io, name=image.name)
 
         return thumbnail
@@ -122,11 +118,11 @@ class Employee(models.Model):
     region = models.ForeignKey(Region, related_name="employee", on_delete=models.PROTECT, verbose_name="Վարչություն")
     precinct = models.ForeignKey(Precinct, related_name="employee", on_delete=models.PROTECT, null=True, blank=True, verbose_name="Տեղամաս")
     position = models.ForeignKey(Position,related_name="employee", on_delete=models.PROTECT, verbose_name="Պաշտոն")
+    phone = models.CharField(max_length=9, null=True, blank=True, verbose_name="Հեռ.")
     camera = models.OneToOneField(Camera, related_name="employee", on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Տեսախցիկ")
     previous_camera_number = models.CharField(max_length=5, null=True, blank=True, verbose_name="Նախկին տեսախցիկի համար")
-    phone = models.CharField(max_length=9, null=True, blank=True, verbose_name="Հեռ.")
     image = models.ImageField(upload_to="person/", null=True, blank=True, verbose_name="Ծննդյան ամսաթիվ")
-    birth_date = models.DateField(null=True, blank=True, verbose_name="Ծննդյան ամսաթիվ")
+    birth_day = models.DateField(null=True, blank=True, verbose_name="Ծննդյան ամսաթիվ")
     order_day = models.DateField(null=True, blank=True, verbose_name="Հրամանի ամսաթիվ")
     residential_address = models.CharField(max_length=250, null=True, blank=True, verbose_name="Բնակության հասցե")
     service_number = models.CharField(max_length=5, null=True, blank=True, verbose_name="Ծառայողական համար")
@@ -165,30 +161,24 @@ class Employee(models.Model):
             f"{self.phone or ''}"
         )
     
-
 def upload_to(instance, filename):
     ext = filename.split('.')[-1]
     return f'pdf/{uuid.uuid4()}.{ext}'
 
-
 class StationShift(models.Model):
     start_shift = models.DateTimeField(verbose_name="Հերթափոխի սկիզբ")
     end_shift = models.DateTimeField(verbose_name="Հերթափոխի ավարտ")
-
     region = models.ForeignKey('Region', related_name='stationshift', on_delete=models.CASCADE, verbose_name="Մարզ")
     precinct = models.ForeignKey('Precinct', related_name='stationshift', on_delete=models.CASCADE, verbose_name="Տեղամաս")
-
     employee_01 = models.ForeignKey('Employee', related_name='stationshift', on_delete=models.PROTECT, verbose_name="Հերթափոխ 1")
     employee_02 = models.ForeignKey('Employee', related_name='stationshift_02', on_delete=models.PROTECT, verbose_name="Հերթափոխ 2")
     employee_03 = models.ForeignKey('Employee', related_name='stationshift_03', on_delete=models.PROTECT, null=True, blank=True, verbose_name="Հերթափոխ 3")
     employee_04 = models.ForeignKey('Employee', related_name='stationshift_04', on_delete=models.PROTECT, null=True, blank=True, verbose_name="Հերթափոխ 4")
-
     car = models.ForeignKey('Car', related_name='stationshift', on_delete=models.CASCADE, verbose_name="Ծառայողական մեքենան")
     route = models.ForeignKey('Route', related_name='stationshift', on_delete=models.CASCADE, verbose_name="Երթուղի")
 
     def __str__(self):
         return f'{self.start_shift} {self.end_shift} {self.car} {self.route}'
-
 
 class InformationForShift(models.Model):
     text_info = models.TextField(null=True, blank=True, verbose_name="Հերթափոխի վերաբերյալ տեղեկություն")
@@ -199,7 +189,6 @@ class ShiftDayInfo(models.Model):
     registration_day = models.DateField(auto_now_add=True)
     pdf_file = models.FileField(upload_to='pdf/shifts/', validators=[FileExtensionValidator(allowed_extensions=['pdf'])], verbose_name="Հերթափոխի վերաբերյալ զեկուցագիր")
     precinct = models.ForeignKey(Precinct, related_name='shiftdayinfo', on_delete=models.CASCADE, verbose_name="Տեղամաս")
-
 
 class UserAccess(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -257,7 +246,6 @@ class LunchTime(models.Model):
 
     @property
     def duration_display(self):
-        # Չավարտված ընդմիջման դեպքում
         if self.end_lanch is None or self.duration is None:
             return None
 
