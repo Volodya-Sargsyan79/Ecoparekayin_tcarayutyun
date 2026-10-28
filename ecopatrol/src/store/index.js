@@ -13,6 +13,7 @@ export default createStore({
       relatives: "",
       regions: "",
       precincts: "",
+      filelist: null,
       position: "",
       stationshif: null,
       employee: null,
@@ -21,7 +22,6 @@ export default createStore({
       persons: null,
       creater: null,
       call_list: null,
-      filelist: null,
       isLoading: false,
       isAuthenticated: false
     }
@@ -31,25 +31,18 @@ export default createStore({
   mutations: {
     initializeStore(state) {
       if (localStorage.getItem('token')) {
-
           state.user.token = localStorage.getItem('token')
           state.user.isAuthenticated = true
-
           state.user.groups =
               JSON.parse(localStorage.getItem('groups') || '[]')
-
           state.user.region_id =
               Number(localStorage.getItem('region_id'))
-
           state.user.precinct_id =
               Number(localStorage.getItem('precinct_id'))
-
       } else {
-
           state.user.token = ''
           state.user.isAuthenticated = false
           state.user.groups = []
-
       }
     },
     setIsLoading(state, status) {
@@ -63,7 +56,6 @@ export default createStore({
       state.user.token = ''
       state.user.isAuthenticated = false
       state.user.groups = []
-
       localStorage.removeItem('token')
       localStorage.removeItem('groups')
       localStorage.removeItem('region_id')
@@ -79,7 +71,6 @@ export default createStore({
         state.user.groups = user.groups || []
         state.user.region_id = user.region_id
         state.user.precinct_id = user.precinct_id
-
         localStorage.setItem('groups', JSON.stringify(state.user.groups))
         localStorage.setItem('region_id', user.region_id)
         localStorage.setItem('precinct_id', user.precinct_id)

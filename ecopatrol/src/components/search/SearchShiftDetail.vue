@@ -133,7 +133,6 @@
         </div>
       </div>
     </div>
-
     <div class="columns">
       <div class="column" style="display: flex; align-items: flex-end;">
         <button class="button is-primary" @click="handleClick">Ավելացնել զեկուցագիր կամ տեղեկատվություն</button>
@@ -150,8 +149,8 @@
   import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
   import markerIcon from "leaflet/dist/images/marker-icon.png";
   import markerShadow from "leaflet/dist/images/marker-shadow.png";
+  import { formatDate } from "@/utils/dateFormatter";  
   import SearchTable from "../tables/SearchTable.vue";
-  import { formatDate } from "@/utils/dateFormatter";
 
   delete L.Icon.Default.prototype._getIconUrl;
   L.Icon.Default.mergeOptions({
@@ -182,15 +181,12 @@
       userGroups() {
         return this.$store.state.user.groups || []
       },
-
       isPrecinctHead() {
         return this.userGroups.includes('Տեղամասի պետեր')
       },
-
       isRegionHead() {
           return this.userGroups.includes('Վարչության պետեր')
       },
-
       cannotListen() {
           return this.isPrecinctHead || this.isRegionHead
       },
@@ -217,8 +213,6 @@
             "Արագացուցիչի վազքը <br> հերթափոխի սկզբին",
             "Արագացուցիչի վազքը <br> հերթափոխի ավարտին",
             "Շարժիչի աշխատանք",
-            
-          
           ]
         } 
       },

@@ -29,7 +29,6 @@
                             @change="loadRoute"
                             >
                                 <option value="">Ընտրել</option>
-
                                 <option
                                     v-for="precinct in $store.state.user.precincts"
                                     :key="precinct.id"

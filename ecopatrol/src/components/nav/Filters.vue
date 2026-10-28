@@ -74,17 +74,12 @@
             visibleMenuTree() {
                 const user = this.$store.state.user
                 const groups = user.groups || []
-
-                // Տվյալները դեռ չեն բեռնվել
                 if (user.isLoading || !groups.length) {
                     return []
                 }
-
                 const isDutyOfficer = groups.includes('Հերթապահներ')
                 const isPrecinctHead = groups.includes('Տեղամասի պետեր')
                 const isRegionHead = groups.includes('Վարչության պետեր')
-
-                // Օպերատորը և ադմինը տեսնում են բոլոր վարչությունները
                 if (
                     !isDutyOfficer &&
                     !isPrecinctHead &&
@@ -92,15 +87,10 @@
                 ) {
                     return this.menuTree
                 }
-
                 const regionId = Number(user.region_id)
-
                 if (!regionId) {
                     return []
                 }
-
-                // Հերթապահը, տեղամասի պետը և վարչության պետը
-                // տեսնում են միայն իրենց վարչությունը
                 return this.menuTree.filter(
                     region => Number(region.regionId) === regionId
                 )
@@ -116,34 +106,24 @@
                     const user = this.$store.state.user
                     const groups = user.groups || []
                     const precincts = res.data || []
-
                     const isDutyOfficer =
                         groups.includes('Հերթապահներ')
-
                     const isPrecinctHead =
                         groups.includes('Տեղամասի պետեր')
-
                     const isRegionHead =
                         groups.includes('Վարչության պետեր')
-
-                    // Վարչության պետը տեսնում է տվյալ վարչության բոլոր տեղամասերը
                     if (isRegionHead) {
                         this.$store.state.user.precincts = precincts
                     }
-
-                    // Հերթապահը և տեղամասի պետը տեսնում են միայն իրենց տեղամասը
                     else if (isDutyOfficer || isPrecinctHead) {
                         this.$store.state.user.precincts = precincts.filter(
                         precinct =>
                             Number(precinct.id) === Number(user.precinct_id)
                         )
                     }
-
-                    // Ադմին, օպերատոր և այլ խմբեր
                     else {
                         this.$store.state.user.precincts = precincts
                     }
-
                     this.$router.push(
                         '/dashboard/precinct_shift/search_information/searchshift'
                     )
