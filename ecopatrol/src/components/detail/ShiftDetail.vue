@@ -1,6 +1,5 @@
 <template>
   <div class="box">
-    
     <div v-if="!isDutyOfficer" class="columns">
       <div class="column">
         <div class="map-container">
@@ -95,13 +94,8 @@
                 <span v-if="l.end && l.end !== 'None'">{{ l.end }}</span>
                 <span v-else class="has-text-warning">ընթացքի մեջ..</span>
               </td>
-
               <td>
-                <span
-                  v-if="l.duration !== null"
-                >
-                  {{ l.duration }}
-                </span>
+                <span v-if="l.duration !== null">{{ l.duration }}</span>
                 <span v-else>—</span>
               </td>
             </tr>
@@ -150,7 +144,6 @@
         </div>
       </div>
     </div>
-    
     <div class="columns">
       <div class="column" style="display: flex; align-items: flex-end;">
         <button class="button is-primary" @click="handleClick">Ավելացնել զեկուցագիր կամ տեղեկատվություն</button>
@@ -185,10 +178,10 @@
       return {
         shift_info: null,
         shift_pdf: null,
-        lat: null,       // latitude input
-        lng: null,       // longitude input
-        map: null,       // store map instance
-        marker: null,    // store marker instance
+        lat: null,
+        lng: null,
+        map: null,
+        marker: null,
         file: null,
         previewUrl: null,
         previewType: null,
@@ -210,19 +203,15 @@
       userGroups() {
         return this.$store.state.user.groups || []
       },
-
       isDutyOfficer() {
         return this.userGroups.includes('Հերթապահներ')
       },
-
       isPrecinctHead() {
         return this.userGroups.includes('Տեղամասի պետեր')
       },
-
       isRegionHead() {
         return this.userGroups.includes('Վարչության պետեր')
       },
-
       cannotPrecinctUser() {
           return this.isDutyOfficer || this.isPrecinctHead || this.isRegionHead
       },

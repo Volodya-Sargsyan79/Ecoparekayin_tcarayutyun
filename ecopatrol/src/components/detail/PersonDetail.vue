@@ -3,7 +3,7 @@
     <div class="columns">
       <div class="column is-3">
         <div class="field">
-            <img :src="`http://${$hostname}:8000/media/${person.image}`"/>
+            <img :src="`/media/${person.image}`"/>
         </div>
       </div>
       <div class="column is-9">
