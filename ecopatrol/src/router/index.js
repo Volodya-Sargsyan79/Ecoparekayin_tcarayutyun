@@ -37,27 +37,11 @@ const routes = [
     meta: { requireLogin: true },
     children: [
       {
-        path: 'employee',
-        component: () =>
-          import('@/components/registration/RegistrationEmployee.vue'),
-        meta: {
-          dutyOfficerForbidden: true
-        }
-      },
-      {
         path: 'shift',
         component: () =>
           import('@/components/registration/RegistrationShift.vue'),
         meta: {
           precinctHeadForbidden: true
-        }
-      },
-      {
-        path: 'route',
-        component: () =>
-          import('@/components/registration/RegistrationRoute.vue'),
-        meta: {
-          dutyOfficerForbidden: true
         }
       }
     ]
